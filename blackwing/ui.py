@@ -488,7 +488,7 @@ def show_report(case):
                 st.text(source["excerpt"])
 
 
-def show_history(case):
+def show_history(case, *, include_legacy=True):
     turns = list(reversed(case["turns"]))[:25]
     if turns:
         labels = {turn["turn_id"]: f"{turn.get('mode', 'Investigation')} · {turn.get('question', '')[:90]}"
@@ -499,6 +499,8 @@ def show_history(case):
     else:
         st.caption("Completed and failed investigation turns appear here.")
 
+    if not include_legacy:
+        return
     earlier = {}
     for path in sorted(OUTPUT.glob("brief-*.json"), key=lambda item: item.name):
         try:
@@ -513,10 +515,13 @@ def show_history(case):
             st.json(earlier[selected].get("trace", []), expanded=False)
 
 
-def show_inference():
+def show_inference(*, cloud=False):
     providers = {"local": "Local Ollama", "iit": "IIT Hosted"}
-    provider = st.selectbox("Inference provider", list(providers), index=list(providers).index(provider_name()),
-                            format_func=providers.__getitem__, key="inference-provider")
+    if cloud:
+        provider = "iit"
+    else:
+        provider = st.selectbox("Inference provider", list(providers), index=list(providers).index(provider_name()),
+                                format_func=providers.__getitem__, key="inference-provider")
     status = inference_status(provider)
     st.caption(f"{status.get('provider_label') or providers[provider]} · {status.get('model') or 'Model unavailable'}")
     st.text(f"API status · {status.get('api_status', 'Not checked')}")
@@ -525,14 +530,25 @@ def show_inference():
     st.text(f"Requests completed · {status.get('requests_completed', 0)} of {status.get('requests_attempted', 0)}")
     if status.get("remaining_quota") is not None:
         st.text(f"Remaining quota · {status['remaining_quota']}")
-    retrieval = st.selectbox("Retrieval", ["Hybrid + reranker", "BM25"])
+    if cloud:
+        retrieval = "BM25"
+        st.caption("Retrieval · BM25")
+        if status["api_status"] in {"Not configured", "Disabled"}:
+            st.info("IIT inference is disabled or awaiting configuration. Evidence browsing and the risk screen are available.")
+    else:
+        retrieval = st.selectbox("Retrieval", ["Hybrid + reranker", "BM25"])
     cap = st.selectbox("Output token cap", [512, 1024])
-    return {"provider": provider, "retrieval": retrieval, "cap": cap}
+    settings = {"provider": provider, "retrieval": retrieval, "cap": cap}
+    if cloud:
+        settings["cache"] = False
+    return settings
 
 
-def main():
+def main(*, cloud=False):
     st.set_page_config(page_title="BLACKWING AI Copilot", layout="wide", page_icon="✈")
     st.title("BLACKWING AI Copilot")
+    if cloud:
+        st.caption("Cloud demonstration · Investigation state is temporary and scoped to this browser session.")
     with st.sidebar:
         st.header("Case workspace")
         if st.button("Start New Investigation", width="stretch"):
@@ -540,7 +556,7 @@ def main():
         if st.button("Explore Historical Incidents", width="stretch"):
             st.session_state["workspace_view"] = "history"
         with st.expander("Inference status", expanded=True):
-            settings = show_inference()
+            settings = show_inference(cloud=cloud)
         glossary = ROOT / "aviation-glossary.pdf"
         if glossary.is_file():
             st.download_button("Aviation glossary", glossary.read_bytes(),
@@ -570,7 +586,8 @@ def main():
         return
     history = list_historical_cases()
     if view == "history":
-        explore_cases(list_cases(), history)
+        cases = [case for case in list_cases() if not (cloud and case.get('held_out'))]
+        explore_cases(cases, history)
         return
 
     case = get_case(st.session_state["workspace_case"])
@@ -605,7 +622,7 @@ def main():
     with report:
         show_report(case)
     with history_tab:
-        show_history(case)
+        show_history(case, include_legacy=not cloud)
 
 
 if __name__ == "__main__":

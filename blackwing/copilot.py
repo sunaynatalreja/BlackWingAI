@@ -351,7 +351,7 @@ def _critic(candidate, evidence, mode, hazard_id, question):
         uncertainty = "Submitted or reported evidence awaits independent corroboration. " + uncertainty
     if mode == "regulatory":
         uncertainty = "Candidate only. Verify the applicable clause, edition and effective date. " + uncertainty
-    return {
+    item = {
         "finding_id": uuid.uuid4().hex, "section": section, "kind": kind, "claim": claim,
         "status": "pending", "citations": citations, "uncertainty": uncertainty.strip(),
         "related_finding_ids": [hazard_id] if hazard_id else [],

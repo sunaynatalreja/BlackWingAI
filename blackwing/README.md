@@ -49,6 +49,10 @@ Calls use an 8,192-token combined budget and reserve 512 output tokens by defaul
 
 Uploads and narratives are treated as untrusted data. Emails and common formatted phone numbers are masked. Review uploads for additional personal details before submission. The local state, caches and traces are stored under `output/`. Set `BLACKWING_OTLP_ENDPOINT` to an approved OTLP HTTP collector for metadata-only spans.
 
+## Streamlit Community Cloud
+
+Use the [Community Cloud deployment guide](cloud/DEPLOYMENT.md) for the hosted profile and setup.
+
 ## Container
 
 ```powershell

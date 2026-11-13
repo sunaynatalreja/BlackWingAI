@@ -7,11 +7,13 @@ import sqlite3
 import unicodedata
 import uuid
 from contextlib import closing, contextmanager
+from contextvars import ContextVar
 from functools import lru_cache
 from pathlib import Path, PureWindowsPath
 
 ROOT = Path(__file__).resolve().parent
 DATABASE = ROOT / "output" / "copilot.sqlite3"
+_SESSION_DATABASE = ContextVar("blackwing_session_database", default=None)
 GOA = "GOA-VT-BXL"
 MAX_NARRATIVE_CHARS = 12_000
 PROTECTED_CASE_ALIASES = frozenset({"GOAVTBXL", "INDAAIB001", "INDAAIB001VTBXL"})
@@ -45,9 +47,20 @@ def is_protected_source(record):
 
 
 @contextmanager
+def session_database(path):
+    """Use a session-owned database for the current investigation UI run."""
+    token = _SESSION_DATABASE.set(path)
+    try:
+        yield
+    finally:
+        _SESSION_DATABASE.reset(token)
+
+
+@contextmanager
 def _database():
-    DATABASE.parent.mkdir(parents=True, exist_ok=True)
-    with closing(sqlite3.connect(DATABASE, timeout=15)) as connection:
+    database = _SESSION_DATABASE.get() or DATABASE
+    database.parent.mkdir(parents=True, exist_ok=True)
+    with closing(sqlite3.connect(database, timeout=15)) as connection:
         with connection:
             connection.executescript("""
                 CREATE TABLE IF NOT EXISTS cases (case_id TEXT PRIMARY KEY, data TEXT NOT NULL);

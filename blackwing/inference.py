@@ -101,7 +101,14 @@ def inference_status(provider=None):
         return result
     result.update(requests_attempted=counts["attempts"], requests_completed=counts["completions"] or 0,
                   tokens_used=counts["tokens"])
-    if latest:
+    if result["api_status"] == "Not configured":
+        return result
+    if name == "iit" and (
+        os.getenv("BLACKWING_ALLOW_REMOTE", "") != "YES"
+        or os.getenv("BLACKWING_TEAM_KEY_COORDINATED", "") != "YES"
+    ):
+        result["api_status"] = "Disabled"
+    elif latest:
         result["api_status"] = ("Connected" if latest["completed"] else
                                 "Request rejected" if latest["received"] else "Disconnected")
         if latest["quota"] is not None:
