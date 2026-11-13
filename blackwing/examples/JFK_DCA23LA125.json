@@ -1,0 +1,14 @@
+{
+  "case_id": "JFK-DCA23LA125-DEMO",
+  "event_date": "2023-01-13",
+  "airport": "JFK",
+  "jurisdiction": "US",
+  "narrative": "NTSB factual reports describe American Airlines flight 106 taxiing toward runway 4L at JFK on January 13, 2023. Delta Air Lines flight 1943 had begun its takeoff roll on runway 4L. A runway incursion occurred and Delta rejected takeoff. Examine the provided factual reports, identify the observed timeline, evidence gaps and possible 2023 FAA procedure topics, and propose source-linked review actions. Do not infer official root cause, legal violation or severity without verification.",
+  "attachments": [
+    "BW-SRC-001",
+    "BW-SRC-002",
+    "BW-SRC-003"
+  ],
+  "requested_output": "preliminary evidence-cited safety review",
+  "comparison_mode": "cross_case"
+}

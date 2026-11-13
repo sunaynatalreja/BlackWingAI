@@ -1,0 +1,10 @@
+.env
+.env.*
+*.key
+*.pem
+*.crt
+*.cer
+*.pfx
+.venv
+__pycache__
+output

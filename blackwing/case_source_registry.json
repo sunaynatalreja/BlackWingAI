@@ -1,0 +1,20 @@
+{
+  "BW-SRC-001": {
+    "case_id": "JFK-DCA23LA125-DEMO",
+    "event_date": "2023-01-13",
+    "airport": "JFK",
+    "jurisdiction": "US"
+  },
+  "BW-SRC-002": {
+    "case_id": "JFK-DCA23LA125-DEMO",
+    "event_date": "2023-01-13",
+    "airport": "JFK",
+    "jurisdiction": "US"
+  },
+  "BW-SRC-003": {
+    "case_id": "JFK-DCA23LA125-DEMO",
+    "event_date": "2023-01-13",
+    "airport": "JFK",
+    "jurisdiction": "US"
+  }
+}

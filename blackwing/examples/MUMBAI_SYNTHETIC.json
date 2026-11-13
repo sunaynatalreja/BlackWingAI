@@ -1,0 +1,9 @@
+{
+  "case_id": "NEW-MUMBAI-SYNTHETIC",
+  "airport": "BOM",
+  "jurisdiction": "INDIA",
+  "event_date": "2026-11-12",
+  "new_case": true,
+  "comparison_mode": "prior_only",
+  "narrative": "Synthetic exercise. A ground observer at Mumbai reports that a taxiing aircraft crossed an active runway without the expected clearance. Another aircraft was on approach. The observer reports that ATC instructed the arriving aircraft to go around. The runway number, timing, aircraft IDs, clearances and surveillance records are unavailable."
+}

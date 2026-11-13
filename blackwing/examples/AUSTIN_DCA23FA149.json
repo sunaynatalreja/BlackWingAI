@@ -1,0 +1,12 @@
+{
+  "case_id": "AUS-DCA23FA149",
+  "event_date": "2023-02-04",
+  "airport": "AUS",
+  "jurisdiction": "US",
+  "comparison_mode": "cross_case",
+  "narrative": "On February 4, 2023, at Austin-Bergstrom International Airport, Southwest Airlines flight 708 and FedEx flight 1432 were involved in a runway incursion with overflight. Reconstruct the sequence using only linked factual evidence; compare with independent cases without transferring their causal conclusions.",
+  "attachments": [
+    "BW-9DACD0CC1EDC"
+  ],
+  "requested_output": "preliminary evidence-cited six-section investigation"
+}

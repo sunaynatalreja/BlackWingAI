@@ -1,0 +1,371 @@
+{
+  "method": "BM25",
+  "source_ids": [
+    "BW-SRC-001",
+    "BW-SRC-002",
+    "BW-SRC-003"
+  ],
+  "pages": 80,
+  "results": [
+    {
+      "words": 100,
+      "overlap": 20,
+      "chunks": 263,
+      "primary_page_hit_at_5_count": 4,
+      "primary_page_mrr_at_5": 0.35,
+      "questions": 10,
+      "results": [
+        {
+          "question_id": "BW-G001",
+          "first_primary_page_rank": null,
+          "top5_chunk_ids": [
+            "BW-SRC-001-p012-w0000",
+            "BW-SRC-001-p010-w0080",
+            "BW-SRC-001-p009-w0000",
+            "BW-SRC-001-p009-w0080",
+            "BW-SRC-003-p010-w0320"
+          ]
+        },
+        {
+          "question_id": "BW-G002",
+          "first_primary_page_rank": null,
+          "top5_chunk_ids": [
+            "BW-SRC-003-p028-w0160",
+            "BW-SRC-003-p008-w0080",
+            "BW-SRC-003-p005-w0240",
+            "BW-SRC-001-p012-w0080",
+            "BW-SRC-002-p018-w0400"
+          ]
+        },
+        {
+          "question_id": "BW-G003",
+          "first_primary_page_rank": null,
+          "top5_chunk_ids": [
+            "BW-SRC-003-p037-w0080",
+            "BW-SRC-002-p018-w0000",
+            "BW-SRC-001-p015-w0160",
+            "BW-SRC-003-p012-w0240",
+            "BW-SRC-003-p038-w0240"
+          ]
+        },
+        {
+          "question_id": "BW-G004",
+          "first_primary_page_rank": null,
+          "top5_chunk_ids": [
+            "BW-SRC-001-p007-w0000",
+            "BW-SRC-003-p010-w0320",
+            "BW-SRC-001-p016-w0000",
+            "BW-SRC-001-p010-w0000",
+            "BW-SRC-003-p010-w0240"
+          ]
+        },
+        {
+          "question_id": "BW-G005",
+          "first_primary_page_rank": null,
+          "top5_chunk_ids": [
+            "BW-SRC-003-p034-w0160",
+            "BW-SRC-001-p006-w0160",
+            "BW-SRC-003-p038-w0160",
+            "BW-SRC-003-p010-w0320",
+            "BW-SRC-003-p034-w0080"
+          ]
+        },
+        {
+          "question_id": "BW-G006",
+          "first_primary_page_rank": 1,
+          "top5_chunk_ids": [
+            "BW-SRC-001-p008-w0000",
+            "BW-SRC-001-p010-w0080",
+            "BW-SRC-001-p010-w0000",
+            "BW-SRC-003-p030-w0000",
+            "BW-SRC-003-p011-w0320"
+          ]
+        },
+        {
+          "question_id": "BW-G007",
+          "first_primary_page_rank": 1,
+          "top5_chunk_ids": [
+            "BW-SRC-001-p008-w0080",
+            "BW-SRC-001-p008-w0000",
+            "BW-SRC-001-p010-w0080",
+            "BW-SRC-003-p010-w0320",
+            "BW-SRC-001-p009-w0000"
+          ]
+        },
+        {
+          "question_id": "BW-G008",
+          "first_primary_page_rank": 2,
+          "top5_chunk_ids": [
+            "BW-SRC-001-p015-w0160",
+            "BW-SRC-001-p009-w0000",
+            "BW-SRC-001-p015-w0080",
+            "BW-SRC-001-p009-w0080",
+            "BW-SRC-001-p015-w0000"
+          ]
+        },
+        {
+          "question_id": "BW-G009",
+          "first_primary_page_rank": 1,
+          "top5_chunk_ids": [
+            "BW-SRC-001-p009-w0000",
+            "BW-SRC-001-p006-w0000",
+            "BW-SRC-001-p007-w0000",
+            "BW-SRC-001-p010-w0000",
+            "BW-SRC-001-p008-w0000"
+          ]
+        },
+        {
+          "question_id": "BW-G010",
+          "first_primary_page_rank": null,
+          "top5_chunk_ids": [
+            "BW-SRC-003-p012-w0000",
+            "BW-SRC-002-p016-w0160",
+            "BW-SRC-002-p009-w0000",
+            "BW-SRC-003-p030-w0000",
+            "BW-SRC-002-p016-w0000"
+          ]
+        }
+      ]
+    },
+    {
+      "words": 216,
+      "overlap": 30,
+      "chunks": 137,
+      "primary_page_hit_at_5_count": 4,
+      "primary_page_mrr_at_5": 0.3333,
+      "questions": 10,
+      "results": [
+        {
+          "question_id": "BW-G001",
+          "first_primary_page_rank": null,
+          "top5_chunk_ids": [
+            "BW-SRC-003-p010-w0186",
+            "BW-SRC-001-p012-w0000",
+            "BW-SRC-001-p009-w0000",
+            "BW-SRC-001-p010-w0000",
+            "BW-SRC-002-p016-w0186"
+          ]
+        },
+        {
+          "question_id": "BW-G002",
+          "first_primary_page_rank": null,
+          "top5_chunk_ids": [
+            "BW-SRC-003-p028-w0000",
+            "BW-SRC-002-p017-w0000",
+            "BW-SRC-003-p008-w0000",
+            "BW-SRC-003-p028-w0186",
+            "BW-SRC-003-p005-w0186"
+          ]
+        },
+        {
+          "question_id": "BW-G003",
+          "first_primary_page_rank": null,
+          "top5_chunk_ids": [
+            "BW-SRC-003-p037-w0000",
+            "BW-SRC-002-p018-w0000",
+            "BW-SRC-001-p015-w0000",
+            "BW-SRC-001-p015-w0186",
+            "BW-SRC-003-p030-w0000"
+          ]
+        },
+        {
+          "question_id": "BW-G004",
+          "first_primary_page_rank": null,
+          "top5_chunk_ids": [
+            "BW-SRC-001-p007-w0000",
+            "BW-SRC-003-p010-w0186",
+            "BW-SRC-003-p012-w0000",
+            "BW-SRC-003-p038-w0186",
+            "BW-SRC-001-p008-w0000"
+          ]
+        },
+        {
+          "question_id": "BW-G005",
+          "first_primary_page_rank": null,
+          "top5_chunk_ids": [
+            "BW-SRC-003-p034-w0186",
+            "BW-SRC-003-p034-w0000",
+            "BW-SRC-001-p006-w0000",
+            "BW-SRC-003-p012-w0000",
+            "BW-SRC-002-p016-w0186"
+          ]
+        },
+        {
+          "question_id": "BW-G006",
+          "first_primary_page_rank": 1,
+          "top5_chunk_ids": [
+            "BW-SRC-001-p008-w0000",
+            "BW-SRC-003-p010-w0186",
+            "BW-SRC-001-p010-w0000",
+            "BW-SRC-001-p007-w0000",
+            "BW-SRC-001-p009-w0000"
+          ]
+        },
+        {
+          "question_id": "BW-G007",
+          "first_primary_page_rank": 1,
+          "top5_chunk_ids": [
+            "BW-SRC-001-p008-w0000",
+            "BW-SRC-003-p010-w0186",
+            "BW-SRC-001-p009-w0000",
+            "BW-SRC-001-p010-w0000",
+            "BW-SRC-003-p010-w0372"
+          ]
+        },
+        {
+          "question_id": "BW-G008",
+          "first_primary_page_rank": 3,
+          "top5_chunk_ids": [
+            "BW-SRC-001-p015-w0186",
+            "BW-SRC-001-p015-w0000",
+            "BW-SRC-001-p009-w0000",
+            "BW-SRC-001-p002-w0000",
+            "BW-SRC-003-p012-w0000"
+          ]
+        },
+        {
+          "question_id": "BW-G009",
+          "first_primary_page_rank": 1,
+          "top5_chunk_ids": [
+            "BW-SRC-001-p009-w0000",
+            "BW-SRC-003-p010-w0186",
+            "BW-SRC-001-p006-w0000",
+            "BW-SRC-001-p007-w0000",
+            "BW-SRC-001-p010-w0000"
+          ]
+        },
+        {
+          "question_id": "BW-G010",
+          "first_primary_page_rank": null,
+          "top5_chunk_ids": [
+            "BW-SRC-003-p012-w0000",
+            "BW-SRC-002-p016-w0000",
+            "BW-SRC-002-p016-w0186",
+            "BW-SRC-002-p009-w0000",
+            "BW-SRC-003-p030-w0000"
+          ]
+        }
+      ]
+    },
+    {
+      "words": 320,
+      "overlap": 48,
+      "chunks": 97,
+      "primary_page_hit_at_5_count": 5,
+      "primary_page_mrr_at_5": 0.375,
+      "questions": 10,
+      "results": [
+        {
+          "question_id": "BW-G001",
+          "first_primary_page_rank": null,
+          "top5_chunk_ids": [
+            "BW-SRC-003-p010-w0272",
+            "BW-SRC-001-p012-w0000",
+            "BW-SRC-002-p016-w0000",
+            "BW-SRC-001-p010-w0000",
+            "BW-SRC-003-p012-w0000"
+          ]
+        },
+        {
+          "question_id": "BW-G002",
+          "first_primary_page_rank": null,
+          "top5_chunk_ids": [
+            "BW-SRC-003-p028-w0000",
+            "BW-SRC-003-p005-w0272",
+            "BW-SRC-002-p017-w0000",
+            "BW-SRC-003-p005-w0000",
+            "BW-SRC-001-p012-w0000"
+          ]
+        },
+        {
+          "question_id": "BW-G003",
+          "first_primary_page_rank": null,
+          "top5_chunk_ids": [
+            "BW-SRC-003-p037-w0000",
+            "BW-SRC-002-p018-w0000",
+            "BW-SRC-001-p015-w0000",
+            "BW-SRC-003-p038-w0000",
+            "BW-SRC-003-p030-w0000"
+          ]
+        },
+        {
+          "question_id": "BW-G004",
+          "first_primary_page_rank": null,
+          "top5_chunk_ids": [
+            "BW-SRC-001-p007-w0000",
+            "BW-SRC-003-p012-w0000",
+            "BW-SRC-003-p009-w0272",
+            "BW-SRC-003-p010-w0272",
+            "BW-SRC-003-p038-w0272"
+          ]
+        },
+        {
+          "question_id": "BW-G005",
+          "first_primary_page_rank": 4,
+          "top5_chunk_ids": [
+            "BW-SRC-001-p006-w0000",
+            "BW-SRC-003-p034-w0000",
+            "BW-SRC-003-p012-w0000",
+            "BW-SRC-001-p007-w0000",
+            "BW-SRC-003-p010-w0272"
+          ]
+        },
+        {
+          "question_id": "BW-G006",
+          "first_primary_page_rank": 1,
+          "top5_chunk_ids": [
+            "BW-SRC-001-p008-w0000",
+            "BW-SRC-001-p010-w0000",
+            "BW-SRC-003-p010-w0000",
+            "BW-SRC-001-p007-w0000",
+            "BW-SRC-003-p010-w0272"
+          ]
+        },
+        {
+          "question_id": "BW-G007",
+          "first_primary_page_rank": 1,
+          "top5_chunk_ids": [
+            "BW-SRC-001-p008-w0000",
+            "BW-SRC-003-p010-w0272",
+            "BW-SRC-001-p009-w0000",
+            "BW-SRC-001-p010-w0000",
+            "BW-SRC-001-p006-w0000"
+          ]
+        },
+        {
+          "question_id": "BW-G008",
+          "first_primary_page_rank": 2,
+          "top5_chunk_ids": [
+            "BW-SRC-001-p015-w0000",
+            "BW-SRC-001-p009-w0000",
+            "BW-SRC-001-p002-w0000",
+            "BW-SRC-003-p012-w0000",
+            "BW-SRC-003-p008-w0272"
+          ]
+        },
+        {
+          "question_id": "BW-G009",
+          "first_primary_page_rank": 1,
+          "top5_chunk_ids": [
+            "BW-SRC-001-p009-w0000",
+            "BW-SRC-003-p012-w0000",
+            "BW-SRC-001-p007-w0000",
+            "BW-SRC-003-p010-w0272",
+            "BW-SRC-001-p010-w0000"
+          ]
+        },
+        {
+          "question_id": "BW-G010",
+          "first_primary_page_rank": null,
+          "top5_chunk_ids": [
+            "BW-SRC-002-p016-w0000",
+            "BW-SRC-003-p012-w0000",
+            "BW-SRC-001-p017-w0000",
+            "BW-SRC-003-p030-w0000",
+            "BW-SRC-002-p009-w0000"
+          ]
+        }
+      ]
+    }
+  ]
+}
