@@ -1,0 +1,13 @@
+export BLACKWING_CONFIG="$PWD/config/blackwing.properties"
+export BLACKWING_API_HOST="127.0.0.1"
+export BLACKWING_API_PORT="8000"
+export BLACKWING_LLM_PROVIDER="ollama"
+export OLLAMA_BASE_URL="http://localhost:11434"
+export OLLAMA_MODEL="qwen3:8b"
+export OLLAMA_TIMEOUT_SECONDS="600"
+export OLLAMA_TEMPERATURE="0.1"
+export OLLAMA_THINK="false"
+export OLLAMA_MAX_OUTPUT_TOKENS="1024"
+export BLACKWING_UI_API_URL="http://127.0.0.1:8000"
+export BLACKWING_UI_TIMEOUT_SECONDS="2400"
+source ../.venv/bin/activate
