@@ -1,0 +1,25 @@
+{
+  "document_id": "ntsb-dca23fa149-final-report",
+  "title": "NTSB investigation: runway incursion and overflight involving Southwest Airlines flight 708 and FedEx flight 1432",
+  "document_type": "incident_report",
+  "authority_type": "NTSB final investigation report",
+  "source_status": "official_final_report",
+  "version": "AIR-24-02",
+  "source_id": "NTSB-DCA23FA149",
+  "source_url": "https://www.ntsb.gov/investigations/Pages/DCA23FA149.aspx",
+  "jurisdiction": "US",
+  "document_date": "2024-06-06",
+  "effective_date": null,
+  "page_number": null,
+  "section_reference": "What Happened; What We Found",
+  "historical_findings": [
+    "NTSB probable cause for the Austin event: the local controller incorrectly assumed Southwest would depart before FedEx arrived, resulting in loss of separation.",
+    "NTSB contributing factors for the Austin event: controller expectation bias, limited awareness of the Southwest aircraft's position, and insufficient preincident tower training for low-visibility operations.",
+    "NTSB also cited the Southwest crew's failure to account for short-final traffic and communicate its need for additional runway time, and the FAA's failure to require surface detection equipment and direct flight-crew alerting at that airport."
+  ],
+  "comparison_notes": [
+    "The Austin event involved Southwest holding on the runway for an engine run-up while FedEx approached to land in dense fog; it did not involve a crossing aircraft during another aircraft's takeoff roll.",
+    "The JFK narrative reports night visual meteorological conditions and an ASDE-X alert. Do not transfer the Austin report's fog, lack of surface detection equipment, or controller cause to JFK."
+  ],
+  "content": "On February 4, 2023, at Austin-Bergstrom International Airport in Austin, Texas, Southwest Airlines flight 708 was cleared for takeoff on runway 18L while a FedEx flight was cleared to continue its approach to that same runway. Dense fog prevented the local controller from seeing the Southwest aircraft, and the tower did not have surface detection equipment to help monitor ground traffic. FAA procedures required 2 miles of separation, but the aircraft were closer than that as the Southwest aircraft lined up and stopped on the runway to perform an engine run-up. The FedEx crew saw the Southwest aircraft through the fog and initiated a missed approach after crossing the runway threshold. The closest separation was about 150 to 170 feet. No collision occurred. The Southwest aircraft continued its takeoff and the FedEx aircraft later landed without further incident. The NTSB determined the probable cause was the local controller's incorrect assumption that the Southwest aircraft would depart before the FedEx aircraft arrived, resulting in loss of separation. Factors contributing to that incorrect assumption included expectation bias, lack of controller situational awareness about the Southwest aircraft's position, and lack of prior low-visibility-operations training at the tower. The NTSB also cited the Southwest crew's failure to account for short-final traffic and communicate the need for additional runway time, and the FAA's failure to require surface detection equipment at that airport and direct alerting for flight crews. This is a distinct historical analogy: it involved a takeoff aircraft occupying the runway while another aircraft was approaching to land in dense fog; it did not involve an aircraft crossing the runway during another aircraft's takeoff roll. Similar factors such as controller situational awareness, runway occupancy, and alerting can inform hypotheses, but the NTSB cause for this Austin event is not a finding about any new case."
+}

@@ -1,0 +1,1 @@
+"""BlackWing AI starter application."""
