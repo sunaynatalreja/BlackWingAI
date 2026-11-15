@@ -66,6 +66,7 @@ class EvidenceInput(APIModel):
 
 
 class CaseCreate(APIModel):
+    source_incident_id: str | None = Field(default=None, min_length=3, max_length=100, description="External incident source identifier for matching indexed factual reports.")
     category: IncidentCategory = IncidentCategory.RUNWAY_INCURSION
     narrative: str = Field(min_length=20, max_length=30_000)
     incident_date: date | None = None
@@ -75,6 +76,7 @@ class CaseCreate(APIModel):
 
 
 class CasePatch(APIModel):
+    source_incident_id: str | None = Field(default=None, min_length=3, max_length=100)
     narrative: str | None = Field(default=None, min_length=20, max_length=30_000)
     incident_date: date | None = None
     jurisdiction: str | None = Field(default=None, max_length=100)
@@ -124,6 +126,7 @@ class KnowledgeSearchResponse(APIModel):
 
 class CaseResponse(APIModel):
     case_id: str
+    source_incident_id: str | None = None
     category: IncidentCategory
     status: CaseStatus
     narrative: str

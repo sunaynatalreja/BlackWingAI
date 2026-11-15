@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import json
 import logging
+import os
 from typing import Any, Awaitable, Callable
 from uuid import uuid4
 
@@ -92,16 +93,34 @@ async def _execute_run(
     settings: Settings,
     repo: MemoryRepository,
     runner: AnalysisRunner,
+    use_agent_retrieval: bool = True,
 ) -> None:
     repo.patch_run(run_id, {"status": "running", "started_at": datetime.now(timezone.utc)})
     evidence = [*case.get("evidence", []), *retrieved]
     try:
+        agent_evidence = None
+        if use_agent_retrieval and os.getenv("BLACKWING_AGENT_RAG", "0") == "1":
+            # Keep integration outside agent packages and UI. No LLM calls here.
+            from blackwing.rag.agent_router import build_agent_packets
+            agent_evidence = build_agent_packets(
+                retriever=retriever, narrative=case["narrative"],
+                case_id=case.get("source_incident_id") or case["case_id"],
+                jurisdiction=case.get("jurisdiction"), incident_date=str(case.get("incident_date"))
+                    if case.get("incident_date") else None,
+                documents=repo.list_documents(), uploaded_evidence=case.get("evidence", []),
+                embedding_model=settings.rag_embedding_model,
+                method=os.getenv("BLACKWING_AGENT_RAG_METHOD", "hybrid").strip().lower(),
+                limit_per_agent=3,
+            )
         result = await runner(
             case["narrative"],
             settings,
             case_id=case["case_id"],
             evidence=evidence,
             retrieval_count=len(retrieved),
+            jurisdiction=case.get("jurisdiction"),
+            incident_date=str(case.get("incident_date")) if case.get("incident_date") else None,
+            **({"agent_evidence": agent_evidence} if agent_evidence is not None else {}),
         )
         events = []
         for sequence, event in enumerate(result.get("trace", []), 1):
@@ -261,7 +280,7 @@ async def create_analysis_run(
     )["results"] if request.include_retrieval else []
     run_id = str(uuid4())
     run = repo.create_run(run_id, case_id, request.workflow, settings.model_name)
-    background.add_task(_execute_run, run_id, case, retrieved, settings, repo, runner)
+    background.add_task(_execute_run, run_id, case, retrieved, settings, repo, runner, request.include_retrieval)
     return _run_response(run)
 
 

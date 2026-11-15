@@ -1,5 +1,5 @@
-"""Local, citation-preserving retrieval for BlackWing."""
-
-from blackwing.rag.retriever import RAGRetriever
-
-__all__ = ["RAGRetriever"]
+from .retriever import RAGRetriever, retriever
+from .engine import HybridIndex, CrossEncoderReranker
+from .corpus import load_manifest, CorpusAudit
+__all__ = ["RAGRetriever", "retriever", "HybridIndex", "CrossEncoderReranker",
+           "load_manifest", "CorpusAudit"]

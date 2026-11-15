@@ -12,6 +12,8 @@ from pydantic import ValidationError
 
 from blackwing.agents.base import AgentExecutionError, AgentSpec
 from blackwing.agents.compliance.agent import unassessed_output as compliance_unassessed_output
+from blackwing.agents.compliance.evidence import ground_compliance_output
+from blackwing.agents.risk.evidence import ground_risk_output
 from blackwing.agents.similar_case.agent import build_output as similar_case_output
 from blackwing.agents.investigation.agent import remove_historical_case_evidence_ids
 from blackwing.agents.registry import AGENT_SPECS
@@ -22,7 +24,10 @@ from blackwing.config import Settings
 class CaseState(TypedDict, total=False):
     case_id: str
     narrative: str
+    jurisdiction: str | None
+    incident_date: str | None
     evidence: list[dict[str, Any]]
+    agent_evidence: dict[str, list[dict[str, Any]]] | None
     outputs: dict[str, dict[str, Any]]
     trace: list[dict[str, Any]]
 
@@ -31,9 +36,12 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
     async def run(state: CaseState) -> dict[str, Any]:
         role = spec.key
         try:
-            evidence = state.get("evidence", [])
+            # Opt-in RAG provides role-specific sources; legacy runs use shared evidence.
+            agent_packets = state.get("agent_evidence")
+            evidence = (agent_packets.get(role, []) if agent_packets is not None
+                        else state.get("evidence", []))
             compliance_sources = {
-                "regulation", "procedure", "guidance",
+                "regulation", "procedure",
             }
             if role == "similar_case":
                 output = similar_case_output(state["narrative"], evidence)
@@ -55,6 +63,14 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
                 )
                 if role == "investigation":
                     output = remove_historical_case_evidence_ids(output, evidence)
+                elif role == "compliance":
+                    output = ground_compliance_output(
+                        output, evidence,
+                        jurisdiction=state.get("jurisdiction"),
+                        incident_date=state.get("incident_date"),
+                    )
+                elif role == "risk":
+                    output = ground_risk_output(output, evidence)
         except httpx.TimeoutException as exc:
             raise AgentExecutionError(role, "model_timeout", "The configured model provider did not respond before the configured timeout.") from exc
         except httpx.HTTPStatusError as exc:
@@ -100,12 +116,18 @@ async def analyze_incident(
     case_id: str | None = None,
     evidence: list[dict[str, Any]] | None = None,
     retrieval_count: int = 0,
+    agent_evidence: dict[str, list[dict[str, Any]]] | None = None,
+    jurisdiction: str | None = None,
+    incident_date: str | None = None,
 ) -> dict[str, Any]:
     case_id = case_id or str(uuid4())
     initial_state: CaseState = {
         "case_id": case_id,
         "narrative": narrative.strip(),
+        "jurisdiction": jurisdiction,
+        "incident_date": incident_date,
         "evidence": evidence or [],
+        "agent_evidence": agent_evidence,
         "outputs": {},
         "trace": [
             {"step": "case_created", "status": "complete"},
