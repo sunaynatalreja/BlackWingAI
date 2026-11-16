@@ -116,6 +116,7 @@ async def _execute_run(
             case["narrative"],
             settings,
             case_id=case["case_id"],
+            source_incident_id=case.get("source_incident_id"),
             evidence=evidence,
             retrieval_count=len(retrieved),
             jurisdiction=case.get("jurisdiction"),
@@ -329,10 +330,18 @@ async def get_report(case_id: str, repo: MemoryRepository = Depends(get_reposito
 @app.get("/api/v1/cases/{case_id}/report/export", tags=["reports"])
 async def export_report(
     case_id: str,
-    export_format: str = Query(default="json", alias="format", pattern="^json$"),
+    export_format: str = Query(default="json", alias="format", pattern="^(json|md)$"),
     repo: MemoryRepository = Depends(get_repository),
 ) -> Response:
     report = await get_report(case_id, repo)
+    if export_format == "md":
+        from blackwing.reporting import render_markdown_report
+        filename = f"blackwing-{case_id}-report.md"
+        return Response(
+            content=render_markdown_report(report.model_dump(mode="json")),
+            media_type="text/markdown; charset=utf-8",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
     filename = f"blackwing-{case_id}-report.json"
     return Response(
         content=json.dumps(report.model_dump(mode="json"), ensure_ascii=False),

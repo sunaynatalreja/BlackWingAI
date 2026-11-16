@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from typing import Any, TypedDict
 from uuid import uuid4
 
@@ -15,7 +16,10 @@ from blackwing.agents.compliance.agent import unassessed_output as compliance_un
 from blackwing.agents.compliance.evidence import ground_compliance_output
 from blackwing.agents.risk.evidence import ground_risk_output
 from blackwing.agents.similar_case.agent import build_output as similar_case_output
-from blackwing.agents.investigation.agent import remove_historical_case_evidence_ids
+from blackwing.agents.investigation.grounding import ground_investigation_output
+from blackwing.agents.mitigation.grounding import ground_mitigation_output
+from blackwing.agents.critic.grounding import audit_critic_output
+from blackwing.agents.verification.grounding import ground_verification_output
 from blackwing.agents.registry import AGENT_SPECS
 from blackwing.agents.runtime import invoke_agent
 from blackwing.config import Settings
@@ -26,6 +30,7 @@ class CaseState(TypedDict, total=False):
     narrative: str
     jurisdiction: str | None
     incident_date: str | None
+    source_incident_id: str | None
     evidence: list[dict[str, Any]]
     agent_evidence: dict[str, list[dict[str, Any]]] | None
     outputs: dict[str, dict[str, Any]]
@@ -41,12 +46,14 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
             evidence = (agent_packets.get(role, []) if agent_packets is not None
                         else state.get("evidence", []))
             compliance_sources = {
-                "regulation", "procedure",
+                "regulation", "procedure", "operational_order",
             }
             if role == "similar_case":
-                output = similar_case_output(state["narrative"], evidence)
+                output = similar_case_output(state["narrative"], evidence,
+                                             current_incident_id=state.get("source_incident_id"))
             elif role == "compliance" and not any(
                 str(item.get("document_type", "")).casefold() in compliance_sources
+                or str(item.get("source_type", "")).casefold() in compliance_sources
                 for item in evidence
             ):
                 # With no authoritative rule text, the model has no compliance
@@ -62,7 +69,9 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
                     prior_outputs=state.get("outputs", {}),
                 )
                 if role == "investigation":
-                    output = remove_historical_case_evidence_ids(output, evidence)
+                    output = ground_investigation_output(
+                        output, evidence, incident_id=state.get("source_incident_id")
+                    )
                 elif role == "compliance":
                     output = ground_compliance_output(
                         output, evidence,
@@ -71,6 +80,12 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
                     )
                 elif role == "risk":
                     output = ground_risk_output(output, evidence)
+                elif role == "mitigation":
+                    output = ground_mitigation_output(output, state.get("outputs", {}))
+                elif role == "critic":
+                    output = audit_critic_output(output, state.get("outputs", {}))
+                elif role == "verification":
+                    output = ground_verification_output(output, state.get("outputs", {}))
         except httpx.TimeoutException as exc:
             raise AgentExecutionError(role, "model_timeout", "The configured model provider did not respond before the configured timeout.") from exc
         except httpx.HTTPStatusError as exc:
@@ -119,13 +134,24 @@ async def analyze_incident(
     agent_evidence: dict[str, list[dict[str, Any]]] | None = None,
     jurisdiction: str | None = None,
     incident_date: str | None = None,
+    source_incident_id: str | None = None,
 ) -> dict[str, Any]:
     case_id = case_id or str(uuid4())
+    # The source incident reference is different from the application's UUID.
+    # If older callers omit it, recover from a scoped official case-factual chunk.
+    if not source_incident_id:
+        source_incident_id = next((
+            str(row["incident_id"])
+            for row in ((agent_evidence or {}).get("investigation") or [])
+            if row.get("incident_id") and str(row.get("evidence_role") or "").casefold() == "case_factual"
+        ), None)
+    source_incident_id = source_incident_id or case_id
     initial_state: CaseState = {
         "case_id": case_id,
         "narrative": narrative.strip(),
         "jurisdiction": jurisdiction,
         "incident_date": incident_date,
+        "source_incident_id": source_incident_id,
         "evidence": evidence or [],
         "agent_evidence": agent_evidence,
         "outputs": {},
@@ -138,7 +164,12 @@ async def analyze_incident(
             },
         ],
     }
-    async with httpx.AsyncClient(timeout=settings.model_timeout_seconds) as client:
+    # Hosted IIT TLS may use a trusted local CA bundle. Never disable verification.
+    ca_bundle = os.environ.get("BLACKWING_LLM_CA_CERT")
+    if ca_bundle and not os.path.isfile(ca_bundle):
+        raise ValueError("BLACKWING_LLM_CA_CERT must point to an existing trusted CA bundle")
+    async with httpx.AsyncClient(timeout=settings.model_timeout_seconds,
+                                 verify=ca_bundle if ca_bundle else True) as client:
         graph = _build_graph(client, settings)
         final_state = await graph.ainvoke(initial_state)
 

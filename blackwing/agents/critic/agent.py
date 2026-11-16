@@ -9,5 +9,5 @@ SPEC = AgentSpec(
     name="Critic Agent",
     prompt_path=Path(__file__).with_name("prompt.md"),
     output_schema=CriticOutput,
-    upstream_context=("investigation", "compliance", "risk", "mitigation"),
+    upstream_context=("investigation", "similar_case", "compliance", "risk", "mitigation"),
 )

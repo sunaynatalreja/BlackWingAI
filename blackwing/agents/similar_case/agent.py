@@ -1,75 +1,78 @@
-"""Deterministic, source-deduplicated comparison for retrieved historical cases."""
+"""Deterministic, deduplicated, provenance-bound historical-case comparator.
 
+Similar-case similarity is a *candidate analogy*, never a factual finding
+about the current incident. No LLM call or extra IIT tokens are required.
+"""
 from __future__ import annotations
 
-from typing import Any
+import re
+from typing import Any, Mapping, Sequence
 
+from blackwing.agents.evidence_utils import source_id
 from blackwing.agents.similar_case.schema import SimilarCaseMatch, SimilarCaseOutput
 
+_TERMS = re.compile(r"[a-z0-9]{3,}", re.I)
+_STOP = {"runway", "aircraft", "airport", "reported", "incident", "the", "and", "with", "from", "that", "when"}
 
-def build_output(narrative: str, evidence: list[dict[str, Any]]) -> dict[str, Any]:
-    """Build one grounded match per source, without asking a small model to cite it."""
-    reports: dict[str, dict[str, Any]] = {}
+
+def _features(s: str) -> set[str]:
+    return set(_TERMS.findall(s.lower())) - _STOP
+
+
+def build_output(narrative: str, evidence: Sequence[Mapping[str, Any]], *,
+                 current_incident_id: str | None = None) -> dict[str, Any]:
+    reports: dict[str, Mapping[str, Any]] = {}
     for item in evidence:
-        if str(item.get("document_type", "")).casefold() != "incident_report":
+        if str(item.get("document_type") or "").casefold() != "incident_report":
             continue
-        source_id = item.get("source_id")
-        if not source_id:
+        case_id = str(item.get("incident_id") or "")
+        if current_incident_id and case_id.casefold() == current_incident_id.casefold():
             continue
-        current = reports.setdefault(source_id, item)
-        # Prefer the chunk carrying curated facts, but retain the first source metadata.
-        if item.get("historical_findings") and not current.get("historical_findings"):
-            reports[source_id] = {**current, **item}
+        source = source_id(item)
+        if not source:
+            continue
+        old = reports.get(source)
+        if old is None or (not old.get("historical_findings") and item.get("historical_findings")):
+            reports[source] = item
 
-    matches: list[SimilarCaseMatch] = []
-    exact_reference_found = False
-    for source_id, item in reports.items():
-        source_text = " ".join(str(item.get(key, "")) for key in ("title", "excerpt", "source_id")).casefold()
-        # Exact matching is intentionally conservative; retrieval similarity alone
-        # must never classify an incident as an already investigated case.
-        reference_tokens = [token for token in narrative.split() if token.upper().startswith(("JFK-", "DCA", "NTSB-"))]
-        if reference_tokens and any(token.casefold().strip(".,:;") in source_text for token in reference_tokens):
-            exact_reference_found = True
-        findings = item.get("historical_findings") or []
-        notes = item.get("comparison_notes") or []
+    targets = _features(narrative)
+    scored: list[tuple[float, str, Mapping[str, Any], list[str]]] = []
+    for ref, item in reports.items():
+        text = " ".join(str(item.get(k) or "") for k in ("title", "excerpt", "content", "comparison_notes"))
+        overlapping = sorted(targets & _features(text))
+        # Retrieving a case is not evidence of similarity; require at least one
+        # nontrivial overlapping operational term, or state insufficiency.
+        score = len(overlapping) / (len(targets) + 1)
+        scored.append((score, ref, item, overlapping))
+    scored.sort(key=lambda t: (-t[0], t[1]))
+
+    matches = []
+    for score, ref, item, features in scored[:3]:
+        notes = list(item.get("comparison_notes") or [])
+        if not features:
+            notes.append("No specific shared operational feature was established from available excerpts.")
+        if not item.get("incident_date"):
+            notes.append("Historical incident date not verified from supplied metadata.")
         matches.append(SimilarCaseMatch(
-            source_id=source_id,
-            title=str(item.get("title", "Historical incident report")),
+            source_id=ref,
+            title=str(item.get("title") or "Historical incident report"),
             source_url=item.get("source_url"),
-            similarity=(
-                "The curator-identified analogy is a runway conflict involving takeoff operations "
-                "and another aircraft movement on the same runway. See the material differences below."
-            ),
-            differences_or_unknowns=[str(note) for note in notes],
-            source_findings=[str(finding) for finding in findings],
+            similarity=("Potential shared terms from supplied excerpts: " + ", ".join(features[:6]) + "."
+                        if features else "Retrieved historical record; specific analogy not established."),
+            differences_or_unknowns=[str(x) for x in notes][:8],
+            source_findings=[str(x) for x in (item.get("historical_findings") or [])][:5],
         ))
-
-    if exact_reference_found:
-        status = "existing_case_match"
-        assessment = "A source containing the supplied incident reference was retrieved; verify that it describes the same event before reusing any findings."
-    elif matches:
+    if matches:
         status = "unseen_case_with_similar_historical_cases"
-        assessment = (
-            "The incoming incident reference is not present in the retrieved reports. "
-            f"{len(matches)} distinct historical report(s) provide analogy only. Their official causes apply to those historical events, not this case."
-        )
+        assessment = f"{len(matches)} retrieved historical source(s); each analogy is a candidate only."
     else:
         status = "unseen_case_no_historical_match"
-        assessment = "No historical incident report matched the current retrieval query; this case remains unseen in the indexed corpus."
-
+        assessment = "No distinct historical incident report was supplied by retrieval."
     return SimilarCaseOutput(
-        case_status=status,
-        matches=matches,
-        assessment=assessment,
-        factors_to_verify=(
-            [
-                "Controller traffic awareness and coordination at the time of the crossing.",
-                "Flight-crew surface-navigation and runway-clearance cross-checks.",
-                "Timing and effectiveness of surface-surveillance alerts and controller intervention.",
-            ] if matches else []
-        ),
+        case_status=status, matches=matches, assessment=assessment,
+        factors_to_verify=["Check which operational conditions genuinely match before transferring any lessons."] if matches else [],
         limitations=[
-            "The historical report is an analogy, not evidence of what caused the incoming event.",
-            "Verify all source details and current-case facts with primary records and a qualified investigator.",
+            "A retrieved historical case does not establish the cause or contributing factors of this event.",
+            "Source authenticity, dates and comparisons require a human investigator.",
         ],
     ).model_dump(mode="json")
