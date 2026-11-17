@@ -30,21 +30,43 @@ if submitted:
                     run_response.raise_for_status()
                     run = run_response.json()
                     deadline = time.monotonic() + settings.ui_request_timeout_seconds
+                    poll_errors = 0
                     while run["status"] in {"queued", "running"} and time.monotonic() < deadline:
                         time.sleep(2)
-                        status_response = client.get(f"{settings.ui_api_url}/api/v1/runs/{run['run_id']}")
-                        status_response.raise_for_status()
-                        run = status_response.json()
+                        try:
+                            status_response = client.get(f"{settings.ui_api_url}/api/v1/runs/{run['run_id']}")
+                            status_response.raise_for_status()
+                            run = status_response.json()
+                            poll_errors = 0
+                        except httpx.RequestError as exc:
+                            # A dropped local connection should not hide a run
+                            # that the API continues processing in the background.
+                            poll_errors += 1
+                            st.warning(
+                                "The connection to the API dropped while checking the run "
+                                f"(attempt {poll_errors}); reconnecting…"
+                            )
+                            time.sleep(min(2 * poll_errors, 10))
             st.subheader("Analysis run")
             st.caption(f"Case ID: {case['case_id']} · Run ID: {run['run_id']} · Status: {run['status']}")
             if run["status"] == "completed":
                 report_response = httpx.get(f"{settings.ui_api_url}/api/v1/cases/{case['case_id']}/report", timeout=settings.ui_request_timeout_seconds)
                 report_response.raise_for_status()
                 report = report_response.json()
+                critic_output = report["report"]["agent_outputs"].get("critic", {})
+                critic_issues = critic_output.get("issues", [])
+                if any(issue.get("issue_type") in {
+                    "critic_model_output_invalid", "critic_model_context_budget_exceeded"
+                } for issue in critic_issues):
+                    if any(issue.get("issue_type") == "critic_model_context_budget_exceeded"
+                           for issue in critic_issues):
+                        st.warning("The Critic input exceeded the safe model context budget, so no Critic response was produced. A deterministic audit was used; check the API service log for details.")
+                    else:
+                        st.warning("The Critic model response did not match its schema. A deterministic audit was used; check the API service log for validation details.")
                 for agent_name, agent_output in report["report"]["agent_outputs"].items():
                     with st.expander(
                         agent_name.replace("_", " ").title(),
-                        expanded=agent_name in {"investigation", "similar_case"},
+                        expanded=True,
                     ):
                         if agent_name == "similar_case" and agent_output.get("case_status", "").startswith("unseen_case"):
                             st.info("Incoming case is unseen in the currently indexed reports. The retrieved cases below are historical analogies, not findings about this case.")

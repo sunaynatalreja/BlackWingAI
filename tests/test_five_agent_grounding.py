@@ -7,6 +7,7 @@ from blackwing.agents.investigation.agent import remove_historical_case_evidence
 from blackwing.agents.similar_case.agent import build_output
 from blackwing.agents.mitigation.grounding import ground_mitigation_output
 from blackwing.agents.critic.grounding import audit_critic_output
+from blackwing.agents.critic.agent import normalize_model_payload
 from blackwing.agents.verification.grounding import ground_verification_output
 from blackwing.reporting import render_markdown_report
 
@@ -110,6 +111,27 @@ def test_critic_flags_citation_and_regulatory_gaps():
     assert "ungrounded_hazard" in types
     assert "regulatory_context_gap" in types
     assert out["overall_assessment"] == "requires_human_review"
+
+
+def test_critic_normalizes_common_model_json_variants():
+    out = normalize_model_payload({"critic_output": {
+        "issues": [{"type": "unsupported_conclusion", "details": "Hypothesis is not sourced.", "extra": "drop"},
+                   {"issue_type": "", "description": ""}],
+        "missing_analysis": "Check direct evidence.",
+        "overall_assessment": "review",
+        "extra": "drop",
+    }})
+    assert out == {
+        "issues": [{
+            "issue_type": "unsupported_conclusion",
+            "severity": "review",
+            "affected_output": None,
+            "description": "Hypothesis is not sourced.",
+            "suggested_correction": None,
+        }],
+        "missing_analysis": ["Check direct evidence."],
+        "overall_assessment": "review",
+    }
 
 
 def test_verification_never_approves_and_surfaces_problems():

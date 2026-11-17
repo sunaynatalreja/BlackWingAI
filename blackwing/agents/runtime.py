@@ -4,16 +4,21 @@ from __future__ import annotations
 
 import json
 import asyncio
+import logging
 import os
 import time
+from time import perf_counter
 from typing import Any, Mapping
 
 import httpx
 from pydantic import ValidationError
 
 from blackwing.agents.base import AgentSpec
+from blackwing.agents.critic.agent import normalize_model_payload as normalize_critic_payload
 from blackwing.config import Settings
 from blackwing.rag.small_context import build_small_messages, verify_retry_budget
+
+logger = logging.getLogger("blackwing.agents.runtime")
 
 
 # One hosted request at a time per API process; server deployments must share a
@@ -82,6 +87,7 @@ async def invoke_agent(
         strict_tokens=strict,
     )
     for attempt in range(2):
+        request_started = perf_counter()
         if settings.llm_provider == "ollama":
             response = await client.post(
                 f"{settings.ollama_base_url}/api/chat",
@@ -131,15 +137,59 @@ async def invoke_agent(
             parsed = json.loads(raw_content)
             if not isinstance(parsed, dict):
                 raise ValueError("Agent response must be a JSON object")
-            return spec.output_schema.model_validate(parsed).model_dump(mode="json")
-        except (json.JSONDecodeError, ValidationError, TypeError, ValueError):
+            if spec.key == "critic":
+                parsed = normalize_critic_payload(parsed)
+            validated = spec.output_schema.model_validate(parsed).model_dump(mode="json")
+            logger.info(
+                "Agent response validated; agent=%s provider=%s model=%s attempt=%s elapsed_seconds=%.2f response_chars=%s",
+                spec.key,
+                settings.llm_provider,
+                settings.model_name,
+                attempt + 1,
+                perf_counter() - request_started,
+                len(raw_content),
+            )
+            return validated
+        except (json.JSONDecodeError, ValidationError, TypeError, ValueError) as exc:
+            if isinstance(exc, ValidationError):
+                diagnostic = exc.errors(include_input=False, include_url=False)
+            elif isinstance(exc, json.JSONDecodeError):
+                diagnostic = [{"message": exc.msg, "line": exc.lineno, "column": exc.colno}]
+            else:
+                diagnostic = [{"message": str(exc)}]
+            response_limit = settings.model_response_log_limit
+            response_preview = (
+                json.dumps(raw_content, ensure_ascii=False)[:response_limit]
+                if response_limit and isinstance(raw_content, str)
+                else "<response logging disabled or response was not text>"
+            )
+            log_method = logger.warning if attempt == 0 else logger.error
+            log_method(
+                "Agent output validation failed; agent=%s provider=%s model=%s attempt=%s/%s "
+                "elapsed_seconds=%.2f response_chars=%s error_type=%s validation_details=%s response_preview=%s",
+                spec.key,
+                settings.llm_provider,
+                settings.model_name,
+                attempt + 1,
+                2,
+                perf_counter() - request_started,
+                len(raw_content) if isinstance(raw_content, str) else None,
+                type(exc).__name__,
+                json.dumps(diagnostic, ensure_ascii=False, separators=(",", ":")),
+                response_preview,
+            )
             if attempt == 1:
                 raise
+            retry_details = json.dumps(diagnostic, ensure_ascii=False, separators=(",", ":"))[:900]
             messages.extend([
-                {"role": "assistant", "content": str(raw_content)[:350]},
+                {"role": "assistant", "content": str(raw_content)[:700]},
                 {
                     "role": "user",
-                    "content": "Previous JSON was invalid. Correct schema and return only compact JSON; maximum two items per list.",
+                    "content": (
+                        "Your previous response failed validation. Correct these specific issues: "
+                        f"{retry_details}. Return only one compact JSON object matching the requested "
+                        "schema exactly. Do not add markdown or commentary; use at most two items per list."
+                    ),
                 },
             ])
             verify_retry_budget(messages, max_output, strict=strict)

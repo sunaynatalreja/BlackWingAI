@@ -110,6 +110,8 @@ python -m streamlit run blackwing/ui.py
 
 The UI creates a runway-incursion case, starts an analysis run, polls for completion, and displays each typed agent output plus the trace. The seven-step workflow can take several minutes with a local model.
 
+When an agent response fails JSON or schema validation, the API service log records the agent, provider/model, retry number, elapsed time, validation errors, and a JSON-escaped preview of the raw model response. The preview defaults to 4,000 characters and is bounded by `logging.model_response_log_limit` in `config/blackwing.properties`, backed by `BLACKWING_MODEL_RESPONSE_LOG_LIMIT`. Set that environment variable to `0` to disable response previews. Logs stay local and are not returned in API errors. Critic retries once and normalizes common small-model JSON variations; Critic and Verification also have explicitly labeled deterministic fallbacks when their model pass is malformed or cannot fit the safe context budget. Context-budget failures are labeled separately because no model response exists to log. The UI shows the agent outputs and execution trace, including fallback status.
+
 ## Run the contract test
 
 ```bash

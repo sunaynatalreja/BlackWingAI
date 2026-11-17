@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 from typing import Any, TypedDict
 from uuid import uuid4
@@ -24,6 +25,8 @@ from blackwing.agents.registry import AGENT_SPECS
 from blackwing.agents.runtime import invoke_agent
 from blackwing.config import Settings
 
+logger = logging.getLogger("blackwing.workflow")
+
 
 class CaseState(TypedDict, total=False):
     case_id: str
@@ -40,6 +43,7 @@ class CaseState(TypedDict, total=False):
 def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
     async def run(state: CaseState) -> dict[str, Any]:
         role = spec.key
+        fallback_used = False
         try:
             # Opt-in RAG provides role-specific sources; legacy runs use shared evidence.
             agent_packets = state.get("agent_evidence")
@@ -60,14 +64,70 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
                 # source to assess. Return an explicit, schema-valid unassessed result.
                 output = compliance_unassessed_output()
             else:
-                output = await invoke_agent(
-                    spec,
-                    client=client,
-                    settings=settings,
-                    narrative=state["narrative"],
-                    evidence=evidence,
-                    prior_outputs=state.get("outputs", {}),
-                )
+                try:
+                    output = await invoke_agent(
+                        spec,
+                        client=client,
+                        settings=settings,
+                        narrative=state["narrative"],
+                        evidence=evidence,
+                        prior_outputs=state.get("outputs", {}),
+                    )
+                except (json.JSONDecodeError, ValidationError, TypeError, ValueError) as exc:
+                    if role not in {"critic", "verification"}:
+                        raise
+                    # Both roles have deterministic cross-agent grounding checks.
+                    # If their optional model pass cannot fit the context or fails
+                    # output validation, preserve a complete report and disclose
+                    # that the model pass was skipped.
+                    context_budget_exceeded = "token_budget" in str(exc).casefold()
+                    if role == "critic":
+                        from blackwing.agents.critic.schema import CriticOutput
+                        logger.warning(
+                            "Critic model review unavailable; deterministic audit only; reason=%s "
+                            "error_type=%s detail=%s",
+                            "context_budget_exceeded" if context_budget_exceeded else "invalid_model_response",
+                            type(exc).__name__, str(exc)[:500],
+                        )
+                        output = CriticOutput(
+                            issues=[{
+                                "issue_type": "critic_model_context_budget_exceeded" if context_budget_exceeded else "critic_model_output_invalid",
+                                "severity": "review",
+                                "affected_output": "critic",
+                                "description": (
+                                    "The Critic input exceeded the safe model context budget, so no Critic model response was produced; deterministic cross-agent checks were applied."
+                                    if context_budget_exceeded else
+                                    "The Critic model response did not match its response schema; deterministic cross-agent checks were applied instead."
+                                ),
+                                "suggested_correction": "Review the deterministic audit and service log; reduce the Critic context or correct the response schema issue before retrying.",
+                            }],
+                            missing_analysis=[
+                                "Critic model input exceeded the safe context budget; only deterministic audit checks ran."
+                                if context_budget_exceeded else
+                                "Model-generated adversarial review was unavailable; only deterministic audit checks ran."
+                            ],
+                            overall_assessment="requires_human_review",
+                        ).model_dump(mode="json")
+                    else:
+                        from blackwing.agents.verification.schema import VerificationOutput
+                        logger.warning(
+                            "Verification model review unavailable; deterministic checks only; reason=%s "
+                            "error_type=%s detail=%s",
+                            "context_budget_exceeded" if context_budget_exceeded else "invalid_model_response",
+                            type(exc).__name__, str(exc)[:500],
+                        )
+                        output = VerificationOutput(
+                            claims_needing_source=[
+                                (
+                                    "Verification input exceeded the safe model context budget; deterministic provenance and completeness checks were applied."
+                                    if context_budget_exceeded else
+                                    "Model-generated verification was unavailable; deterministic provenance and completeness checks were applied."
+                                )
+                            ],
+                            completeness_status="incomplete",
+                            human_approval_required=True,
+                        ).model_dump(mode="json")
+                    fallback_used = True
                 if role == "investigation":
                     output = ground_investigation_output(
                         output, evidence, incident_id=state.get("source_incident_id")
@@ -92,7 +152,15 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
             raise AgentExecutionError(role, "model_http_error", f"The configured model provider returned HTTP {exc.response.status_code}. Check provider, model, and API key settings.") from exc
         except httpx.RequestError as exc:
             raise AgentExecutionError(role, "model_unreachable", "The API could not connect to the configured model provider.") from exc
-        except (json.JSONDecodeError, ValidationError, ValueError) as exc:
+        except ValueError as exc:
+            if "token_budget" in str(exc).casefold():
+                raise AgentExecutionError(
+                    role,
+                    "context_budget_exceeded",
+                    "The agent input exceeded the safe model context budget; no model response was produced.",
+                ) from exc
+            raise AgentExecutionError(role, "invalid_agent_output", "The model response did not match the agent's required JSON schema.") from exc
+        except (json.JSONDecodeError, ValidationError) as exc:
             raise AgentExecutionError(role, "invalid_agent_output", "The model response did not match the agent's required JSON schema.") from exc
         except Exception as exc:
             raise AgentExecutionError(role, "agent_processing_error", "The agent failed while processing the model response.") from exc
@@ -104,7 +172,7 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
                 "step": role,
                 "agent": spec.name,
                 "model": "deterministic-corpus-comparison" if role == "similar_case" else settings.model_name,
-                "status": "complete",
+                "status": "deterministic_fallback" if fallback_used else "complete",
             },
         ]
         return {"outputs": outputs, "trace": trace}
