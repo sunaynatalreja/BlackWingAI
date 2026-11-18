@@ -1,0 +1,41 @@
+{
+  "sources": [
+    {
+      "source_id": "EXAMPLE-FACTUAL-001",
+      "path": "incident_reports/example_factual.pdf",
+      "approved": false,
+      "source_type": "official_factual",
+      "document_type": "incident_report",
+      "incident_id": "YOUR-CASE-ID",
+      "incident_date": "2023-01-01",
+      "publication_date": "2023-02-01",
+      "jurisdiction": "US",
+      "authority": "Issuing authority from verified source",
+      "source_url": "https://example.org/verified-original-url",
+      "edition": "Original edition"
+    },
+    {
+      "source_id": "EXAMPLE-GUIDANCE-001",
+      "path": "guidance/example_guidance.pdf",
+      "approved": false,
+      "source_type": "advisory",
+      "document_type": "guidance",
+      "publication_date": "2022-01-01",
+      "jurisdiction": "International",
+      "authority": "Verified issuing organization",
+      "source_url": "https://example.org/verified-original-url"
+    },
+    {
+      "source_id": "EXAMPLE-ASRS-CSV",
+      "path": "asrs/asrs_export.csv",
+      "approved": false,
+      "source_type": "voluntary_asrs",
+      "pii_reviewed": false,
+      "document_type": "incident_report",
+      "record_id_column": "ACN",
+      "text_column": "Narrative",
+      "authority": "NASA ASRS",
+      "jurisdiction": "US"
+    }
+  ]
+}

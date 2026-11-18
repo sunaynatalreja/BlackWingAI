@@ -9,5 +9,5 @@ SPEC = AgentSpec(
     name="Verification Agent",
     prompt_path=Path(__file__).with_name("prompt.md"),
     output_schema=VerificationOutput,
-    upstream_context=("investigation", "compliance", "risk", "mitigation", "critic"),
+    upstream_context=("investigation", "similar_case", "compliance", "risk", "mitigation", "critic"),
 )

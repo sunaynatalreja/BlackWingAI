@@ -16,6 +16,7 @@ from blackwing.agents.risk.schema import HazardOutput, RiskOutput
 from blackwing.agents.mitigation.schema import MitigationOptionOutput, MitigationOutput
 from blackwing.agents.critic.schema import CriticIssueOutput, CriticOutput
 from blackwing.agents.verification.schema import VerificationOutput
+from blackwing.agents.report.schema import ReportAgentOutput
 from blackwing.agents.similar_case.schema import SimilarCaseOutput
 
 
@@ -66,6 +67,7 @@ class EvidenceInput(APIModel):
 
 
 class CaseCreate(APIModel):
+    source_incident_id: str | None = Field(default=None, min_length=3, max_length=100, description="External incident source identifier for matching indexed factual reports.")
     category: IncidentCategory = IncidentCategory.RUNWAY_INCURSION
     narrative: str = Field(min_length=20, max_length=30_000)
     incident_date: date | None = None
@@ -75,6 +77,7 @@ class CaseCreate(APIModel):
 
 
 class CasePatch(APIModel):
+    source_incident_id: str | None = Field(default=None, min_length=3, max_length=100)
     narrative: str | None = Field(default=None, min_length=20, max_length=30_000)
     incident_date: date | None = None
     jurisdiction: str | None = Field(default=None, max_length=100)
@@ -124,6 +127,7 @@ class KnowledgeSearchResponse(APIModel):
 
 class CaseResponse(APIModel):
     case_id: str
+    source_incident_id: str | None = None
     category: IncidentCategory
     status: CaseStatus
     narrative: str
@@ -227,6 +231,7 @@ class AnalysisReport(APIModel):
     workflow: str
     model: str
     agent_outputs: AgentOutputs
+    generated_report: ReportAgentOutput | None = None
     trace: list[AnalysisTraceEntry]
     limitations: list[str]
 

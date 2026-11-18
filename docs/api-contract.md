@@ -176,6 +176,17 @@ The API retrieves at most five candidate passages and supplies case evidence plu
     "status": "PRELIMINARY_REQUIRES_HUMAN_REVIEW",
     "workflow": "runway_incursion_investigation",
     "model": "qwen3:8b",
+    "generated_report": {
+      "executive_summary": "Preliminary report text assembled from the agent work products.",
+      "sections": [
+        {"task_id": "overview", "title": "Incident overview", "summary": "...", "key_points": [], "generation_method": "model"},
+        {"task_id": "findings_and_causes", "title": "Findings and causal assessment", "summary": "...", "key_points": [], "generation_method": "model"},
+        {"task_id": "comparisons_and_compliance", "title": "Historical comparisons and compliance", "summary": "...", "key_points": [], "generation_method": "model"},
+        {"task_id": "risk_and_follow_up", "title": "Risk and recommended follow-up", "summary": "...", "key_points": [], "generation_method": "model"}
+      ],
+      "human_approval_required": true,
+      "report_notice": "Preliminary AI-assisted analysis. Verify sources and obtain qualified human review."
+    },
     "agent_outputs": {
       "investigation": {
         "incident_summary": "...",
@@ -236,4 +247,4 @@ FastAPI validation errors use its standard `detail` response shape. Other endpoi
 
 Changes that remove or rename fields require a new API major version. Additive optional fields may be added within v1. Category IDs, run status values, agent role names and evidence-state values are API enums once formally frozen. The current Pydantic models reject unknown request properties to surface client/server mismatches early.
 
-The report export currently supports JSON only. PDF generation, resumable graph checkpoints, authentication, and tenant/case authorization are target-architecture work and are not exposed as working v1 endpoints yet.
+The report export currently supports JSON and Markdown. The Streamlit UI displays the Report Agent's readable report on screen; it does not generate a PDF. Resumable graph checkpoints, authentication, and tenant/case authorization remain target-architecture work and are not exposed as working v1 endpoints yet.
