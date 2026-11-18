@@ -8,6 +8,7 @@ import logging
 import os
 import time
 from time import perf_counter
+from pathlib import Path
 from typing import Any, Mapping
 
 import httpx
@@ -76,7 +77,11 @@ async def invoke_agent(
     evidence: list[dict[str, Any]],
     prior_outputs: Mapping[str, dict[str, Any]],
 ) -> dict[str, Any]:
-    system_prompt = f"{spec.prompt_path.read_text(encoding='utf-8').strip()}\n\n{COMMON_SAFETY_INSTRUCTIONS}"
+    agent_prompt = spec.prompt_path.read_text(encoding="utf-8").strip()
+    if spec.key.startswith("report_"):
+        common_report_prompt = Path(__file__).with_name("report").joinpath("prompt.md").read_text(encoding="utf-8").strip()
+        agent_prompt = f"{common_report_prompt}\n\n{agent_prompt}"
+    system_prompt = f"{agent_prompt}\n\n{COMMON_SAFETY_INSTRUCTIONS}"
     max_output = min(1024, settings.ollama_max_output_tokens if settings.llm_provider == "ollama"
                      else settings.api_max_output_tokens)
     strict = settings.llm_provider != "ollama"

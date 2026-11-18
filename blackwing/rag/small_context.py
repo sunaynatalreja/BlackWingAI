@@ -65,7 +65,7 @@ def _eligible(agent: str, e: Mapping[str, Any]) -> bool:
         return _is_direct(e) or _is_guidance(e)
     if agent == "mitigation":
         return _is_direct(e) or _is_guidance(e)
-    if agent in {"critic", "verification"}:
+    if agent in {"critic", "verification"} or agent.startswith("report"):
         return _is_direct(e) or _is_rule(e)
     return False
 
@@ -154,7 +154,21 @@ def _review_context(agent: str, prior_outputs: Mapping[str, Any]) -> dict[str, A
             "assumptions": [_short(item, 75) for item in (mitigation.get("assumptions") or [])[:1]],
         },
     }
-    if agent == "verification":
+    if agent == "report":
+        if "investigation" in prior_outputs:
+            compact["investigation"]["reported_observations"] = _short_rows(
+                investigation.get("reported_observations"), limit=1, fields={
+                    "text": 85, "evidence_ids": 40, "source_ids": 40, "evidence_state": 30,
+                }
+            )
+        if "similar_case" in prior_outputs:
+            compact["similar_case"]["source_findings"] = [
+                _short(item, 100) for item in (similar.get("source_findings") or [])[:2]
+            ]
+            compact["similar_case"]["limitations"] = [
+                _short(item, 90) for item in (similar.get("limitations") or [])[:1]
+            ]
+    if agent in {"verification", "report"}:
         compact["critic"] = {
             "issues": _short_rows(critic.get("issues"), limit=3, fields={
                 "issue_type": 60, "severity": 35, "affected_output": 45,
@@ -162,7 +176,7 @@ def _review_context(agent: str, prior_outputs: Mapping[str, Any]) -> dict[str, A
             }),
             "missing_analysis": [_short(item, 90) for item in (critic.get("missing_analysis") or [])[:2]],
         }
-    return compact
+    return {key: value for key, value in compact.items() if key in prior_outputs}
 
 
 def select_evidence(agent: str, evidence: list[dict[str, Any]], *, limit: int = 3,
@@ -238,8 +252,8 @@ def build_small_messages(*, agent: str, system: str, narrative: str,
                 "investigation", evidence, limit=1, excerpt_chars=excerpt_chars
             )} if agent == "compliance" else {}),
             "prior_agent_outputs": (
-                _review_context(agent, prior_outputs)
-                if agent in {"critic", "verification"}
+                _review_context("report" if agent.startswith("report") else agent, prior_outputs)
+                if agent in {"critic", "verification"} or agent.startswith("report")
                 else {role: _compact(prior_outputs[role], upstream_chars)
                       for role in upstream_roles if role in prior_outputs}
             ),

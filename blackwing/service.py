@@ -21,6 +21,7 @@ from blackwing.agents.investigation.grounding import ground_investigation_output
 from blackwing.agents.mitigation.grounding import ground_mitigation_output
 from blackwing.agents.critic.grounding import audit_critic_output
 from blackwing.agents.verification.grounding import ground_verification_output
+from blackwing.agents.report.workflow import create_report
 from blackwing.agents.registry import AGENT_SPECS
 from blackwing.agents.runtime import invoke_agent
 from blackwing.config import Settings
@@ -44,15 +45,27 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
     async def run(state: CaseState) -> dict[str, Any]:
         role = spec.key
         fallback_used = False
+        report_trace: list[dict[str, Any]] = []
         try:
             # Opt-in RAG provides role-specific sources; legacy runs use shared evidence.
             agent_packets = state.get("agent_evidence")
             evidence = (agent_packets.get(role, []) if agent_packets is not None
                         else state.get("evidence", []))
+            if role == "report":
+                evidence = state.get("evidence", [])
             compliance_sources = {
                 "regulation", "procedure", "operational_order",
             }
-            if role == "similar_case":
+            if role == "report":
+                output, report_trace = await create_report(
+                    client=client,
+                    settings=settings,
+                    narrative=state["narrative"],
+                    evidence=evidence,
+                    prior_outputs=state.get("outputs", {}),
+                )
+                fallback_used = any(event.get("status") == "deterministic_fallback" for event in report_trace)
+            elif role == "similar_case":
                 output = similar_case_output(state["narrative"], evidence,
                                              current_incident_id=state.get("source_incident_id"))
             elif role == "compliance" and not any(
@@ -168,6 +181,7 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
         outputs[role] = output
         trace = [
             *state.get("trace", []),
+            *report_trace,
             {
                 "step": role,
                 "agent": spec.name,
@@ -241,7 +255,8 @@ async def analyze_incident(
         graph = _build_graph(client, settings)
         final_state = await graph.ainvoke(initial_state)
 
-    outputs = final_state["outputs"]
+    outputs = dict(final_state["outputs"])
+    generated_report = outputs.pop("report", None)
     # The approved risk matrix and source retrieval are not connected yet.
     outputs["risk"]["numeric_score"] = None
     outputs["risk"]["assessment_status"] = "not_scored_no_approved_matrix"
@@ -256,6 +271,7 @@ async def analyze_incident(
         "workflow": " -> ".join(spec.key for spec in AGENT_SPECS),
         "model": settings.model_name,
         "agent_outputs": outputs,
+        "generated_report": generated_report,
         "trace": trace,
         "limitations": [
             "Model-backed agent roles share the configured model; role separation is prompt and workflow separation, not separate model deployments.",

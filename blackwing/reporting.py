@@ -20,6 +20,11 @@ def _safe(value: Any) -> str:
     return s.replace("`", "'").replace("|", "\\|")
 
 
+def safe_report_text(value: Any) -> str:
+    """Apply the report view's contact redaction before presenting user text."""
+    return _safe(value)
+
+
 def _ids(value: Any) -> str:
     refs = [str(x) for x in (value or []) if str(x).strip()]
     return " [passages: " + ", ".join(_safe(x) for x in refs) + "]" if refs else " [source not established]"
@@ -27,6 +32,9 @@ def _ids(value: Any) -> str:
 
 def render_markdown_report(container: Mapping[str, Any]) -> str:
     r = container.get("report") or container
+    generated = r.get("generated_report")
+    if generated:
+        return render_agent_report_markdown(container, generated)
     outputs = r.get("agent_outputs") or {}
     inv = outputs.get("investigation") or {}
     sim = outputs.get("similar_case") or {}
@@ -120,4 +128,43 @@ def render_markdown_report(container: Mapping[str, Any]) -> str:
               "**Human approval required:** Yes", "", "## 8. Limitations", ""]
     lines += ["- " + _safe(x) for x in r.get("limitations", [])]
     lines += ["", "_References identify retrieved passages, not independent verification of their factual meaning._", ""]
+    return "\n".join(lines)
+
+
+def render_agent_report_markdown(container: Mapping[str, Any], generated: Mapping[str, Any]) -> str:
+    """Render the Report Agent's structured sections without altering its claims."""
+    r = container.get("report") or container
+    lines = [
+        "# BlackWing AI — Preliminary Incident Report",
+        "",
+        "_Every flight leaves a story. Every clue reveals the truth._",
+        "",
+        "> **AI-assisted draft.** Verify sources and obtain qualified human review before relying on findings.",
+        "",
+        f"**Case:** `{_safe(r.get('case_id') or container.get('case_id'))}`  ",
+        f"**Model:** `{_safe(r.get('model'))}`  ",
+        f"**Status:** `{_safe(r.get('status'))}`",
+        "",
+        "## Executive summary",
+        "",
+        _safe(generated.get("executive_summary")) or "No summary was produced.",
+    ]
+    for section in generated.get("sections", []):
+        lines += ["", f"## {_safe(section.get('title') or section.get('task_id'))}", ""]
+        if section.get("summary"):
+            lines += [_safe(section["summary"]), ""]
+        for point in section.get("key_points", []):
+            lines.append(f"- **{_safe(point.get('classification'))}:** {_safe(point.get('text'))}{_ids(point.get('evidence_ids'))}")
+            sources = point.get("source_ids") or []
+            if sources:
+                lines.append("  - Sources: " + ", ".join(f"`{_safe(source)}`" for source in sources))
+        if section.get("generation_method") == "deterministic_fallback":
+            lines += ["", "_This section uses a deterministic summary of the source-agent outputs._"]
+    lines += [
+        "",
+        "**Human approval required:** Yes",
+        "",
+        _safe(generated.get("report_notice") or "Preliminary AI-assisted analysis; human review required."),
+        "",
+    ]
     return "\n".join(lines)

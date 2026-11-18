@@ -175,7 +175,7 @@ async def capabilities() -> dict[str, Any]:
         "api_version": "v1",
         "incident_categories": [{"id": "runway_incursion", "status": "supported"}],
         "workflow": "runway_incursion_investigation",
-        "agent_roles": ["investigation", "similar_case", "compliance", "risk", "mitigation", "critic", "verification"],
+        "agent_roles": ["investigation", "similar_case", "compliance", "risk", "mitigation", "critic", "verification", "report"],
         "features": {
             "case_evidence": True,
             "knowledge_document_ingestion": True,
