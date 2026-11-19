@@ -61,7 +61,21 @@ class CrossEncoderReranker:
             self._model = CrossEncoder(self.identity)
         return [float(v) for v in self._model.predict([(query, passage) for passage in passages],
                                                       show_progress_bar=False)]
+def _is_protected_gold(row):
+    import re
 
+    identifiers = " ".join(
+        str(row.get(key) or "")
+        for key in ("source_id", "document_id", "source_path")
+    )
+
+    return bool(
+        re.search(
+            r"(?<![A-Za-z0-9])BW-HO-00[1-9](?![0-9])",
+            identifiers,
+            flags=re.IGNORECASE,
+        )
+    )
 
 def _scope_filter(row: dict[str, Any], *, scope: str, case_id: str | None,
                   jurisdiction: str | None, incident_date: str | None,
@@ -192,7 +206,8 @@ class HybridIndex:
     def load(cls, directory: str | Path, *, embeddings: Any = None) -> "HybridIndex":
         directory = Path(directory)
         manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
-        chunks = [json.loads(line) for line in (directory / "chunks.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
+        with (directory / "chunks.jsonl").open("r", encoding="utf-8") as f:
+            chunks = [json.loads(line) for line in f if line.strip()]
         if _signature(chunks) != manifest["signature"]:
             raise ValueError("Index content does not match manifest: refuse to search")
         vectors = None
@@ -219,11 +234,19 @@ class HybridIndex:
             raise ValueError("method must be bm25, dense, hybrid or rerank")
         if scope == "regulatory" and (not jurisdiction or not incident_date):
             raise ValueError("Regulatory retrieval requires jurisdiction and incident_date")
-        pool = [row for row in self.chunks if
-                (not document_types or row.get("document_type") in document_types) and
-                _scope_filter(row, scope=scope, case_id=case_id, jurisdiction=jurisdiction,
-                              incident_date=incident_date,
-                              include_retrospective_guidance=include_retrospective_guidance)]
+        pool = [
+    row for row in self.chunks
+    if not _is_protected_gold(row)
+    and (not document_types or row.get("document_type") in document_types)
+    and _scope_filter(
+        row,
+        scope=scope,
+        case_id=case_id,
+        jurisdiction=jurisdiction,
+        incident_date=incident_date,
+        include_retrospective_guidance=include_retrospective_guidance,
+    )
+]
         if not query.strip() or not pool:
             return {"results": [], "retrieval_method": "no_matches", "limitations": ["No eligible evidence in selected scope"],
                     "metrics": {"eligible_chunks": len(pool), "reranker_status": "not_run"}}

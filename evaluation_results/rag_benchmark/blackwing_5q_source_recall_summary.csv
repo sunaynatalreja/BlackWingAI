@@ -1,0 +1,13 @@
+﻿case,method,n_questions,mean_source_recall_in_top_5_passages,mean_source_recall_in_top_10_passages,label_scope,review_status
+AUSTIN,bm25,2,0.5,0.5,Document-level judgments over local BGE indexed source IDs; among first K passage results.,ANALYST_ASSISTED_DRAFT_FOR_HUMAN_SIGNOFF
+AUSTIN,dense,2,0.0,0.5,Document-level judgments over local BGE indexed source IDs; among first K passage results.,ANALYST_ASSISTED_DRAFT_FOR_HUMAN_SIGNOFF
+AUSTIN,hybrid,2,0.5,0.5,Document-level judgments over local BGE indexed source IDs; among first K passage results.,ANALYST_ASSISTED_DRAFT_FOR_HUMAN_SIGNOFF
+AUSTIN,rerank,2,0.5,0.5,Document-level judgments over local BGE indexed source IDs; among first K passage results.,ANALYST_ASSISTED_DRAFT_FOR_HUMAN_SIGNOFF
+COMBINED,bm25,5,0.4,0.466667,Document-level judgments over local BGE indexed source IDs; among first K passage results.,ANALYST_ASSISTED_DRAFT_FOR_HUMAN_SIGNOFF
+COMBINED,dense,5,0.333333,0.6,Document-level judgments over local BGE indexed source IDs; among first K passage results.,ANALYST_ASSISTED_DRAFT_FOR_HUMAN_SIGNOFF
+COMBINED,hybrid,5,0.466667,0.533333,Document-level judgments over local BGE indexed source IDs; among first K passage results.,ANALYST_ASSISTED_DRAFT_FOR_HUMAN_SIGNOFF
+COMBINED,rerank,5,0.533333,0.6,Document-level judgments over local BGE indexed source IDs; among first K passage results.,ANALYST_ASSISTED_DRAFT_FOR_HUMAN_SIGNOFF
+JFK,bm25,3,0.333333,0.444445,Document-level judgments over local BGE indexed source IDs; among first K passage results.,ANALYST_ASSISTED_DRAFT_FOR_HUMAN_SIGNOFF
+JFK,dense,3,0.555556,0.666667,Document-level judgments over local BGE indexed source IDs; among first K passage results.,ANALYST_ASSISTED_DRAFT_FOR_HUMAN_SIGNOFF
+JFK,hybrid,3,0.444444,0.555556,Document-level judgments over local BGE indexed source IDs; among first K passage results.,ANALYST_ASSISTED_DRAFT_FOR_HUMAN_SIGNOFF
+JFK,rerank,3,0.555556,0.666667,Document-level judgments over local BGE indexed source IDs; among first K passage results.,ANALYST_ASSISTED_DRAFT_FOR_HUMAN_SIGNOFF

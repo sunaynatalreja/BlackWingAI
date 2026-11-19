@@ -1,0 +1,90 @@
+{
+  "title": "BLACKWING AI — five-question document-source relevance labeling",
+  "date": "2026-11-20",
+  "classification": "TECHNICAL_TRIAL_DRAFT_HUMAN_SIGNOFF_PENDING",
+  "unit": "source document (not text chunk)",
+  "label_policy": {
+    "2": "source directly supports all main requested information",
+    "1": "source supports useful parts but not all detail",
+    "0": "no question-specific evidence",
+    "binary_relevant": "1 when grade>=1; includes partial supporting sources; strict full-answer alternative requires grade==2"
+  },
+  "coverage": {
+    "protected_source_ids_excluded": "BW-HO-001 .. BW-HO-009",
+    "nonprotected_manifest_sources_screened": 70,
+    "zip_sqlite_fts5_sources": 49,
+    "global_bge_index_sources": "NOT AVAILABLE HERE: must validate 50 eligible source IDs from local BGE chunks.jsonl",
+    "judgments": 350,
+    "positive_document_labels": 11
+  },
+  "question_summaries": [
+    {
+      "question_id": "BW-G001",
+      "case": "JFK",
+      "query": "On which local date and at what airport did the AAL106/DAL1943 occurrence take place?",
+      "reference_answer": "13 January 2023 at John F. Kennedy International Airport (JFK), Queens, New York.",
+      "relevant_source_count_in_manifest_superset": 3,
+      "full_relevance_source_ids": "BW-EV-001; BW-EV-002; BW-EV-003",
+      "partial_relevance_source_ids": "",
+      "all_relevant_source_ids": "BW-EV-001; BW-EV-002; BW-EV-003",
+      "reference_corpus": "70 non-protected entries in ZIP manifest (49 in separate SQLite FTS5).",
+      "IMPORTANT": "Exact 50-source BGE membership must be verified against local global chunks.jsonl before calculating source-level Recall."
+    },
+    {
+      "question_id": "BW-G002",
+      "case": "JFK",
+      "query": "Name the two flights and aircraft types involved in the JFK incursion.",
+      "reference_answer": "American Airlines 106 (Boeing 777-200) and Delta Air Lines 1943 (Boeing 737-900ER).",
+      "relevant_source_count_in_manifest_superset": 3,
+      "full_relevance_source_ids": "BW-EV-001",
+      "partial_relevance_source_ids": "BW-EV-002; BW-EV-003",
+      "all_relevant_source_ids": "BW-EV-001; BW-EV-002; BW-EV-003",
+      "reference_corpus": "70 non-protected entries in ZIP manifest (49 in separate SQLite FTS5).",
+      "IMPORTANT": "Exact 50-source BGE membership must be verified against local global chunks.jsonl before calculating source-level Recall."
+    },
+    {
+      "question_id": "BW-G005",
+      "case": "JFK",
+      "query": "What difference is shown between AAL106’s assigned taxi route and the observed route?",
+      "reference_answer": "Assigned route: taxiway B then crossing at K; observed: continued via B to taxiway J and entered runway 4L.",
+      "relevant_source_count_in_manifest_superset": 3,
+      "full_relevance_source_ids": "BW-EV-001; BW-EV-002; BW-EV-003",
+      "partial_relevance_source_ids": "",
+      "all_relevant_source_ids": "BW-EV-001; BW-EV-002; BW-EV-003",
+      "reference_corpus": "70 non-protected entries in ZIP manifest (49 in separate SQLite FTS5).",
+      "IMPORTANT": "Exact 50-source BGE membership must be verified against local global chunks.jsonl before calculating source-level Recall."
+    },
+    {
+      "question_id": "BW-G011",
+      "case": "AUSTIN",
+      "query": "Identify the date, airport, and two flights involved in DCA23FA149.",
+      "reference_answer": "4 February 2023, Austin-Bergstrom International Airport; FedEx 1432 and Southwest 708.",
+      "relevant_source_count_in_manifest_superset": 1,
+      "full_relevance_source_ids": "BW-EV-006",
+      "partial_relevance_source_ids": "",
+      "all_relevant_source_ids": "BW-EV-006",
+      "reference_corpus": "70 non-protected entries in ZIP manifest (49 in separate SQLite FTS5).",
+      "IMPORTANT": "Exact 50-source BGE membership must be verified against local global chunks.jsonl before calculating source-level Recall."
+    },
+    {
+      "question_id": "BW-G014",
+      "case": "AUSTIN",
+      "query": "Which aircraft was arriving and which was departing, and which runway was in use?",
+      "reference_answer": "FedEx 1432 was arriving on runway 18L; Southwest 708 was departing runway 18L.",
+      "relevant_source_count_in_manifest_superset": 1,
+      "full_relevance_source_ids": "BW-EV-006",
+      "partial_relevance_source_ids": "",
+      "all_relevant_source_ids": "BW-EV-006",
+      "reference_corpus": "70 non-protected entries in ZIP manifest (49 in separate SQLite FTS5).",
+      "IMPORTANT": "Exact 50-source BGE membership must be verified against local global chunks.jsonl before calculating source-level Recall."
+    }
+  ],
+  "limitations": [
+    "Labels are a source-document screening and evidence review, not exhaustive chunk-level labels.",
+    "ZIP corpus source inventory differs from global BGE index. Scoring script checks that every retrieved-index source has a label, and excludes heldout finals.",
+    "Case-identity screening excludes generic guidance and unrelated events from these strictly incident-specific questions.",
+    "Some extra manifest entries were not part of FTS index and were screened via accessible text/title/metadata; source approval remains pending.",
+    "Judgments are analyst-assisted draft; specialist/human review recommended prior to claiming authoritative gold labels.",
+    "Recall output is source-coverage within the first K retrieved passages (not chunk-level Recall@K or source-ranked top-K unique documents)."
+  ]
+}
