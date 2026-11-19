@@ -16,6 +16,7 @@ from blackwing.agents.risk.schema import HazardOutput, RiskOutput
 from blackwing.agents.mitigation.schema import MitigationOptionOutput, MitigationOutput
 from blackwing.agents.critic.schema import CriticIssueOutput, CriticOutput
 from blackwing.agents.verification.schema import VerificationOutput
+from blackwing.agents.report.schema import ReportAgentOutput
 from blackwing.agents.similar_case.schema import SimilarCaseOutput
 
 
@@ -230,6 +231,7 @@ class AnalysisReport(APIModel):
     workflow: str
     model: str
     agent_outputs: AgentOutputs
+    generated_report: ReportAgentOutput | None = None
     trace: list[AnalysisTraceEntry]
     limitations: list[str]
 

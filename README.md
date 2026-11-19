@@ -1,6 +1,6 @@
 # BlackWing AI
 
-Runway-incursion API and local UI prototype. The repository now has a versioned case API, typed request/response models, an OpenAPI document, knowledge source endpoints with chunked hybrid retrieval, seven sequential LangGraph agents, run polling, trace access, report delivery and human review recording.
+Runway-incursion API and local UI prototype. The repository has a versioned case API, typed request/response models, an OpenAPI document, knowledge source endpoints with chunked hybrid retrieval, eight sequential LangGraph agents, run polling, trace access, report delivery and human review recording.
 
 ## API contract
 
@@ -11,9 +11,11 @@ Runway-incursion API and local UI prototype. The repository now has a versioned 
 
 ## Current runnable slice
 
-The API supports only `runway_incursion` in v1. It lets a client create/edit a draft case, attach text evidence, ingest/list/search knowledge documents, start an analysis run, poll status, read the typed report and trace, and record/list a review. Investigation, Compliance, Risk, Mitigation, Critic and Verification call the selected model provider. Similar Case Analysis uses deterministic, deduplicated source metadata so it can reliably mark a case unseen in the current corpus and report sourced historical findings without making them findings about the new case. Each role has its own response schema.
+The API supports only `runway_incursion` in v1. It lets a client create/edit a draft case, attach text evidence, ingest/list/search knowledge documents, start an analysis run, poll status, read the typed report and trace, and record/list a review. Investigation, Compliance, Risk, Mitigation, Critic, Verification and Report call the selected model provider. Similar Case Analysis uses deterministic, deduplicated source metadata so it can reliably mark a case unseen in the current corpus and report sourced historical findings without making them findings about the new case. Each role has its own response schema.
 
-Each role is maintained as an independent package under `blackwing/agents/<role>/`. A package owns `agent.py`, `schema.py`, and `prompt.md`; shared model-provider handling lives in `blackwing/agents/runtime.py`, and workflow order/upstream context lives in `blackwing/agents/registry.py`. Contributors can change one role's prompt and schema without editing the other agent packages. Changes to an output schema must remain compatible with the public report schema in `blackwing/schemas.py`.
+Each role is maintained as an independent package under `blackwing/agents/<role>/`. A package owns its registration, schema, and prompt files; shared model-provider handling lives in `blackwing/agents/runtime.py`, and workflow order/upstream context lives in `blackwing/agents/registry.py`. The Report Agent receives the previous agents' structured work products, creates a constrained task plan, then drafts the report as four smaller section tasks before assembling a typed report. The UI presents that report first and keeps the source agent JSON in a separate details tab. Contributors can change one role's prompts and schema without editing the other agent packages. Changes to an output schema must remain compatible with the public report schema in `blackwing/schemas.py`.
+
+Prompting strategies are role-specific: the Investigation Agent uses few-shot examples to teach the model how to distinguish sourced facts, reported observations, and unknowns. Other model-backed analysis agents use zero-shot role instructions in their individual prompt files. Similar Case Analysis is deterministic code and makes no model call. The Report Agent uses task breakdown prompting: it plans four fixed report sections, then drafts each section in a focused call using relevant upstream agent outputs.
 
 Cases and user-ingested knowledge sources use an in-memory repository and are lost when the API stops. The bundled historical NTSB report is loaded at startup. Retrieval chunks documents, combines BM25 and local BGE dense embeddings with reciprocal-rank fusion, and applies an operational-term rerank. If model weights are not available yet, searches continue using BM25. No approved risk matrix is configured; risk scores remain null. The app records review decisions but does not authenticate reviewers or publish a final regulatory determination. See the architecture document before using it beyond local development.
 
@@ -108,7 +110,9 @@ source .venv/bin/activate
 python -m streamlit run blackwing/ui.py
 ```
 
-The UI creates a runway-incursion case, starts an analysis run, polls for completion, and displays each typed agent output plus the trace. The seven-step workflow can take several minutes with a local model.
+The UI creates a runway-incursion case, starts an analysis run, polls for completion, and displays a readable, task-built report with separate agent details and a trace view. The report includes the tagline “Every flight leaves a story. Every clue reveals the truth.” The eight-agent workflow and four section-writing calls can take several minutes with a local model. The report is shown in the UI; no PDF is generated.
+
+When an agent response fails JSON or schema validation, the API service log records the agent, provider/model, retry number, elapsed time, validation errors, and a JSON-escaped preview of the raw model response. The preview defaults to 4,000 characters and is bounded by `logging.model_response_log_limit` in `config/blackwing.properties`, backed by `BLACKWING_MODEL_RESPONSE_LOG_LIMIT`. Set that environment variable to `0` to disable response previews. Logs stay local and are not returned in API errors. Critic retries once and normalizes common small-model JSON variations; Critic and Verification also have explicitly labeled deterministic fallbacks when their model pass is malformed or cannot fit the safe context budget. Context-budget failures are labeled separately because no model response exists to log. The UI shows the agent outputs and execution trace, including fallback status.
 
 ## Run the contract test
 

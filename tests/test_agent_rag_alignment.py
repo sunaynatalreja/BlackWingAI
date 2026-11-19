@@ -129,3 +129,63 @@ def test_role_packet_limits_and_bad_case_id():
         raise AssertionError("Too large packet limit accepted")
     except ValueError:
         pass
+
+
+def test_current_evidence_uses_distinct_pages_and_timeline_when_available():
+    """More candidate hits must not fill all three slots with page-3 duplicates."""
+    class RankedDirect:
+        def search(self, query, documents, *, scope, **kwargs):
+            if scope != "direct":
+                return {"results": []}
+            def row(page, tag, excerpt):
+                return {
+                    "source_id": "CASE-FACT", "chunk_id": tag, "page_number": page,
+                    "source_type": "official_factual", "document_type": "incident_report",
+                    "evidence_role": "case_factual", "incident_id": "CASE-ALPHA",
+                    "excerpt": excerpt,
+                }
+            return {"results": [
+                row(3, "p3a", "Incident location and date"),
+                row(3, "p3b", "Other introductory details"),
+                row(4, "p4a", "Aircraft type and context"),
+                row(5, "p5a", "Investigation methods"),
+                row(6, "p6a", "0639:13 takeoff clearance, 0640:31 crew radio call"),
+            ][: kwargs["limit"]]}
+
+    packets = build_agent_packets(
+        retriever=RankedDirect(), narrative="Aircraft runway event",
+        case_id="CASE-ALPHA", jurisdiction="US", incident_date="2024-03-05",
+        documents=[], limit_per_agent=3, method="rerank",
+    )
+    facts = packets["investigation"]
+    assert [row["page_number"] for row in facts] == [3, 6, 4]
+    assert {row["chunk_id"] for row in packets["risk"]} == {"p3a", "p6a"}
+
+
+def test_event_rich_chronology_preferred_over_earlier_admin_timestamp():
+    """Prioritize time-stamped ATC event sequences over briefing timestamps."""
+    class ChronologyRetriever:
+        def search(self, query, documents, *, scope, **kwargs):
+            if scope != "direct":
+                return {"results": []}
+            def row(page, tag, excerpt):
+                return {
+                    "source_id": "CASE-FACT", "chunk_id": tag, "page_number": page,
+                    "source_type": "official_factual", "document_type": "incident_report",
+                    "incident_id": "CASE-ALPHA", "excerpt": excerpt,
+                }
+            return {"results": [
+                row(3, "p3", "Incident date and aircraft identities"),
+                row(3, "p3-dup", "Other introduction"),
+                row(4, "p4", "Aircraft context"),
+                row(5, "p5", "0545:12 Controller received a briefing"),
+                row(6, "p6", "0639:13 Cleared for takeoff. 0640:31 Abort. 0640:34 Go around."),
+            ][:kwargs["limit"]]}
+
+    packets = build_agent_packets(
+        retriever=ChronologyRetriever(), narrative="Aircraft runway conflict",
+        case_id="CASE-ALPHA", jurisdiction="US", incident_date="2024-03-05",
+        documents=[], limit_per_agent=3, method="rerank",
+    )
+    assert [row["page_number"] for row in packets["investigation"]] == [3, 6, 4]
+    assert [row["page_number"] for row in packets["risk"][:2]] == [3, 6]

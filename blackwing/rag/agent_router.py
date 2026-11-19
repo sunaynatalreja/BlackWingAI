@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Any, Mapping
 
 AGENT_ROLES = (
@@ -28,6 +29,86 @@ def _unique(items: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
         if len(results) == limit:
             break
     return results
+
+
+# Look for actual clock-time transcript markers (e.g. 0639:13), not case-specific pages.
+_TIMELINE_CLOCK = re.compile(r"\b(?:[01]\d|2[0-3])\d{2}:[0-5]\d\b")
+# Generic aviation actions that make a chronological passage useful for incident
+# reconstruction. Terms are not tied to a particular airport or incident.
+_ATC_ACTION = re.compile(
+    r"\b(?:clear(?:ed|ance)?|take\s?off|abort(?:ed)?|go[ -]?around|"
+    r"hold short|readback|land(?:ed|ing)?|runway crossing|taxi(?:ed|ing)?)\b",
+    re.IGNORECASE,
+)
+
+
+def _event_relevance(item: dict[str, Any]) -> int:
+    """Heuristic for choosing a useful chronology chunk, not a truth score."""
+    excerpt = str(item.get("excerpt") or item.get("content") or item.get("text") or "")
+    times = list(_TIMELINE_CLOCK.finditer(excerpt))
+    if not times:
+        return -1  # Prefer true clock-stamped transcript lines.
+    actions = {m.group(0).lower() for m in _ATC_ACTION.finditer(excerpt)}
+    return min(len(times), 4) + 2 * min(len(actions), 5)
+
+
+
+def _diverse_current(items: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
+    """Keep top-ranked current fact, then chronology, then distinct pages.
+
+    The retrieved ranking still determines the candidates. This only avoids
+    spending a small model's entire evidence budget on near-duplicate page hits.
+    It never creates a passage or changes its source/citation identifiers.
+    """
+    if limit <= 0 or not items:
+        return []
+
+    chosen: list[dict[str, Any]] = []
+    used_ids: set[str] = set()
+    used_pages: set[tuple[str, str]] = set()
+
+    def page_key(item: dict[str, Any]) -> tuple[str, str] | None:
+        page = item.get("page_number") or item.get("page")
+        if page is None:
+            return None
+        return str(item.get("source_id") or item.get("document_id") or ""), str(page)
+
+    def add(item: dict[str, Any]) -> bool:
+        key = str(item.get("chunk_id") or item.get("evidence_id") or item.get("document_id") or item.get("source_id") or "")
+        if not key or key in used_ids:
+            return False
+        chosen.append(item)
+        used_ids.add(key)
+        pg = page_key(item)
+        if pg is not None:
+            used_pages.add(pg)
+        return True
+
+    add(items[0])
+    if len(chosen) < limit:
+        # A mere timestamp can describe an administrative briefing. Prefer a
+        # time-stamped passage with operational clearances and radio actions.
+        # Ties preserve the search engine's ranking, and selected IDs are intact.
+        timed = [
+            row for row in items[1:]
+            if page_key(row) not in used_pages and _event_relevance(row) >= 0
+        ]
+        if timed:
+            best = max(timed, key=_event_relevance)
+            add(best)
+
+    for item in items[1:]:
+        if len(chosen) >= limit:
+            break
+        pg = page_key(item)
+        if pg is not None and pg not in used_pages:
+            add(item)
+
+    for item in items[1:]:
+        if len(chosen) >= limit:
+            break
+        add(item)
+    return chosen[:limit]
 
 
 def _case_uploads(items: list[dict[str, Any]], case_id: str) -> list[dict[str, Any]]:
@@ -81,7 +162,7 @@ def build_agent_packets(*, retriever: Any, narrative: str, case_id: str,
         )
         return [dict(row) for row in result["results"]]
 
-    direct = search("direct", 2, case_id=case_id, jurisdiction=jurisdiction,
+    direct_candidates = search("direct", 10, case_id=case_id, jurisdiction=jurisdiction,
                     incident_date=incident_date)
     historical = search("historical", 2, case_id=case_id,
                         incident_date=incident_date)
@@ -94,6 +175,7 @@ def build_agent_packets(*, retriever: Any, narrative: str, case_id: str,
     for row in guidance:
         row["evidence_role"] = "general_guidance"
         row["caution"] = "Advisory, not a binding determination"
+    direct = _diverse_current(direct_candidates, limit_per_agent)
     current = _unique([*uploads, *direct], limit_per_agent)
 
     # One coherent, bounded evidence packet per agent; similar_case is
