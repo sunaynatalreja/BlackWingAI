@@ -1,1 +1,7 @@
-The Similar Case Analysis Agent is implemented as a deterministic source-grounded comparator in `agent.py`. The prompt is retained as the agent's behavioral contract for future model-assisted analysis. Any model-assisted extension must deduplicate sources, cite only supplied source metadata, state differences, and never transfer a historical probable cause to the incoming incident.
+# Similar Case Analysis — deterministic comparison
+
+Implemented in `agent.py` without an LLM call. Only compare separately
+identified historical incident reports. Source-deduplicate, provide real source
+IDs and titles, describe actual shared or unknown characteristics. Never copy a
+historical probable cause into current-case findings. If no historical record
+was retrieved, report no match rather than invent one.

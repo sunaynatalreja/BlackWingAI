@@ -49,6 +49,49 @@ def test_large_prior_output_is_capped_and_fits():
     assert len(messages[1]["content"]) < 5000
 
 
+def test_final_review_context_summarizes_agent_outputs_to_fit():
+    long_claim = {"text": "Incident claim " + "X" * 800, "evidence_ids": ["E" * 200] * 8,
+                  "source_ids": ["S" * 200] * 8, "evidence_state": "unknown"}
+    outputs = {
+        "investigation": {
+            "incident_summary": "Summary " + "I" * 3000,
+            "timeline_events": [{"event": "Event " + "T" * 500, "time_reference": "unknown",
+                                 "evidence_ids": ["E" * 200] * 8, "evidence_state": "unknown"} for _ in range(8)],
+            **{key: [long_claim] * 8 for key in
+               ("documented_facts", "reported_observations", "hypotheses", "contributing_factors")},
+            "unknowns": ["Unknown " + "U" * 500] * 8,
+        },
+        "similar_case": {"case_status": "unseen_case", "matches": [{"source_id": "NTSB",
+            "title": "Historical case " + "H" * 500, "similarity": "Similar " + "S" * 500,
+            "differences_or_unknowns": ["Difference " + "D" * 500] * 8} for _ in range(8)]},
+        "compliance": {"jurisdiction": "US", "overall_applicability": "not_assessed",
+            "checks": [{"source_id": "RULE", "source_type": "regulation", "effective_date": "unknown",
+                        "applicability_status": "requires_review", "rationale": "R" * 500,
+                        "evidence_ids": ["E" * 200] * 8} for _ in range(8)],
+            "missing_context": ["Missing " + "M" * 500] * 8},
+        "risk": {"hazards": [{"hazard_id": "H001", "description": "Hazard " + "Z" * 500,
+            "evidence_ids": ["E" * 200] * 8, "existing_controls": ["C" * 300] * 8,
+            "control_gaps": ["G" * 300] * 8} for _ in range(8)], "risk_notes": "N" * 1000,
+            "missing_inputs": ["Input " + "M" * 500] * 8},
+        "mitigation": {"recommendations": [{"hazard_ids": ["H001"] * 8,
+            "contributing_factor": "Factor " + "F" * 500, "action": "Action " + "A" * 500,
+            "classification": "preventive", "priority": "proposed"} for _ in range(8)],
+            "assumptions": ["Assumption " + "A" * 500] * 8},
+        "critic": {"issues": [{"issue_type": "gap", "severity": "review", "affected_output": "risk",
+            "description": "Issue " + "I" * 500, "suggested_correction": "Correction " + "C" * 500} for _ in range(8)],
+            "missing_analysis": ["Missing " + "M" * 500] * 8},
+    }
+    for agent, roles in (
+        ("critic", ("investigation", "similar_case", "compliance", "risk", "mitigation")),
+        ("verification", ("investigation", "similar_case", "compliance", "risk", "mitigation", "critic")),
+    ):
+        messages = build_small_messages(agent=agent, system="Review outputs for gaps. " * 30,
+            narrative="Current incident. " * 100, evidence=DOCS, prior_outputs=outputs,
+            upstream_roles=roles, output_tokens=1024)
+        assert "Incident claim" in messages[1]["content"]
+        assert len(messages[1]["content"]) < 12000
+
+
 def test_invalid_output_ceiling_fails_closed():
     with pytest.raises(ValueError, match="1024"):
         build_small_messages(agent="risk", system="X", narrative="Y", evidence=[],

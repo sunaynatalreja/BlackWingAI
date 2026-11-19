@@ -52,6 +52,7 @@ class Settings:
     ui_api_url: str
     ui_request_timeout_seconds: float
     rag_embedding_model: str
+    model_response_log_limit: int = 4000
 
     @property
     def model_name(self) -> str:
@@ -67,7 +68,7 @@ class Settings:
         if not config_path:
             raise ValueError("Set BLACKWING_CONFIG to the properties file path")
         values = _read_properties(Path(config_path).expanduser())
-        required = {"app.host", "app.port", "llm.provider", "ui.api_url", "ui.request_timeout_seconds", "rag.embedding_model"}
+        required = {"app.host", "app.port", "llm.provider", "ui.api_url", "ui.request_timeout_seconds", "rag.embedding_model", "logging.model_response_log_limit"}
         provider = values.get("llm.provider", "").lower()
         if not provider:
             raise ValueError(
@@ -106,4 +107,5 @@ class Settings:
             ui_api_url=values["ui.api_url"].rstrip("/"),
             ui_request_timeout_seconds=float(values["ui.request_timeout_seconds"]),
             rag_embedding_model=values["rag.embedding_model"],
+            model_response_log_limit=max(0, int(values.get("logging.model_response_log_limit") or 4000)),
         )
