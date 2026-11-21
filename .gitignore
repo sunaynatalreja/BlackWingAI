@@ -11,5 +11,6 @@ rag_indexes/
 rag_cache/
 source_documents/
 gold_private/
+datasets/BLACKWING_DATA.zip
 *.sqlite
 *.sqlite3
