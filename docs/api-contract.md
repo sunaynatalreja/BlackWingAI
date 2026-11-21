@@ -114,11 +114,11 @@
 }
 ```
 
-`201` returns metadata and `content_length`, but not the full content. User ingested sources are stored in memory. An official NTSB Austin runway-incursion report is bundled as the initial distinct historical reference source. The example URL is illustrative only.
+`201` returns metadata and `content_length`, but not the full content. User ingested sources are stored in memory. The approved dataset index is configured with `BLACKWING_RAG_INDEX_DIR`; protected final reports and unseen/golden prompt files are not loaded as index sources. The example URL is illustrative only.
 
 ### Search knowledge
 
-`POST /api/v1/knowledge/search` accepts `query` (3–2000 chars), optional `document_types`, `jurisdiction`, `incident_date`, and `limit` (1–20). It returns ranked chunks with document and chunk IDs, metadata, source links and `ranking_score`, plus `retrieval_method` and limitations. Retrieval uses BM25 and local BGE dense embeddings fused with reciprocal rank; if embedding weights cannot load, it reports a BM25 fallback. A search result is a candidate passage, not a verified applicable requirement or a cause finding about a new case.
+`POST /api/v1/knowledge/search` accepts `query` (3–2000 chars), optional `document_types`, `jurisdiction`, `incident_date`, and `limit` (1–20). It returns ranked chunks with document and chunk IDs, metadata, source links and `ranking_score`, plus `retrieval_method` and limitations. Retrieval uses BM25 and hosted BGE dense embeddings fused with reciprocal rank; if the hosted embedding service is unavailable, it reports a BM25 fallback. A search result is a candidate passage, not a verified applicable requirement or a cause finding about a new case.
 
 ### Start a run
 
@@ -195,7 +195,7 @@ The API retrieves at most five candidate passages and supplies case evidence plu
       },
       "similar_case": {"matches": [], "assessment": "No historical match found.", "limitations": []},
       "compliance": {"jurisdiction": "US", "overall_applicability": "requires_human_verification", "checks": [], "missing_context": []},
-      "risk": {"hazards": [], "risk_notes": "...", "assessment_status": "not_scored_no_approved_matrix", "numeric_score": null, "missing_inputs": []},
+      "risk": {"hazards": [], "risk_notes": "...", "assessment_status": "not_scored_missing_severity_or_likelihood", "numeric_score": null, "risk_rating": null, "scoring_method": "provisional_5x5_severity_x_likelihood_max_hazard", "missing_inputs": []},
       "mitigation": {"recommendations": [], "assumptions": []},
       "critic": {"issues": [], "missing_analysis": [], "overall_assessment": "requires_human_review"},
       "verification": {"claims_needing_source": [], "unsupported_conclusions": [], "conflicts": [], "completeness_status": "incomplete", "human_approval_required": true}

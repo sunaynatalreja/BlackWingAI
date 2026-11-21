@@ -1,7 +1,7 @@
-"""Deterministic RAG grounding guard for preliminary risk findings.
+"""Deterministic source grounding and provisional 5x5 scoring for Risk outputs.
 
-No inference API, embedding call, or risk matrix is needed here. This guards
-citation integrity after the existing Risk Agent returns its typed JSON.
+This performs no model or embedding call. It filters citations and computes a
+transparent severity-times-likelihood score after the Risk Agent returns JSON.
 """
 
 from __future__ import annotations
@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Any, Mapping, Sequence
 
 from blackwing.agents.risk.schema import RiskOutput
+from blackwing.agents.risk.scoring import score_risk_output
 
 _DIRECT_TYPES = {"official_factual", "official_preliminary", "user_submitted", "user_report"}
 _ADVISORY_TYPES = {"advisory", "guidance"}
@@ -58,11 +59,14 @@ def ground_risk_output(
             missing.append(
                 f"Confirm incident-specific factual evidence for potential hazard {hazard.hazard_id}."
             )
+        if hazard.severity is None or hazard.likelihood is None:
+            missing.append(
+                f"Severity and likelihood are not both rated for potential hazard {hazard.hazard_id}."
+            )
     if result.hazards and not any_direct_citation:
         note.append("Candidate hazards are hypotheses, not established current-incident findings.")
-    result.numeric_score = None
-    result.assessment_status = "provisional_no_approved_risk_matrix"
+    note.append("Scores are provisional 5×5 estimates for qualified human review, not operational risk determinations.")
     if note:
         result.risk_notes = (result.risk_notes + " " + " ".join(dict.fromkeys(note))).strip()
     result.missing_inputs = list(dict.fromkeys(missing))[:12]
-    return result.model_dump(mode="json")
+    return score_risk_output(result.model_dump(mode="json"))

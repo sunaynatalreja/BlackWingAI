@@ -32,7 +32,7 @@ flowchart LR
   CRIT --> LLM
   VER --> LLM
   REP --> LLM
-  LLM --> OLLAMA[Ollama / Qwen3-8B]
+  LLM --> HOSTED[IIT KGP API / Qwen3-8B]
   REVIEW --> STORE
   STORE -. local prototype .-> MEM[In-memory repository]
   STORE -. deployment target .-> DB[(PostgreSQL)]
@@ -44,8 +44,8 @@ flowchart LR
 
 1. The UI creates a case through `POST /api/v1/cases` and may attach evidence in the same request or through `/evidence`.
 2. The API validates the runway-incursion category, metadata and narrative, then returns a `case_id`.
-3. Knowledge documents enter through `/api/v1/knowledge/documents`. The local prototype has a distinct official NTSB Austin runway-incursion report bundled as an initial source; user ingested content remains in memory. Both are chunked at retrieval time.
-4. `POST /api/v1/cases/{case_id}/runs` starts a run and returns `202 Accepted` with a `run_id`. The API retrieves up to five passages with BM25, local BGE dense embeddings, reciprocal-rank fusion, and a small operational-term rerank. If BGE model weights are unavailable, the search reports and uses BM25 fallback.
+3. The versioned RAG index is built from the approved `01_RAG_KNOWLEDGE_BASE` manifest. Knowledge documents uploaded at runtime remain in memory and can be added to the index for that process. The app does not seed final reports. Gold evaluation files and unseen case prompts are not indexed.
+4. `POST /api/v1/cases/{case_id}/runs` starts a run and returns `202 Accepted` with a `run_id`. The API retrieves up to five passages with BM25, hosted IIT BGE dense embeddings, reciprocal-rank fusion, and a small operational-term rerank. If the hosted embedding service is unavailable, the search reports and uses BM25 fallback.
 5. LangGraph passes the narrative and supplied/retrieved evidence through Investigation, Similar Case Analysis, Compliance, Risk, Mitigation, Critic, Verification and Report nodes in order. Similar Case Analysis is deterministic and deduplicates by source; other applicable roles call the selected model provider. Compliance returns `not_assessed` when no authoritative rule source is present. Historical probable causes may inform questions to check but never become current-case findings.
 6. Report Agent receives agent outputs as upstream context. It plans four fixed sections and drafts each with a separate prompt and schema-sized model call; a deterministic section summary is used if a section response cannot be validated. It assembles the structured report without removing the source agent outputs.
 7. The API records run progress, agent results and report-task trace events. The Streamlit UI polls `GET /api/v1/runs/{run_id}` and displays the report as its primary view, with source JSON and trace in separate tabs.
@@ -59,8 +59,8 @@ flowchart LR
 | Case service | Narrative, category, date, location and evidence metadata | API handlers |
 | Knowledge service | Document metadata/content, date and jurisdiction filters, chunked candidate excerpts | In-memory store; BM25 + BGE dense + reciprocal-rank fusion + operational-term rerank |
 | Workflow service | Agent ordering, shared case context, run state and trace | LangGraph, sequential nodes |
-| Model gateway | Consistent provider interface | Ollama `/api/chat` or OpenAI-compatible `/chat/completions`; endpoint, model and key resolved from environment-backed properties |
-| Deterministic safety services | Citation checks, schema checks, configured risk matrix | Risk scoring is intentionally not configured yet |
+| Model gateway | Hosted inference transport and schema validation | IIT KGP OpenAI-compatible `/chat/completions`; assigned URL, model, key and CA certificate path resolved from environment-backed properties; TLS verification stays enabled |
+| Deterministic safety services | Citation checks, schema checks, provisional 5×5 severity × likelihood scoring | 1–25 product; highest per-hazard score and provisional bands, human review required |
 | Review service | Reviewer decision, rationale and override history | Review endpoint; in-memory record |
 | Repository port | Persistence boundary | In-memory adapter for local single-process prototype |
 
@@ -90,3 +90,7 @@ Prompting strategy follows agent responsibility. The Investigation Agent uses fe
 The supplied diagrams describe independently deployable services, JWT/OIDC and RBAC, PostgreSQL, MinIO, Qdrant and Redis. The current local implementation keeps API, orchestration and agents in one process, uses one configured chat model, and stores user data in memory. The BGE model is local through FastEmbed; the first search downloads its ONNX weights. Restarting the API loses cases, ingested sources and the in-memory embedding cache, and multiple API workers would not share state. Production deployment must replace the in-memory repository with PostgreSQL/object storage, add identity and case-level authorization, persist a vector index, configure deterministic risk scoring, migrations and durable background jobs.
 
 The LLM outputs remain untrusted proposals. The system does not establish source truth, regulatory applicability, legal liability or operational instructions. A qualified reviewer must check material claims and make the review decision.
+
+### Dataset split policy
+
+The dataset builder permits source paths only under `01_RAG_KNOWLEDGE_BASE` and honors both `approved` and `trial_index_eligible` manifest flags. It excludes paths under `02_GOLD_EVALUATION_PROTECTED` and `03_UNSEEN_INCIDENT_TEST_CASES`. The unseen set is used as retrieval-only validation input. The golden sample prompt is sanitized to omit evaluator notes and answer files and is available as a Streamlit demo prefill; its matching preliminary report is excluded from the index and must be uploaded as current-case evidence. The UI extracts PDF/TXT text into the case evidence field, not the shared corpus. Final report answer keys remain held out.

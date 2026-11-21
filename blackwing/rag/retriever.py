@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import logging
 import os
-from importlib.resources import files
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -13,17 +12,8 @@ from .engine import CrossEncoderReranker, HybridIndex
 logger = logging.getLogger("blackwing.rag")
 
 
-def load_seed_documents() -> list[dict[str, Any]]:
-    seed = files("blackwing.rag").joinpath("seed")
-    rows = []
-    for resource in seed.iterdir():
-        if resource.name.lower().endswith(".json"):
-            rows.append(json.loads(resource.read_text(encoding="utf-8")))
-    return rows
-
-
 def _compat_document(item: dict[str, Any]) -> dict[str, Any]:
-    """Do not invent incident ID when the team's original seeded source lacks one."""
+    """Normalize runtime uploads without inventing incident identities."""
     row = dict(item)
     row.setdefault("document_id", str(row.get("source_id") or row.get("title") or "unnamed"))
     dtype = str(row.get("document_type") or "").casefold()
@@ -62,18 +52,49 @@ class RAGRetriever:
         self.strategy = strategy
         self.embedder = embedder
         self.reranker = reranker
+        self.embedding_settings: Any = None
         self._index: HybridIndex | None = None
         self._signature: str | None = None
         self._dense_error: str | None = None
         self._rerank_error: str | None = None
 
+    def configure_index_dir(self, index_dir: str | Path | None) -> None:
+        """Apply the property-file-resolved index path and discard stale loaded data."""
+        target = Path(index_dir).expanduser() if index_dir else None
+        if target != self.index_dir:
+            self.index_dir = target
+            self._index = None
+            self._signature = None
+            self._dense_error = None
+            self._rerank_error = None
+
+    def configure_embedding_settings(self, settings: Any) -> None:
+        """Apply API embedding secrets and policy resolved from properties."""
+        old = self.embedding_settings
+        new_identity = (
+            settings.rag_backend, settings.rag_embedding_model,
+            settings.rag_embedding_url, settings.rag_embedding_ca_cert,
+            settings.rag_embedding_api_key, settings.rag_embedding_timeout_seconds,
+            settings.rag_embedding_retries, settings.rag_cache_path,
+        )
+        old_identity = None if old is None else (
+            old.rag_backend, old.rag_embedding_model, old.rag_embedding_url,
+            old.rag_embedding_ca_cert, old.rag_embedding_api_key,
+            old.rag_embedding_timeout_seconds, old.rag_embedding_retries,
+            old.rag_cache_path,
+        )
+        self.embedding_settings = settings
+        if old_identity != new_identity:
+            self._index = None
+            self._signature = None
+            self.embedder = None
+
     def _embedding(self, mode: str = "local"):
         if self.embedder is not None:
             return self.embedder
         try:
-            # Local is the default to avoid institute quota usage without explicit opt in.
-            cache = os.environ.get("BLACKWING_RAG_CACHE", "") or None
-            return make_embeddings(mode, cache_path=cache)
+            cache = self.embedding_settings.rag_cache_path if self.embedding_settings else None
+            return make_embeddings(mode, cache_path=cache or None, settings=self.embedding_settings)
         except Exception as exc:
             self._dense_error = f"{type(exc).__name__}: {str(exc)[:160]}"
             logger.warning("RAG dense unavailable (%s); lexical-only fallback", type(exc).__name__)
@@ -92,7 +113,8 @@ class RAGRetriever:
             return None
 
     def _open_index(self, documents: list[dict[str, Any]], embedding_model: str) -> HybridIndex:
-        requested_mode = os.getenv("BLACKWING_RAG_BACKEND", "local").lower()
+        requested_mode = (self.embedding_settings.rag_backend if self.embedding_settings
+                          else os.getenv("BLACKWING_RAG_BACKEND", "iit")).lower()
         # Original FastAPI passes a model name; fail safely for unsupported model.
         if "bge-small-en-v1.5" not in embedding_model.casefold() and self.embedder is None:
             raise ValueError("This IIT pipeline requires BGE-small-en-v1.5; no MiniLM/BGE vector mixing")

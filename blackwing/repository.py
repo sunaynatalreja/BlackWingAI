@@ -8,7 +8,6 @@ from threading import RLock
 from typing import Any
 
 from blackwing.schemas import CaseStatus, RunStatus
-from blackwing.rag.retriever import load_seed_documents
 
 
 def now() -> datetime:
@@ -23,11 +22,9 @@ class MemoryRepository:
         self.cases: dict[str, dict[str, Any]] = {}
         self.runs: dict[str, dict[str, Any]] = {}
         self.reviews: dict[str, list[dict[str, Any]]] = {}
-        # Seed the local knowledge base with the official NTSB reference case.
-        # Ingested user documents remain in-memory for this development slice.
-        self.documents: dict[str, dict[str, Any]] = {
-            row["document_id"]: {**row, "created_at": now()} for row in load_seed_documents()
-        }
+        # The approved dataset index is configured separately. Do not seed a
+        # protected final report into in-memory retrieval documents.
+        self.documents: dict[str, dict[str, Any]] = {}
 
     def create_case(self, case_id: str, data: dict[str, Any]) -> dict[str, Any]:
         timestamp = now()

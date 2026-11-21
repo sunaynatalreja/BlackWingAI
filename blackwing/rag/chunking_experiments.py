@@ -60,8 +60,8 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--root", type=Path, required=True)
     p.add_argument("--development-gold", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
-    p.add_argument("--backend", choices=("none", "local", "iit"), default="none",
-                   help="Local only by default; IIT requires explicit opt-in")
+    p.add_argument("--backend", choices=("none", "local", "iit"), default="iit",
+                   help="Hosted IIT embeddings by default; requires configured key and CA")
     p.add_argument("--method", choices=("bm25", "hybrid", "rerank"), default="bm25")
     p.add_argument("--cache", type=Path)
     p.add_argument("--confirm-hosted-embeddings", action="store_true")

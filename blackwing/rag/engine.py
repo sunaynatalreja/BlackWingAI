@@ -192,7 +192,10 @@ class HybridIndex:
     def load(cls, directory: str | Path, *, embeddings: Any = None) -> "HybridIndex":
         directory = Path(directory)
         manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
-        chunks = [json.loads(line) for line in (directory / "chunks.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
+        # JSON strings may contain Unicode line separators (U+2028/U+0085).
+        # str.splitlines() treats those as record boundaries even when escaped
+        # JSON is otherwise valid; JSONL records are delimited by literal LF.
+        chunks = [json.loads(line) for line in (directory / "chunks.jsonl").read_text(encoding="utf-8").split("\n") if line.strip()]
         if _signature(chunks) != manifest["signature"]:
             raise ValueError("Index content does not match manifest: refuse to search")
         vectors = None

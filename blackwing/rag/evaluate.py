@@ -89,7 +89,7 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--index", type=Path, required=True)
     p.add_argument("--gold", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True, help="New output JSON; refuses overwrite")
-    p.add_argument("--backend", choices=["none", "local", "iit"], default="none")
+    p.add_argument("--backend", choices=["none", "local", "iit"], default="iit")
     p.add_argument("--rerank", action="store_true", help="Use actual CrossEncoder (may download weights)")
     p.add_argument("--cache", type=Path)
     args = p.parse_args(argv)
