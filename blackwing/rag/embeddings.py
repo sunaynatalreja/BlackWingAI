@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import hashlib
-import os
+import json
+import logging
 import sqlite3
 import time
 from pathlib import Path
@@ -13,6 +14,7 @@ from .tokenization import BGE_MODEL, BGE_QUERY_PREFIX, BGESubwordTokenizer, asse
 
 DIMENSION = 384
 BATCH_SIZE = 16
+logger = logging.getLogger("blackwing.rag.embeddings")
 
 
 class EmbeddingFailure(RuntimeError):
@@ -48,21 +50,39 @@ class LocalBGE:
 
 class IITBGE:
     """OpenAI-compatible /v1/embeddings. CA verification is mandatory."""
-    def __init__(self, tokenizer: Any) -> None:
+    def __init__(self, tokenizer: Any, *, base_url: str, api_key: str, ca_cert: str,
+                 model: str = "bge-small-en-v1.5", timeout: float = 60,
+                 retries: int = 2, log_request_body: bool = False) -> None:
         self.tokenizer = tokenizer
-        self.url = os.getenv("BLACKWING_EMBEDDING_URL", "").strip()
-        self.key = os.getenv("BLACKWING_EMBEDDING_API_KEY", "").strip()
-        self.ca = os.getenv("BLACKWING_EMBEDDING_CA_CERT", "").strip()
-        self.model = os.getenv("BLACKWING_EMBEDDING_MODEL", "bge-small-en-v1.5")
-        self.timeout = float(os.getenv("BLACKWING_EMBEDDING_TIMEOUT", "60"))
-        self.retries = min(5, max(0, int(os.getenv("BLACKWING_EMBEDDING_RETRIES", "2"))))
+        endpoint = base_url.strip().rstrip("/")
+        if endpoint.endswith("/v1"):
+            endpoint += "/embeddings"
+        self.url = endpoint
+        self.key = api_key.strip()
+        self.ca = str(Path(ca_cert).expanduser())
+        self.model = model.strip()
+        self.timeout = timeout
+        self.retries = min(5, max(0, retries))
+        self.log_request_body = log_request_body
         self._last_request = 0.0  # single key: serialized calls, <=60 requests/min
+        if self.key and not self.key.isascii():
+            raise EmbeddingFailure(
+                "Embedding API key contains non-ASCII characters. Re-enter the key without smart quotes or other formatting characters."
+            )
+        if any(character.isspace() for character in self.key):
+            raise EmbeddingFailure(
+                "Embedding API key contains whitespace. Re-enter the key without surrounding or embedded spaces."
+            )
         if not self.url.startswith("https://") or not self.key or not self.ca or not Path(self.ca).is_file():
             raise EmbeddingFailure("Hosted embeddings require HTTPS URL, API key, and existing trusted CA certificate")
         self.identity = "iit:" + self.model + ":" + hashlib.sha256(self.url.encode()).hexdigest()[:12]
 
     def encode_batch(self, texts: Sequence[str]) -> np.ndarray:
         import httpx
+        if not texts or len(texts) > BATCH_SIZE:
+            raise EmbeddingFailure(f"Hosted embedding batches must contain 1 to {BATCH_SIZE} texts")
+        for text in texts:
+            assert_budget(text, self.tokenizer)
         headers = {"Authorization": f"Bearer {self.key}"}
         # Never set verify=False or log the API key.
         with httpx.Client(verify=self.ca, timeout=self.timeout) as client:
@@ -72,9 +92,22 @@ class IITBGE:
                     if elapsed < 1.05:
                         time.sleep(1.05 - elapsed)
                     self._last_request = time.monotonic()
-                    response = client.post(self.url, headers=headers,
-                                           json={"model": self.model, "input": list(texts)})
-                    if response.status_code in {429, 500, 502, 503, 504} and attempt < self.retries:
+                    request_started = time.monotonic()
+                    logger.info(
+                        "Embedding HTTP request: method=POST url=%s model=%s inputs=%d "
+                        "authorization=Bearer <redacted> tls_verification=enabled attempt=%d/%d",
+                        self.url, self.model, len(texts), attempt + 1, self.retries + 1,
+                    )
+                    payload = {"model": self.model, "input": list(texts)}
+                    if self.log_request_body:
+                        logger.info("Embedding HTTP request JSON body: %s",
+                                    json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+                    response = client.post(self.url, headers=headers, json=payload)
+                    logger.info(
+                        "Embedding HTTP response: status=%d elapsed_seconds=%.2f inputs=%d",
+                        response.status_code, time.monotonic() - request_started, len(texts),
+                    )
+                    if response.status_code in {429, 500, 502, 503, 504, 507, 509} and attempt < self.retries:
                         time.sleep(min(8.0, 0.5 * (2 ** attempt)))
                         continue
                     response.raise_for_status()
@@ -90,6 +123,11 @@ class IITBGE:
                         raise EmbeddingFailure(f"Hosted embedding network error: {type(exc).__name__}") from exc
                     time.sleep(min(8.0, 0.5 * (2 ** attempt)))
                 except httpx.HTTPStatusError as exc:
+                    if exc.response.status_code in {401, 403}:
+                        raise EmbeddingFailure(
+                            f"Embedding HTTP {exc.response.status_code}; request used Bearer authorization. "
+                            "Check the shared embeddings key and assigned endpoint."
+                        ) from exc
                     raise EmbeddingFailure(f"Embedding HTTP {exc.response.status_code}") from exc
         raise EmbeddingFailure("Hosted embedding retries exhausted")
 
@@ -149,12 +187,28 @@ class CachedEmbeddings:
 
 
 def make_embeddings(mode: str, *, cache_path: str | Path | None = None,
-                    tokenizer: Any | None = None) -> CachedEmbeddings | None:
+                    tokenizer: Any | None = None, settings: Any | None = None,
+                    log_request_body: bool = False) -> CachedEmbeddings | None:
     if mode == "none":
         return None
     tokenizer = tokenizer or BGESubwordTokenizer()
     if mode == "local":
         return CachedEmbeddings(LocalBGE(tokenizer), cache_path)
     if mode == "iit":
-        return CachedEmbeddings(IITBGE(tokenizer), cache_path)
+        if settings is None:
+            from blackwing.config import Settings
+            settings = Settings.load()
+        if cache_path is None:
+            cache_path = settings.rag_cache_path or None
+        backend = IITBGE(
+            tokenizer,
+            base_url=settings.rag_embedding_url,
+            api_key=settings.rag_embedding_api_key,
+            ca_cert=settings.rag_embedding_ca_cert,
+            model=settings.rag_embedding_model,
+            timeout=settings.rag_embedding_timeout_seconds,
+            retries=settings.rag_embedding_retries,
+            log_request_body=log_request_body,
+        )
+        return CachedEmbeddings(backend, cache_path)
     raise ValueError("Embedding mode must be none, local or iit")

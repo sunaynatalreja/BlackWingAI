@@ -26,6 +26,11 @@ class BGESubwordTokenizer:
         self.tokenizer = AutoTokenizer.from_pretrained(model, use_fast=True)
         if not self.tokenizer.is_fast:
             raise RuntimeError("BGE offset-aware tokenization requires a fast tokenizer")
+        # This tokenizer scans long source documents before splitting them. It never
+        # feeds those full documents to a model; enforce the real 512-token limit
+        # explicitly on each chunk in assert_budget/_windows instead of emitting the
+        # Transformers model-length warning while examining the unsplit source.
+        self.tokenizer.model_max_length = 1_000_000_000
 
     def offsets(self, text: str) -> list[tuple[int, int]]:
         return [(a, b) for a, b in self.tokenizer(text, add_special_tokens=False,

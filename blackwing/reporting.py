@@ -89,12 +89,27 @@ def render_markdown_report(container: Mapping[str, Any]) -> str:
     for missing in comp.get("missing_context", []):
         lines.append("- **To verify:** " + _safe(missing))
 
+    score = risk.get("numeric_score")
+    score_label = (
+        f"{score}/25 ({_safe(risk.get('risk_rating'))})"
+        if score is not None else "not scored because severity or likelihood is missing"
+    )
     lines += ["", "## 5. Hazards and Risk", "",
-              f"**Scoring:** {_safe(risk.get('assessment_status'))}. "
-              "No numerical score without an approved risk matrix.", ""]
+              f"**Provisional 5×5 score:** {score_label}. "
+              "Calculated as severity × likelihood; overall score is the highest hazard score. Human review required.", ""]
     for h in risk.get("hazards", []):
         lines.append(f"- **{_safe(h.get('hazard_id'))}**: {_safe(h.get('description'))}"
                      f"{_ids(h.get('evidence_ids'))}")
+        if h.get("severity") is not None or h.get("likelihood") is not None:
+            lines.append(
+                f"  - Provisional rating: severity {_safe(h.get('severity'))}, "
+                f"likelihood {_safe(h.get('likelihood'))}, score {_safe(h.get('score'))}/25 "
+                f"({_safe(h.get('risk_rating'))})."
+            )
+            if h.get("severity_rationale"):
+                lines.append("  - Severity basis: " + _safe(h["severity_rationale"]))
+            if h.get("likelihood_rationale"):
+                lines.append("  - Likelihood basis: " + _safe(h["likelihood_rationale"]))
         if h.get("existing_controls"):
             lines.append("  - Potential controls: " + "; ".join(_safe(x) for x in h["existing_controls"]))
         if h.get("control_gaps"):

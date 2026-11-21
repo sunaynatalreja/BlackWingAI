@@ -92,27 +92,18 @@ Existing routes:
 
 The Markdown export only displays the typed report with explicit uncertainties; it is **not** a new LLM report-generation step, so there is no extra model call or token cost.
 
-### IIT model profile and embedding options
+### IIT model and embedding profile
 
-**Set these values in your private PowerShell session, NOT in Git:**
+**Keep the inference key, embeddings key, and both CA certificate paths in private environment variables, never Git.** The application reads them through `config/blackwing.properties`.
 
-```powershell
-$env:BLACKWING_LLM_API_BASE_URL = "https://<IIT-CHAT-ENDPOINT-BASE>/v1"
-$env:BLACKWING_LLM_API_MODEL = "<institute-provided-model-id>"
-$env:BLACKWING_LLM_API_KEY = "<key from IIT secure channel>"
-$env:BLACKWING_LLM_CA_CERT = "C:\private\certificates\iit-ca.crt"
-$env:BLACKWING_RAG_INDEX_DIR = "$PWD\rag_indexes\austin_local_bge_v1"
-. .\scripts\use_iit.ps1 -Embeddings local
-```
-
-- Mode A: **IIT chat model + local BGE embeddings and local CrossEncoder**. Default `-Embeddings local`; recommended first to avoid rebuilding the local vector index or consuming IIT embedding quota unnecessarily.
-- Mode B: **IIT chat model + hosted IIT BGE embeddings + local CrossEncoder**. Requires `BLACKWING_EMBEDDING_URL`, `BLACKWING_EMBEDDING_API_KEY`, `BLACKWING_EMBEDDING_CA_CERT`, and `BLACKWING_IIT_RAG_INDEX_DIR`, then `. .\scripts\use_iit.ps1 -Embeddings iit`.
-- **Never reuse local vectors with IIT embeddings if backend identity or embedding outputs differ.** Build a new versioned IIT index from the *same approved source manifest* using existing `python -m blackwing.rag.build --backend iit ...`. The existing retriever rejects incompatible vector identities rather than corrupting similarity results.
-- IIT's Qwen3:8B serves through the OpenAI-compatible `/chat/completions`; ensure the provided base URL ends just before `/chat/completions` (usually `/v1`). User's actual service endpoint should be confirmed in institute documentation.
-- Hosted max combined input/output is **8,192** tokens; maximum output **1,024**. Profiles default output 768 and conservative input 2,600. **Exact Qwen3 tokenizer must be cached locally** for hosted preflight; failures are intentionally closed rather than bypassing token caps.
-- `BLACKWING_API_JSON_RESPONSE_FORMAT=0` disables `response_format: {"type":"json_object"}` when the IIT gateway does not support JSON mode. Schema-specific prompts and Pydantic validation still apply, but malformed JSON can fail the run.
-- Hosted client uses a verified CA bundle, never `verify=False`; calls are serialized with a lock **within one process**, paced >=1.05 seconds apart, and transient 429/503 errors retried. A shared API key across **multiple processes** still needs distributed rate/concurrency control; run one API worker for the pilot.
-- The embedding endpoint must return **384-dimensional** BGE-small-compatible vectors. The CrossEncoder remains local (sentence-transformers); it is not silently replaced by an IIT endpoint.
+- Inference: `Qwen/Qwen3-8B` at the API base URL assigned to the group, with the group's inference CA certificate.
+- Embeddings: `bge-small-en-v1.5` at `https://103.42.50.41:1035/v1/embeddings`, using the shared embedding key and `vm02-ca.crt`.
+- The API embeds up to 16 texts per batch; each text is validated against the 512-token BGE limit. The endpoint must return 384-dimensional vectors.
+- Rebuild the RAG index with `python -m blackwing.rag.build --backend iit ...`. Local BGE vectors are incompatible with hosted embeddings; the retriever rejects mismatched vector identities.
+- The CrossEncoder reranker remains local. Hosted embeddings consume the shared endpoint quota; do not rebuild repeatedly without a reason.
+- The configured model context is **8,192** combined input/output tokens by default. Output tokens are controlled by `BLACKWING_LLM_API_MAX_OUTPUT_TOKENS` and default to **1,024**. Oversized prompts fail visibly rather than silently clipping narrative or report text. Cache the Qwen3 and BGE tokenizer files locally for preflight and embedding-limit validation.
+- `BLACKWING_API_JSON_RESPONSE_FORMAT=false` matches the documented chat-completions request. Schema-specific prompts and Pydantic validation still apply; malformed JSON can fail a run.
+- Hosted inference uses a verified CA bundle, never `verify=False`; calls are serialized and paced within one process, with transient 429/503 errors retried. A shared API key across multiple processes still needs distributed rate/concurrency control; run one API worker for the pilot.
 
 ### Test inventory and acceptance criteria
 
@@ -127,7 +118,7 @@ $env:BLACKWING_RAG_INDEX_DIR = "$PWD\rag_indexes\austin_local_bge_v1"
 | Critic | Flags missing citations and unassessed compliance |
 | Verification | Never auto-approves |
 | Markdown export | Shows sections, passage IDs, uncertainties; masks common email/phone patterns |
-| Provider switch | Ollama or IIT chosen by environment profile without code edits |
+| Provider setup | IIT Qwen inference and hosted IIT BGE embeddings configured by environment-backed properties |
 | Hosted error | Transient gateway status retried (bounded) |
 | Local full workflow | Manually run with actual Ollama and Austin index; inspect true report |
 | Hosted full workflow | Manually run with IIT credentials, CA, exact tokenizer, quotas |

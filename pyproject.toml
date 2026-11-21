@@ -13,4 +13,3 @@ include = ["blackwing*"]
 
 [tool.setuptools.package-data]
 "blackwing" = ["agents/*/prompt.md", "agents/report/*.md"]
-"blackwing.rag" = ["seed/*.json"]

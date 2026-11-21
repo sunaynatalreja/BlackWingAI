@@ -52,7 +52,10 @@ def get_repository() -> MemoryRepository:
 
 def get_settings() -> Settings:
     try:
-        return Settings.load()
+        settings = Settings.load()
+        retriever.configure_index_dir(settings.rag_index_dir)
+        retriever.configure_embedding_settings(settings)
+        return settings
     except (ValueError, OSError) as exc:
         raise HTTPException(status_code=503, detail=f"Application configuration unavailable: {exc}") from exc
 
@@ -144,7 +147,11 @@ async def _execute_run(
         })
         repo.update_case(case["case_id"], {"status": "analysis_complete"})
     except AgentExecutionError as exc:
-        logger.warning("Analysis run %s failed at agent %s with code %s", run_id, exc.agent, exc.code)
+        logger.warning(
+            "Analysis run %s failed at agent %s with code %s%s",
+            run_id, exc.agent, exc.code,
+            f"; {exc.debug_detail}" if exc.debug_detail else "",
+        )
         repo.patch_run(run_id, {
             "status": "failed",
             "error_code": exc.code,
@@ -181,7 +188,7 @@ async def capabilities() -> dict[str, Any]:
             "knowledge_document_ingestion": True,
             "keyword_retrieval": True,
             "hybrid_retrieval": True,
-            "seeded_reference_cases": True,
+            "seeded_reference_cases": False,
             "risk_matrix_scoring": False,
             "human_review_recording": True,
         },

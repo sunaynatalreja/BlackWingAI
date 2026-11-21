@@ -43,14 +43,14 @@ class ReportPoint(APIModel):
         "proposal",
         "verification_gap",
     ] = "verification_gap"
-    evidence_ids: list[str] = Field(default_factory=list, max_length=5)
-    source_ids: list[str] = Field(default_factory=list, max_length=5)
+    evidence_ids: list[str] = Field(default_factory=list)
+    source_ids: list[str] = Field(default_factory=list)
 
 
 class ReportSectionDraft(APIModel):
     task_id: ReportTaskId
-    summary: str = Field(max_length=1600)
-    key_points: list[ReportPoint] = Field(default_factory=list, max_length=5)
+    summary: str
+    key_points: list[ReportPoint] = Field(default_factory=list)
 
 
 class ReportSection(ReportSectionDraft):
@@ -59,7 +59,7 @@ class ReportSection(ReportSectionDraft):
 
 
 class ReportAgentOutput(APIModel):
-    executive_summary: str = Field(max_length=2200)
+    executive_summary: str
     sections: list[ReportSection] = Field(min_length=4, max_length=4)
     human_approval_required: Literal[True] = True
     report_notice: str = (
