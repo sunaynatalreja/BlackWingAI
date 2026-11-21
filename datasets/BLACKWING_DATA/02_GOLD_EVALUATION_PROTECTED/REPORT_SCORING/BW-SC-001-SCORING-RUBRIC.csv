@@ -1,5 +1,0 @@
-﻿metric,allowed_values,rule,status
-answer_agreement,0 / 0.5 / 1,Compare model answer with supplied approved gold answer; human must validate,NOT_SCORED
-citation_validity,true / false / unassessed,Cited source ID and page exist and support claim,NOT_SCORED
-factual_grounding,supported / partly_supported / unsupported,Evaluate every material claim; user narrative != official evidence,NOT_SCORED
-applicability,in_scope / out_of_scope / unknown,Consider jurisdiction and effective regulation date,NOT_SCORED

@@ -1,8 +1,0 @@
-﻿agent,case_label,query,reference_source_hint,current_incident_id,jurisdiction,incident_date
-investigation,JFK,What runway did American Airlines 106 AAL106 enter at JFK runway incursion?,BW-EV-001,DCA23LA125,US,2023-01-13
-similar_case,JFK,Austin runway incursion FedEx Southwest cleared to land runway 18L aircraft,BW-EV-006,DCA23LA125,US,2023-01-13
-compliance,JFK,air traffic control taxi instructions readback runway crossing 7110.65Z,BW-RG-004,DCA23LA125,US,2023-01-13
-risk,JFK,runway incursion aviation safety risk hazard taxonomy mitigation runway safety,BW-RK-002,DCA23LA125,US,2023-01-13
-mitigation,JFK,FAA taxi operations runway incursion prevention pilot cockpit procedures,BW-GD-002,DCA23LA125,US,2023-01-13
-critic,JFK,JFK AAL106 DAL1943 ground controller taxiway runway 4L account,BW-EV-001,DCA23LA125,US,2023-01-13
-verification,JFK,NTSB DCA23LA125 ATC factual surveillance runway AAL106,BW-EV-001,DCA23LA125,US,2023-01-13

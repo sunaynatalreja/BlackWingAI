@@ -1,9 +1,0 @@
-{
-  "case_label": "HONOLULU_2023",
-  "case_id": null,
-  "jurisdiction": "US",
-  "incident_date": null,
-  "narrative": null,
-  "input_status": "MISSING_INDEPENDENT_FACTUAL_NARRATIVE",
-  "official_final_report": "HELD_OUT_ONLY_DO_NOT_INCLUDE_IN_PROMPT_OR_INDEX"
-}
