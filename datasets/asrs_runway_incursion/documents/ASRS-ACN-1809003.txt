@@ -1,0 +1,5 @@
+Synopsis:
+DCA Tower Controller reported a runway incursion between two air carriers.
+
+Narrative:
+I was working Local Control. Ground Control was open as well. Ground Control taxied Aircraft Y to Runway 1. Around the same time; I cleared Aircraft X for takeoff.Aircraft X was rolling through the intersection of Runway 4/22 when Ground Control keyed up yelling 'Stop! Stop! Aircraft Y; stop!' I looked down the runway and saw Aircraft Y crossing the hold short line of Taxiway Mike and taxiing onto Runway 1.I keyed up to cancel Aircraft X's takeoff clearance but realized they were past V1 and would not be able to stop so I un-keyed after saying the callsign only.Aircraft X departed without incident. Aircraft Y was instructed to make a right turn on Runway 1 and exit at Taxiway Golf.I believe the pilot was not paying adequate attention when he taxied out and didn't realize he was impeding on Runway 1.

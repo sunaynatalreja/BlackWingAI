@@ -1,0 +1,8 @@
+Synopsis:
+Air taxi flight crew reported departing Runway 4R at HNL; they saw a flashing X;" and were unsure whether it was closed as the runway lights were on with no barriers present on the runway to prevent aircraft from lining up for takeoff."
+
+Narrative:
+Aircraft X was instructed to taxi to 4R at F via C. After proceeding to taxi to 4R at F we then obtained our takeoff clearance. Tower cleared us to take off on 4R at F. While climbing out and turning offshore we noticed the X on the departure end of 4R. When we were doing our preflight briefings we had read that 4R would be closed in the NOTAMs. However; looking at the digital ATIS there was no indications that 4R was closed. We had talked about it and we were going to ask Tower if 4R was open or closed. The runway lights were on and no barriers were up blocking any aircraft's ability to line up on 4R like they normally are. When we were given clearance to take off we believed they had reopened the runway and were good to go.
+
+Secondary Narrative:
+Aircraft X was told to taxi to 4R at F via Taxiway C. After taxiing to 4R at F; we received our takeoff on Runway 4R at F.During our climb-out and turn offshore; we observed the flashing X" on the departure end of Runway 4R. In our preflight briefing; we had noted from the NOTAMs that Runway 4R was listed as closed; however; the digital ATIS contained no indication that 4R was closed. We discussed this discrepancy and planned to clarify with Tower whether 4R was open or closed. The runway lights were on; and no barriers were in place preventing aircraft from lining up on 4R as would normally be expected during a closure.Given that Tower issued a takeoff clearance; we believed the runway had been reopened and that operations were authorized."

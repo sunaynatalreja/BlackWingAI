@@ -1,0 +1,5 @@
+Synopsis:
+General aviation pilot reported they crossed hold short line causing an aircraft on final approach to go-around at MTJ; a non-towered airport.
+
+Narrative:
+Was preparing to takeoff from runway 35; MTJ.  I did not hear a landing call from Aircraft Y for runway 17 and crossed the hold short line at A8.  I did not proceed to the runway once crew pointed out the call. I finally got control of what was happening and was preparing to do a U-turn to exit the runway when the aircraft called a missed approach.  I waited until I could locate the aircraft on ADS-B and proceeded to takeoff.I had issues with radio volumes and usage by the crew and should have corrected all of these before taxi; and especially after engine runup since it was still an issue.  I let distractions keep me from being as diligent as I should have been.

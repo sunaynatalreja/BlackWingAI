@@ -1,0 +1,5 @@
+Synopsis:
+Cessna 172 Flight Instructor reported a loss of brake pressure during taxi resulting in a runway incursion and taxiway excursion. Flight notified ATC tower.
+
+Narrative:
+Aircraft X was doing touch and goes RWY XX. Requested full stop on RWY XX where ATC advised to left turn on Taxiway 1; Hold Short of RWY XY. We were then cleared to cross XY with Hold Instructions at RWY XZ. Approaching RWY XZ; Aircraft X lost all brake pressure on both IP (Flight Instructor) & SP's (Student Pilot) controls. IP increased pressure on brakes. At this point; ACFT veered to the right causing to taxi through the hold short line and into the grass next to the active. IP radiod to ZZZ Tower in which Tower took appropriate actions for arriving traffic.

@@ -1,0 +1,5 @@
+Synopsis:
+B737 Captain reported having to execute a go-around due to an aircraft not completely clearing the runway after landing.
+
+Narrative:
+7 miles behind Aircraft Y A-330 landing on [Runway] XXR at ZZZ. Cleared to land in visual conditions. Aircraft Y turned left on Taxiway 1 after landing; but stopped and did not clear the runway or keep moving. Plenty of time for ATC to tell him to keep moving; but did not. At 500 feet I asked Tower Controller if they considered Aircraft Y clear of the runway (tail of the A330 was still over Runway XXR) and received an immediate call from Tower to 'go-around'. A go-around was executed; we were resequenced and the next approach was to a normal landing 15 minutes later.

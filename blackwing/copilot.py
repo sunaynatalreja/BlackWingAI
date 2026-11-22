@@ -161,3 +161,15 @@ def export_report(case_id, format):
         response = connection.get(f"/api/v1/cases/{case_id}/report/export?format={format}")
     response.raise_for_status()
     return response.content
+
+
+def get_gold_comparison(case_id, run_id):
+    return request('GET', f'/api/v1/cases/{case_id}/runs/{run_id}/gold-comparison')
+
+
+def compare_with_gold(case_id, run_id):
+    # Explicit user action only; credentials and evaluation live in FastAPI.
+    with client() as connection:
+        response = connection.post(f'/api/v1/cases/{case_id}/runs/{run_id}/gold-comparison', timeout=1200)
+    response.raise_for_status()
+    return response.json()

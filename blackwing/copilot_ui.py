@@ -174,8 +174,9 @@ def show_report(case, render_report):
         else:
             st.info(availability["message"])
         return
+    reference_case = show_gold_comparison(case)
     if report.get("generated_report"):
-        render_report(report["generated_report"], report, case["incident"]["case_id"], case["report_run_id"])
+        render_report(report["generated_report"], report, case["incident"]["case_id"], case["report_run_id"], reference_case=reference_case)
     else:
         from blackwing.reporting import render_markdown_report
         st.markdown(render_markdown_report(case["envelope"]))
@@ -330,3 +331,60 @@ def main(*, brand, render_report, cloud=False):
         st.error("The FastAPI backend is unavailable. Start it and set BLACKWING_UI_API_URL to its address.")
     except (ValueError, UnicodeError) as exc:
         st.error(str(exc))
+
+
+def show_gold_comparison(case):
+    st.subheader('Gold comparison score')
+    st.caption('Separate from structural completeness and aviation risk. Human review required.')
+    try:
+        result = copilot.get_gold_comparison(case['incident']['case_id'], case['report_run_id'])
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 404:
+            st.info('Restart FastAPI with the updated code to enable gold comparison.')
+            return
+        raise
+    reference_case = bool(result.get('gold_id'))
+    if result.get('last_error'):
+        st.error(result['last_error']['message'])
+    if result['status'] in {'not_applicable','unavailable'}:
+        st.metric('Gold comparison score', 'Not applicable' if result['status'] == 'not_applicable' else 'Unavailable')
+        st.info(result['reason'])
+        return reference_case
+    st.caption('Matching reference: '+result.get('gold_case','')+' · '+result.get('gold_id',''))
+    if result['status'] in {'not_requested','evaluation_incomplete'}:
+        st.metric('Gold comparison score', 'Not assessed')
+        if result['status'] == 'evaluation_incomplete':
+            st.warning('The comparison could not be validated. No numerical score has been assigned.')
+        if st.button('Compare with gold report', key='compare-gold-'+case['report_run_id']):
+            try:
+                with st.spinner('Comparing the completed report with its matching gold reference…'):
+                    result = copilot.compare_with_gold(case['incident']['case_id'],case['report_run_id'])
+            except httpx.HTTPStatusError as exc:
+                try:
+                    detail = exc.response.json().get('detail')
+                except ValueError:
+                    detail = None
+                message = detail.get('message') if isinstance(detail,dict) else detail
+                st.error(message or f'Gold comparison failed (HTTP {exc.response.status_code}). Inspect the backend log; the report is preserved.')
+                return reference_case
+            except httpx.HTTPError:
+                st.error('Gold comparison connection failed. The report is preserved; refresh before retrying.')
+                return reference_case
+            st.rerun()
+        return reference_case
+    st.metric('Gold comparison score', f"{result['score']:g}/100" if result.get('score') is not None else 'Not assessable')
+    st.caption(result.get('method',''))
+    st.info(result.get('notice','Human review required.'))
+    st.caption(f"Factual claims compared: {result.get('factual_claims',0)}. Run: {case['report_run_id']}")
+    if result.get('comparisons'):
+        st.dataframe(result['comparisons'], hide_index=True, alt='Claim comparisons with matching gold-page quotations')
+    if result.get('improvements'):
+        with st.expander('Improvements to review'):
+            for item in result['improvements']:
+                st.write(item['report_field']+' — '+item['issue'])
+                st.write(item['action'])
+    st.download_button('Download gold comparison', json.dumps(result,indent=2).encode(),
+        file_name='BLACKWING-gold-comparison-'+case['report_run_id']+'.json',mime='application/json',
+        key='download-gold-'+case['report_run_id'])
+
+    return reference_case

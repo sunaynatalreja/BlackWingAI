@@ -1,0 +1,5 @@
+Synopsis:
+Air carrier Captain reported failure of the auto braking system to disengage during roll out. Flight crew disengaged the auto braking system and continued to taxi.
+
+Narrative:
+After a normal landing on runway XX in ZZZ I took control from the f/o at approximately 70 kts.  I applied light manual braking pressure as normal.  When I released brake pressure the aircraft continued to decelerate and came to a full stop on the runway centerline despite no brake pressure being applied by either pilot.  The controller instructed us not to stop on the runway and we informed him that we were having a brake issue.  He instructed the aircraft behind us to go around.  I advanced the thrust levers slightly abouve idle and there was a click as the auto brakes disengaged.  We the taxied to the gate normally and I wrote up the autobrakes for their failure to disengage when manual brakes were applied.

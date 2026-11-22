@@ -1,0 +1,8 @@
+Synopsis:
+Air carrier flight crew reported a runway incursion.
+
+Narrative:
+While taxiing out to Runway XR at ZZZ I might have failed to hold short at the hold short line. The FO and I recognized the error at the same time. He yelled stop as I hit the brakes. Looking out at the line; it was difficult to tell if the nose of the aircraft had crossed over the line. The Tower was informed immediately. The Tower then cleared us for takeoff. No other issues. Both the FO and I had reviewed the bulletin for ZZZ about this problem and it still may have bitten us.  Other issues that may have affected our situational awareness was a last minute weight and balance issue that required us to stop on the taxiway to move passengers and get our numbers. Another issue is that I and the FO are starting to fly again after three months. It is taking time to re-acclimate to line operations. Even being aware of this and taking our time to get it done right; we may have still gotten bit by the error.
+
+Secondary Narrative:
+Approaching Runway XR hold line Captain began to apply brakes; so I thought he was coming to a stop. I looked down to bring up the legs page on my FMC and when I looked up again it was apparent he was not going to stop short of the hold line. I told him to stop and he brought the plane to an immediate stop. We had crossed the line by a few feet. Captain told the Tower we may have crossed the hold line and they asked if we could take an immediate takeoff; we said yes and proceeded to takeoff on XR without incident.

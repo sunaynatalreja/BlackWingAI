@@ -537,3 +537,80 @@ async def get_run_audit(run_id: str, repo: MemoryRepository = Depends(get_reposi
     return {"run_id": run_id, "events": run.get("audit_events", []), "plan": run.get("plan"),
             "partial_outputs": run.get("partial_outputs", {}), "execution_steps": run.get("execution_steps", 0),
             "execution_state": run.get("execution_state"), "resumable": False, "recovery": "Create a new run after interruption; prior run history is retained."}
+
+
+# Evaluation-only routes: gold never enters case evidence or generation.
+_gold_locks: dict[str, asyncio.Lock] = {}
+
+
+def _gold_context(case_id, run_id, repo):
+    from blackwing.gold_comparison import match_gold, report_hash, VERSION, gold_path
+    case = _case_or_404(repo, case_id)
+    run = repo.get_run(run_id)
+    if not run or run['case_id'] != case_id:
+        raise HTTPException(status_code=404, detail='Report run not found')
+    if run['status'] != 'completed' or not run.get('result'):
+        raise HTTPException(status_code=409, detail='A completed report is required for gold comparison.')
+    report = ReportResponse.model_validate({
+        'case_id':case_id,'run_id':run_id,'case_status':case['status'],
+        'analysis_status':'completed','report':run['result'],'reviews':[],'is_final':False,
+        'notice':'Human review required.'}).report.model_dump(mode='json')
+    item = match_gold(case)
+    context = {'status':'not_applicable','score':None,'label':'Gold comparison score',
+               'reason':'No uniquely matching preserved gold case; fictional and unrelated cases are not compared.'}
+    if item:
+        context.update(status='not_requested',gold_id=item['gold_id'],gold_case=item['case_label'],
+                       reason='Select Compare with gold report to request a comparison.')
+        try:
+            gold_path(item)
+        except ValueError as exc:
+            context.update(status='unavailable',reason=str(exc))
+        cached = run.get('gold_comparison') or {}
+        if (context['status'] != 'unavailable' and cached.get('report_hash') == report_hash(report)
+                and cached.get('gold_sha256') == item['sha256'] and cached.get('rubric_version') == VERSION):
+            context = cached
+    if run.get('gold_comparison_error') and context.get('status') not in {'proposed','not_applicable'}:
+        context['last_error'] = run['gold_comparison_error']
+    return case, run, report, context
+
+
+@app.get('/api/v1/cases/{case_id}/runs/{run_id}/gold-comparison', tags=['reports'])
+async def get_gold_comparison(case_id: str, run_id: str, repo: MemoryRepository = Depends(get_repository)):
+    return _gold_context(case_id, run_id, repo)[3]
+
+
+@app.post('/api/v1/cases/{case_id}/runs/{run_id}/gold-comparison', tags=['reports'])
+async def create_gold_comparison(case_id: str, run_id: str,
+        repo: MemoryRepository = Depends(get_repository), settings: Settings = Depends(get_settings)):
+    from blackwing.gold_comparison import compare_report
+    async with _gold_locks.setdefault(run_id, asyncio.Lock()):
+        case, run, report, cached = _gold_context(case_id, run_id, repo)
+        if cached['status'] in {'not_applicable','proposed','not_assessable'}:
+            return cached
+        if cached['status'] == 'unavailable':
+            raise HTTPException(status_code=503, detail=cached['reason'])
+        active, _ = repo.list_cases(status='analysis_running', limit=1, offset=0)
+        if active:
+            raise HTTPException(status_code=409, detail='Wait for active investigations to finish before gold comparison.')
+        try:
+            result = await compare_report(case, report, run_id, settings)
+        except Exception as exc:
+            from pypdf.errors import DependencyError
+            diagnostic = safe_error(exc)
+            code = 'gold_comparison_failed'
+            message = 'Gold comparison did not complete. No score assigned; inspect the backend diagnostics.'
+            if isinstance(exc, DependencyError):
+                code = 'gold_pdf_crypto_missing'
+                message = 'Gold PDF encryption support is missing. Install the project requirements and restart FastAPI.'
+            elif isinstance(exc, httpx.HTTPStatusError):
+                code = 'gold_provider_http_error'
+                message = f'Gold comparison provider returned HTTP {exc.response.status_code}. No score assigned.'
+            elif isinstance(exc, httpx.TimeoutException):
+                code = 'gold_provider_timeout'
+                message = 'Gold comparison model timed out. No score assigned; retry after the active request finishes.'
+            error = {'code':code,'message':message,'error_type':type(exc).__name__}
+            repo.patch_run(run_id, {'gold_comparison_error':error})
+            logger.error('Gold comparison unavailable; run=%s diagnostic=%s', run_id, json.dumps(diagnostic))
+            raise HTTPException(status_code=503, detail=error) from exc
+        repo.patch_run(run_id, {'gold_comparison':result,'gold_comparison_error':None})
+        return result

@@ -1,0 +1,5 @@
+Synopsis:
+Flight Instructor with student reported executing a low altitude go-around at TTN airport when another aircraft taxied onto the runway.
+
+Narrative:
+After completing the VOR-A circle 24 approach into Trenton; we were cleared to land while on the downwind. On final passing through about 500ft MSL we heard an aircraft report holding short of runway 24 at B. The Tower Controller said  hold short 24" and the aircraft read back "24 cleared for takeoff". I said to my student "did you hear that aircraft read back takeoff?"My student said "is he rolling?" And I observed the aircraft approximately halfway across the hold short line. I replied "yes; go around" and my student repeated "go around". Around 350ft MSL we initiated a go-around and reported the go around to Tower. The Controller replied "okay; make left closed traffic" and after we replied immediately issued the aircraft a takeoff clearance. We did not hear the Tower acknowledge that the aircraft had either incorrectly read back the instruction; or cross the hold short line."

@@ -1,0 +1,5 @@
+Synopsis:
+Air carrier First Officer reported that while on approach; an aircraft taxing on the runway missed their assigned exit taxiway resulting in an ATC directed go around.
+
+Narrative:
+While on approach to land on Runway XXL in ZZZ. Towered cleared a cargo aircraft to taxi on Runway XXL but get off on 1. The cargo missed the exit and we felt the go around coming already and that is when Tower instructed us to go around due to traffic on the runway. Cause: Aircraft on runway was not familiar with the taxi exits and missed the exit he was supposed to get off on. Suggestions: Not clearing an aircraft to taxi on the runway being used to land on when aircraft is past the final approach fix.

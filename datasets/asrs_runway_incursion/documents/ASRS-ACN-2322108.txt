@@ -1,0 +1,5 @@
+Synopsis:
+A Tower Local Controller reported a departing C172 flew over the top of a C182 which was crossing the active runway without a clearance.
+
+Narrative:
+I was on local control. I had cleared a Cessna for takeoff and they were airborne more than halfway down the runway. I was in the process of clearing a Warrior for takeoff when the CIC (Controller in Charge) said 'stop stop stop.' I wasn't sure if he was talking to local or ground; so I told the Warrior to hold short of the runway. That's when I noticed a Skylane crossing runway XX at taxiway 1 which was not coordinated with me. Cessna overflew the Skylane on the runway by a few hundred feet and the Warrior held short of the runway. The Skylane was not told to cross the runway by ground.Always ensure readbacks are correct and monitor the aircraft approaching active runways that should be holding short.

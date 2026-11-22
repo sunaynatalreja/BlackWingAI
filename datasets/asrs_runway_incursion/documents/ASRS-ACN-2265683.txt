@@ -1,0 +1,5 @@
+Synopsis:
+Air taxi Captain reported the clearance received was to taxi to the runway and cross the intersecting runway. The pilot stopped over the hold short line because an aircraft was executing a missed approach on the intersecting runway.
+
+Narrative:
+Called for taxi clearance from hangar XX ramp to active runway. Ground Control cleared us to Runway XX via 1; 2; 3; cleared to cross Runway XY (I have listened to the audio of the clearance). approaching Runway XY on 2; crew did the normal 'clear left'; 'clear right'; 'cleared to cross' calls. However; when looking right to confirm clear; crew saw a piston single approaching XY low level appearing to begin a missed approach. Pilot flying (PF) stopped the airplane; and called ground to confirm clear to cross. after a pause; controlled responded with 'no hold short'. PF noted that aircraft was stopped already crossed threshold short line but not yet on the runway. after the piston single passed crew was cleared to continue taxi. No further communication about the incident was heard.

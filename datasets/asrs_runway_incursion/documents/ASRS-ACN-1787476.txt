@@ -1,0 +1,8 @@
+Synopsis:
+Air carrier flight crew reported ATC violation of allowing aircraft to overfly them by 50 ft.
+
+Narrative:
+Cleared RNP 22 at MHLM. After landing Runway 22 and exiting at Taxiway B; Tower instructed us to taxi left (west) on Taxiway A; enter Runway 04 and backtrack down runway to Taxiway D. I advised Tower that we were entering runway at Taxiway A; whereupon tower instructed us to hold short of runway. I advised Tower that we had crossed the hold short line. Tower reiterated hold short instruction; 'For traffic.' CA (Captain) told the tower that an aircraft should not land on runway with us in our position. Tower said that aircraft was only doing a touch and go. After CA protested again; saying that it was unsafe for an aircraft to land on the runway; Tower said that aircraft would turn at the SAP VOR; which is on the approach (east) end of Runway 22. The aircraft; a yellow light twin engine; callsign Aircraft Y; completed its approach and made a low pass; flying the full length of the runway at 50 ft.; and passed in front of our nose. Tower then cleared us to backtrack on runway to Taxiway D. Remainder of flight without incident.Language; use of non-standard phraseology by ATC; lack of safety awareness (Tower).The tower seemed to think it was ok for an aircraft to land with another aircraft over the hold-short line.
+
+Secondary Narrative:
+[Report narrative contained no additional information.]

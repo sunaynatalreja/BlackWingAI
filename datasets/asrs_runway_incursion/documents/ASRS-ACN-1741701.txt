@@ -1,0 +1,5 @@
+Synopsis:
+GA pilot reported landing on a closed runway; that was NOTAMed closed after pilot had already checked NOTAMs and had departed.
+
+Narrative:
+Flying on a VFR cross country from ZZZ1 to ZZZ. I checked NOTAMs for the airport the evening before my flight and early in the morning before my departure. I took off from ZZZ1 at XA:50 local time and I landed at ZZZ around XB:30 local. I saw a working crew on the ramp as I taxied in. The line person parked me and told me I had landed on a closed runway. There were no markings on the runway to indicate it being closed. I asked when the NOTAM was published and she said it was published this morning. I looked at my ForeFlight and a NOTAM was published after I had departed ZZZ1. Had I gotten to ZZZ just a little later there would have been markings on the runway indicating that it was closed and I wouldn't have landed. My assumption is with the coronavirus; the airport manager wasn't certain if or when work would begin and didn't issue the NOTAM until the work crew arrived.

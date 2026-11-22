@@ -1,0 +1,5 @@
+Synopsis:
+Flight Instructor reported a runway incursion due to brake failure and loss of control of the aircraft.
+
+Narrative:
+After startup with a student; we performed a brake check; both sides; with a positive exchange of controls and no issues. After receiving our taxi clearance for an intersection departure; I observed my student taxiing faster than usual; and off centerline. I told him to slow down and bring the aircraft back to centerline; and he informed me there was a problem with the right brake. I took control; was unable to slow the aircraft; and with the runway hold short line approaching notified ground of my inability to stop. I swung to the right; and used brake to perform a 180 degree turn at speed; but wasn't able to turn tight enough to avoid crossing. I notified tower of my crossing; and cleared the runway environment. I got a clearance to taxi back to parking; where we ended the attempted flight; and shut the aircraft down until maintenance could diagnose and resolve the issue.

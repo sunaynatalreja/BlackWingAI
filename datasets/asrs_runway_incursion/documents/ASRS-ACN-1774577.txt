@@ -1,0 +1,5 @@
+Synopsis:
+Air carrier First Officer reported BNA Runway 31 ILS hold short line is wrongly depicted on the chart when compared to its actual location on the airfield.
+
+Narrative:
+At BNA; the ILS Hold Short line for Runway 31 is depicted on the airport diagram as being located on Taxiway L; east of Taxiway L7. This puts it pretty close to the runway; however; it is actually located on Taxiway L; west of (prior to) Taxiway T6. This means you're past the ILS Hold Short before you even start looking for it; and you'd be beyond it already if you came out of the ramp area on Taxiway T6. We talked to Tower about it; and they told us that the line had been moved many months ago.

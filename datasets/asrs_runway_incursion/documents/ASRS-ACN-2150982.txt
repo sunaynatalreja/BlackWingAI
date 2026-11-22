@@ -1,0 +1,5 @@
+Synopsis:
+General aviation Flight Instructor reported a near miss while on a training flight at a non-towered airport when another aircraft lined up and departed while the instructor was on final approach. The Instructor performed a go around and another evasive maneuver on the go around to separate from the departing aircraft.
+
+Narrative:
+On a training flight for a private student. Announced 4 nm from field north then downwind at base. Runway 36; left hand pattern on base noted Aircraft Y taxiing onto Runway 36. I transmitted final. Aircraft Y paused in position for a period at which I announced I was going around on right side. Then I slowed hoping to give spacing. Aircraft Y; then before reaching departure end; rolled right; forcing me to take evasive action. I know the pilot heard my transmission on file and my instructions to him was fly straight ahead I'm on your right side. Aircraft Y then banked right forcing my evasive action. I do not believe he checked base or final before taking active runway. My aircraft has encoding transponder and ADSB.

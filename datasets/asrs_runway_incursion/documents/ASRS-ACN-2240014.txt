@@ -1,0 +1,5 @@
+Synopsis:
+EMB-145 First Officer reported an aircraft that had landed prior had not exited the runway in time; resulting in the air carrier going around.
+
+Narrative:
+This report is due to a tower directed go-around.  During the visual approach to runway XX into ZZZ we were cleared to land number two behind a Cessna 172. We were told spacing looked OK by tower. On final approach we observed the 172 land and brake hard on the runway. Tower told the 172 to exit without delay but they had already come to an almost complete stop. My FO and I called a go-around at the same time as we heard the tower tell us to go-around over the radio. We executed the go-around procedure and ran the after take off and descent checklist. We made left traffic and stayed with the tower. I contacted the flight attendant and passengers then landed runway XX.

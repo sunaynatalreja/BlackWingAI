@@ -1,0 +1,69 @@
+{
+  "run_id": "870905de-b5a8-45c2-836f-8295cf1bd1cf",
+  "events": [
+    {
+      "tool": "retrieve_evidence",
+      "invocation_id": "1f607a78-f5c5-48cc-a566-c6995477e280",
+      "case_id": "44f4380e-fdc9-4126-a11d-c2f5a807f7f3",
+      "input_identifiers": [
+        "44f4380e-fdc9-4126-a11d-c2f5a807f7f3"
+      ],
+      "result_summary": {
+        "output_identifiers": [
+          "BW-EV-001:loc3:fixed:00001:7d6acbb4b3",
+          "BW-EV-003:loc4:fixed:00001:8a2f890285",
+          "BW-EV-001:loc3:fixed:00000:8bf699ac7b",
+          "BW-EV-002:loc19:fixed:00000:b4ab07f5d8",
+          "BW-EV-013:loc5:fixed:00000:38dfd6e18f"
+        ],
+        "count": 5
+      },
+      "duration_ms": 12893.341,
+      "error": null,
+      "sequence": 1,
+      "step": "retrieve_evidence",
+      "agent": null,
+      "status": "complete",
+      "model": null,
+      "detail": null,
+      "timestamp": "2026-11-21T11:29:49.237034Z"
+    },
+    {
+      "tool": "retrieve_evidence",
+      "invocation_id": "571db0f1-fb11-4066-ab0b-aa9c962f7550",
+      "case_id": "44f4380e-fdc9-4126-a11d-c2f5a807f7f3",
+      "input_identifiers": [
+        "44f4380e-fdc9-4126-a11d-c2f5a807f7f3"
+      ],
+      "result_summary": {
+        "fields": [
+          "investigation",
+          "similar_case",
+          "compliance",
+          "risk",
+          "mitigation",
+          "critic",
+          "verification"
+        ],
+        "item_counts": {
+          "investigation": 0,
+          "similar_case": 2,
+          "compliance": 2,
+          "risk": 2,
+          "mitigation": 2,
+          "critic": 0,
+          "verification": 0
+        }
+      },
+      "duration_ms": 8710.91,
+      "error": null,
+      "sequence": 2,
+      "step": "retrieve_evidence",
+      "agent": null,
+      "status": "complete",
+      "model": null,
+      "detail": null,
+      "timestamp": "2026-11-21T11:30:02.142263Z"
+    }
+  ]
+}

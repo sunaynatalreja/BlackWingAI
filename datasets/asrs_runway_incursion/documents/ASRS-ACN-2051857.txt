@@ -1,0 +1,5 @@
+Synopsis:
+ATC Supervisor reported a critical ground conflict event when ATC tower cleared a departure aircraft to LUAW with a landing aircraft on short final. Supervisor notified Tower Operator who sent the landing aircraft to go-around.
+
+Narrative:
+I was merely an observer; supervising the operation. Final Monitor (FM)-2 heard LE-1 at ZZZ give a Line Up and Wait instruction to the Company with aircraft on short final; and took the initiative to call local and advise them. Local then realized the mistake and sent aircraft around. Aircraft directly overflew Company on the runway at what appears to be 500 feet separation or less. Final Monitor 2 acted immediately in a critical moment and saved the day. This is a perfect example of staying alert and tuned in to the operation as a whole; the controller on monitor 2 was about to close the position as the aircraft was the last aircraft for them to monitor. Sharing a runway in this configuration (XXL being closed; sharing XXC for arrivals and departures) led directly to this incident. This airport needs more capacity.

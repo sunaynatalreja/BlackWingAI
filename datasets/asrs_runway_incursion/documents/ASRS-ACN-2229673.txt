@@ -1,0 +1,5 @@
+Synopsis:
+CRJ-550 pilot reported a ground conflict with another aircraft landing in the opposite direction at a non-towered airport.
+
+Narrative:
+We conducted a visual approach to ZZZ runway XX; which all other traffic were using.  We made numerous calls on CTAF throughout our descent and approach. On final approach; a small aircraft cut in front of us and landed on XX. We still had sufficient room to land behind it; and so we continued. However; as we were watching to verify it had cleared the runway; another small aircraft immediately landed on  opposite end of our runway; which was runway XY and not XX; the active runway.  This aircraft had made no radio calls and was attempting to get in before we landed.  Also Because of the slope of the runway; we were unable to see this aircraft.  We landed normally and as we taxied in; we then saw them clearing our runway.  In their haste to get away; they hurriedly taxied to runway XX and took off.  Our company aircraft was waiting for us to land so they could depart IFR and they were holding short of runway XX and could have witnessed the event.

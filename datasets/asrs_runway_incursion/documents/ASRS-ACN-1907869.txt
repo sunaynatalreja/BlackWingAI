@@ -1,0 +1,5 @@
+Synopsis:
+Pilot reported aborting the takeoff roll after he observed an aircraft entering the runway from a taxiway.
+
+Narrative:
+On DATE; I'm operating company Aircraft X ready for aerial survey mission. The aircraft that was involved in this incident landed Runway 33 while I was holding short of Runway 33 at A1 TXY (taxiway). As soon as the aircraft vacate the runway; I was cleared for take off Runway 33 from PNE Tower; during the take-off run I notice the airplane was approaching Runway 33 from TWY L (West of Runway 33) at a very fast speed and I aborted the takeoff at the same time tower call out stop and the aircraft taxi passed the runway hold short line.

@@ -1,0 +1,5 @@
+Synopsis:
+Flight Instructor reported the student ballooned during landing flare resulting in a runway excursion during landing.
+
+Narrative:
+Student was making a landing on Rwy XX.  We were issued a 'land and Hold Short.'Clearance(of Rwy XY Intersection).  The student was the pilot flying and had started making acceptable landings.  For some reason he massively over-flared on this landing and the aircraft ballooned 20+ feet into the air. I tried to talk him down; but when that did not work; I immediately took control and landed the airplane; applying maximum available braking.  The airplane stopped with the nosewheel approximately 4 feet over the hold short line.While there was no danger to the other airplane; it was a technical violation and the Controller had a melt-down; reading me the riot act; issuing a number to call and a none-standard taxi routing in one long clearance (while I was still processing the event that had   just happened.  I subsequent made one wrong turn on the way back to the ramp.

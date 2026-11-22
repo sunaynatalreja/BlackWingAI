@@ -1,0 +1,5 @@
+Synopsis:
+Ground Controller reported they issued runway crossing instructions to an aircraft and as the aircraft crossed the hold short lines the controller noticed an aircraft on short final which was issued go around instructions.
+
+Narrative:
+Working midnight Ground Control with lots of phone calls from city about openings and closings. Multiple taxiways closed for construction add to the complexity level for the majority of the cargo aircraft on midnight [shifts]. Airline maintenance flights up and down from hangars have long instructions and are one way in and out from hangars due to construction so it's constant calling Ground.  Local and Ground coordinate runway crossings and I had given Aircraft X instructions to taxi across airport to the departure runway. I shipped the first one to local and crossed the 2nd one. Aircraft X had just passed the hold bars for the runway when I looked up and saw Aircraft Y on short final. I told the Local Controller to send Aircraft Y around on short final.

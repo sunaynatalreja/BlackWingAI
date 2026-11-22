@@ -1,0 +1,5 @@
+Synopsis:
+C182 pilot reported a ground conflict with emergency vehicles just exiting the runway while on takeoff roll.
+
+Narrative:
+While on Position and hold; RWY XX at ZZZ; waiting for emergency vehicles to clear the runway post engine failure of another aircraft; I heard the Emergency Vehicles call out 'Runway Clear'.  I took this to mean the emergency vehicles were clear of the runway.  I then called out over UNICOM that Aircraft X was on the roll on [runway] XX.  After applying full power; I noticed the emergency vehicles on the runway; approaching the ramp turnoff area. It was called out over UNICOM by another pilot 'Emergency vehicles; clear the runway' several times. At this point I was at takeoff speed and elected to rotate and climb out; sidestepping left of the runway environment while maintaining 4-500 FPM climb.Of note the Emergency vehicles were 'Gator' style vehicles and did not have amber lighting on top or other lighting that I could see.Corrective actions to be taken: Verify the runway is actually clear of vehicles before takeoff roll.

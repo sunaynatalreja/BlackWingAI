@@ -1,0 +1,5 @@
+Synopsis:
+Tower Controller reported that failure to cancel takeoff clearance with a priority aircraft inbound resulted in a runway incursion.
+
+Narrative:
+I was CIC; I had just got on position. There were no aircraft in the Class D airspace. There were two aircraft departing. The first aircraft was Aircraft X headed VFR to ZZZ. He was cleared for takeoff on Runway XX. Approximately a half mile from the airport he was switched to departure. The Local Controller then cleared Aircraft Y; for departure on Runway XX. Right after he did this departure called and said that Aircraft X requested priority handling and had an engine out. The Local Controller let departure clear the aircraft to land Runway YY. In the meantime; he gave Aircraft Y a 230 heading but did not cancel his takeoff clearance. Aircraft X landed Runway YY with Aircraft Y holding on the runway. Take off clearance was canceled but late.I think more training in case of unusual circumstances is needed especially when the traffic is so slow.

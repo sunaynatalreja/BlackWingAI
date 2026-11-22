@@ -1,0 +1,8 @@
+Synopsis:
+Air carrier flight crew reported when cleared across runway; an aircraft overflew them landing on the wrong runway assigned; resulted in a runway incursion.
+
+Narrative:
+We were cleared to Taxi [Taxiway] T lane; [Taxiway] E3 to [Runway] 31C; cross 31R. While crossing [Runway] 31R; we noticed an aircraft we thought was landing [Runway] 31C seemingly headed for us. We crossed the runway and simultaneously switched to Tower frequency to hear the Tower Controller telling the aircraft; an Aircraft Y; that he had been cleared to land [Runway] 31L and I believe he said; Cleared to land 31R. The aircraft landed 31R. We were on Taxiway E3; number 3 in line for take-off and not clear of the Runway 31R hold-short line.ATC should have sent the aircraft around.
+
+Secondary Narrative:
+We where cleared to taxi [Runway] 31C; cross [Runway] 31R; [Taxiway] E3 lane; and hold short 31C. Cleared final for 31R before crossing hold short line for 31R and noticed an aircraft on what looked to be on final for 31C. As we taxied to hold short 31C on E3 lane; the aircraft flew over us and landed 31R. We where number 3 in line for departure on the E3 lane when Tower cleared the Aircraft Y to land 31R. We departed for ZZZ with no further issues.ATC should have sent the aircraft around and the Pilot should not have over flown us to land 31R. Runway 31R should be decommissioned and used for a taxiway only.

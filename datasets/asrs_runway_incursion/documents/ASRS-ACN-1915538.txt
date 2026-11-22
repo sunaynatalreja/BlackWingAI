@@ -1,0 +1,5 @@
+Synopsis:
+Twin Engine Pilot reported the BKL taxi chart does not show taxiway G as part of the ramp area. This caused confusion and a possible runway incursion.
+
+Narrative:
+After [I was] cleared from Ground Control to taxi to Runway 24R via '[Taxiway] G'; I taxied straight out from the Tower across the ramp looking for 'G'. THE TAXI DIAGRAM DID NOT SHOW 'G' AS PART OF THE RAMP on the BKL taxi chart...so I started to taxi onto the taxiway to 6R. Seeing the stop bar for that runway; I immediately stopped and turned about 120 to my right to get back onto the ramp. I'm sure my wheels did not cross the runway bars but my wing might have crossed as I made the turn.The taxi chart should be changed to print 'G' on the ramp section of the taxiway.

@@ -1,0 +1,5 @@
+Synopsis:
+Air taxi Captain reported they crossed runway hold short line without clearance which resulted in ATC issuing a go-around to a landing aircraft.
+
+Narrative:
+I was departing on an IFR flight plan from ZZZ. I was cleared to taxi from the FBO to XXL via taxi 1. I exited the parking area and turned left onto 1. I was immediately told  to hold short of XXL at 2; told to monitor tower; and given a change to my departure frequency. I turned onto 2 from 1; selected COM 1 to monitor tower; and tuned the new departure frequency. I was aware of the need to hold short of XXR; but in the busyness the various tasks; I passed the hold short line before coming to a stop. I was then told by ATC that I had crossed the hold short line; and that they had sent an airliner around that had been on short final for XXR.Subsequently I was cleared to cross XXR; and told left to taxi to XXL on 3. I was then given a phone number to call.

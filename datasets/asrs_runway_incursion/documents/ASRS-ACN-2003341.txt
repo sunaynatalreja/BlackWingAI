@@ -1,0 +1,5 @@
+Synopsis:
+A Tower Controller reported an aircraft on short final initiated a go-around due to another aircraft which had taxied onto the runway that the Controller had not noticed.
+
+Narrative:
+Aircraft X; student solo; called ready for departure at Runway XR. I instructed them to hold short of Runway XR. The pilot read back the instructions clearly. Aircraft Y had been cleared for a touch and go on Runway XR. I was issuing traffic for Aircraft Z; IFR; inbound from the northeast when Aircraft Y reported that they were going around. I responded with Roger and issued the wind. I continued to sort out the traffic for the inbound Aircraft Z. Ground Control then asked what the aircraft on Runway XR was doing. I looked up and saw Aircraft X lined up and waiting on Runway XR. I instructed them to exit the runway at XX intersection. I then issued the brasher. Pilot expectation bias was at play.

@@ -1,0 +1,5 @@
+Synopsis:
+Air taxi pilot reported ATC cleared them to cross a runway with an arriving aircraft on short final.
+
+Narrative:
+Flying a Gulfstream GIV; from ZZZ1 to ZZZ; upon landing on Runway XX  and departing the Runway by [Intersection] 1; we contacted GND (Ground); and they cleared us 'take [Taxiway 2] and hold sort XYR' after stopping at 2 before the Runway. GND said 'Aircraft X; immediate cross RWY XYR'. Looking at the cone off approach of Runway XYR and saw no aircraft in sight; I released the parking brake; pushed the power levels forward; and turned 'ON' all the exterior lights of the aircraft; as it was moving passing the runway markings. GND called 'Aircraft X; immediate stop'. We advised GND that we were already past the RWY marking; but he said; 'Stop; immediately stop;' and we stopped; looking to my left again. I saw a Cessna aircraft on approach with no landing or taxing lights. Difficult to see from my point of view. But it is still far off the runway. We made several calls to GND; and there was no answer. Then GND cleared us to continue taxing.

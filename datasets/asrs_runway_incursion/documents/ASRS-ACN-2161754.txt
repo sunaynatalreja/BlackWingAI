@@ -1,0 +1,5 @@
+Synopsis:
+Flight Instructor reported executing a go-around from short final on approach to U42 airport when another light aircraft taxied into position on their intended runway.
+
+Narrative:
+Upon landing at U42 for recurrence training with another pilot. Our aircraft was on short final (less than a mile) and the other plane announced 'line up an wait runway 34' on the radio. That caused us to immediate execute a go around maneuver. During the go-around we monitored the position of the other aircraft visually and the other aircraft started (without announcing) a takeoff roll. As we were climbing we asked the other aircraft what was their intentions and they stated west departure. Traffic pattern was very busy at U42 with about 6 other planes in the traffic pattern and 4 others on the ground (according to our ADS-B in). After learning the other aircraft would be turning west we decided to exit the pattern turning east and returned to ZZZ1. I believe a Tower at U42 would be crucial to avoid things like this in the future.
