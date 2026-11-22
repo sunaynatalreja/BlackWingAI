@@ -250,7 +250,6 @@ class AnalysisTraceEntry(APIModel):
     agent: str | None = None
     model: str | None = None
     status: str
-    detail: str | None = None
     retrieved_document_count: int | None = None
 
 

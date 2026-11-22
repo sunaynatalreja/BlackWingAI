@@ -391,9 +391,12 @@ async def analyze_incident(
         ],
     }
     # Hosted IIT TLS may use a trusted local CA bundle. Never disable verification.
-    ca_bundle = os.environ.get("BLACKWING_LLM_CA_CERT")
-    if ca_bundle and not os.path.isfile(ca_bundle):
-        raise ValueError("BLACKWING_LLM_CA_CERT must point to an existing trusted CA bundle")
+    ca_bundle = settings.api_ca_cert
+    if ca_bundle:
+        ca_path = Path(ca_bundle).expanduser()
+        if not ca_path.is_file():
+            raise ValueError("api.ca_cert must point to an existing trusted CA bundle")
+        ca_bundle = str(ca_path)
     with execution_audit(case_id, on_execution_event) as execution_events:
         emit("workflow_started", step="workflow_execution", detail={"phase": "initializing_model_client"})
         async with httpx.AsyncClient(timeout=settings.model_timeout_seconds,
