@@ -167,6 +167,19 @@ class RunResponse(APIModel):
 
 
 class TraceEvent(APIModel):
+    event_id: str | None = None
+    execution_id: str | None = None
+    agent_key: str | None = None
+    provider: str | None = None
+    request_id: str | None = None
+    attempt: int | None = None
+    tool: str | None = None
+    invocation_id: str | None = None
+    case_id: str | None = None
+    input_identifiers: list[str] | None = None
+    result_summary: dict[str, Any] | None = None
+    duration_ms: float | None = None
+    error: dict[str, Any] | None = None
     sequence: int
     step: str
     agent: str | None = None
@@ -218,6 +231,21 @@ class AgentOutputs(APIModel):
 
 
 class AnalysisTraceEntry(APIModel):
+    event_id: str | None = None
+    execution_id: str | None = None
+    agent_key: str | None = None
+    provider: str | None = None
+    request_id: str | None = None
+    attempt: int | None = None
+    tool: str | None = None
+    invocation_id: str | None = None
+    case_id: str | None = None
+    input_identifiers: list[str] | None = None
+    result_summary: dict[str, Any] | None = None
+    duration_ms: float | None = None
+    error: dict[str, Any] | None = None
+    detail: Any | None = None
+    timestamp: str | None = None
     step: str
     agent: str | None = None
     model: str | None = None

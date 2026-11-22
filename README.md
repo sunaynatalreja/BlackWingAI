@@ -1,27 +1,26 @@
 # BlackWing AI
 
-Runway-incursion API and local UI prototype. The repository has a versioned case API, typed request/response models, an OpenAPI document, knowledge source endpoints with chunked hybrid retrieval, eight sequential LangGraph agents, run polling, trace access, report delivery and human review recording.
+Runway-incursion API and local UI prototype with evidence-grounded agents, a bounded Planner/Executor/Critic workflow, durable SQLite history, typed reports and required human review.
+
+## Current local implementation
+
+See [local agentic delivery and validation](docs/local-agentic-delivery.md) for architecture, test evidence, modified files, limitations, IIT setup and Sunayana UI requirements. The API supports case creation, text evidence, investigation/status, seven agent outputs, provisional deterministic risk classification, hazard-linked mitigation, Critic findings, review and JSON/Markdown export.
+
+The LangGraph Planner selects execution modes. The Executor runs the existing roles, the Critic can trigger one evidence-supported targeted revision, and the workflow stops within ten counted execution steps. The report role assembles four typed sections deterministically within this budget; standalone report drafting remains available through its existing function.
+
+Cases, evidence, runs, partial/final outputs, tool traces, reviews and report references use SQLite. Interrupted runs are retained as failed with `error_code=interrupted`; recovery creates a new run rather than claiming checkpoint resumption. Run one API worker per database and hosted API key.
+
+Retrieval keeps current-case evidence separate from historical analogies, including voluntary ASRS reports. The existing FAA reference matrix supplies provisional categorical risk only when supporting inputs exist; numeric scores remain null. Human approval is required. Existing saved indexes are reused without rebuilding.
 
 ## API contract
 
-- Interactive Swagger UI: `http://127.0.0.1:8000/api/v1/docs`
-- OpenAPI JSON: `http://127.0.0.1:8000/api/v1/openapi.json`
-- Full endpoint/request/response contract: [docs/api-contract.md](docs/api-contract.md)
-- Component and runtime architecture: [docs/architecture.md](docs/architecture.md)
+- Swagger: `http://127.0.0.1:8000/api/v1/docs`
+- OpenAPI: `http://127.0.0.1:8000/api/v1/openapi.json`
+- [Endpoint contract](docs/api-contract.md)
+- [Architecture](docs/architecture.md)
+- Detailed run audit: `GET /api/v1/runs/{run_id}/audit` (additive; existing routes remain).
 
-## Current runnable slice
-
-The API supports only `runway_incursion` in v1. It lets a client create/edit a draft case, attach text evidence, ingest/list/search knowledge documents, start an analysis run, poll status, read the typed report and trace, and record/list a review. Investigation, Compliance, Risk, Mitigation, Critic, Verification and Report call the selected model provider. Similar Case Analysis uses deterministic, deduplicated source metadata so it can reliably mark a case unseen in the current corpus and report sourced historical findings without making them findings about the new case. Each role has its own response schema.
-
-Each role is maintained as an independent package under `blackwing/agents/<role>/`. A package owns its registration, schema, and prompt files; shared model-provider handling lives in `blackwing/agents/runtime.py`, and workflow order/upstream context lives in `blackwing/agents/registry.py`. The Report Agent receives the previous agents' structured work products, creates a constrained task plan, then drafts the report as four smaller section tasks before assembling a typed report. The UI presents that report first and keeps the source agent JSON in a separate details tab. Contributors can change one role's prompts and schema without editing the other agent packages. Changes to an output schema must remain compatible with the public report schema in `blackwing/schemas.py`.
-
-Prompting strategies are role-specific: the Investigation Agent uses few-shot examples to teach the model how to distinguish sourced facts, reported observations, and unknowns. Other model-backed analysis agents use zero-shot role instructions in their individual prompt files. Similar Case Analysis is deterministic code and makes no model call. The Report Agent uses task breakdown prompting: it plans four fixed report sections, then drafts each section in a focused call using relevant upstream agent outputs.
-
-Cases and user-ingested knowledge sources use an in-memory repository and are lost when the API stops. The bundled historical NTSB report is loaded at startup. Retrieval chunks documents, combines BM25 and local BGE dense embeddings with reciprocal-rank fusion, and applies an operational-term rerank. If model weights are not available yet, searches continue using BM25. No approved risk matrix is configured; risk scores remain null. The app records review decisions but does not authenticate reviewers or publish a final regulatory determination. See the architecture document before using it beyond local development.
-
-The bundled reference is a distinct Austin-Bergstrom runway-incursion case (NTSB DCA23FA149). The JFK scenario is incoming query data and is not included in the knowledge corpus. The Austin event is an analogy with different circumstances, not a source of findings about the JFK event. Source: [NTSB investigation DCA23FA149](https://www.ntsb.gov/investigations/Pages/DCA23FA149.aspx).
-
-The model provider is selected through `BLACKWING_LLM_PROVIDER`: `ollama` uses the local Ollama chat API, while `openai_compatible` uses an OpenAI-compatible hosted chat completions endpoint with a bearer API key. Agent packages and workflow stay the same. The API adapter requests JSON object output and validates every result against the role's Pydantic schema. Providers must support the OpenAI-compatible Chat Completions request format and JSON mode.
+Local Ollama and OpenAI-compatible IIT-hosted Qwen3-8B share the same agent code. The hosted gateway uses exact cached-tokenizer preflight, bounded output, serial paced requests and bounded transient retries. Credentials resolve from environment variables. Hosted testing remains unverified. The integrated Streamlit frontend has passed mocked FastAPI integration tests and a running-app smoke; see [Streamlit integration and launch instructions](docs/streamlit-ui-integration.md).
 
 ## Requirements
 
@@ -31,7 +30,7 @@ The model provider is selected through `BLACKWING_LLM_PROVIDER`: `ollama` uses t
 
 ## Configuration
 
-Application settings are declared in `config/blackwing.properties` and resolved from environment variables. The BGE model property has a non-secret default that can be overridden by `BLACKWING_RAG_EMBEDDING_MODEL`. No credentials are stored in code or in the properties file. Choose **one** of the configurations below. Run the selected block in every terminal that starts the API or Streamlit UI because environment variables are local to each terminal. In hosted mode, the key is read only from `BLACKWING_LLM_API_KEY`.
+Application settings are declared in `config/blackwing.properties` and resolved from environment variables. The BGE model property has a non-secret default that can be overridden by `BLACKWING_RAG_EMBEDDING_MODEL`. No credentials are stored in code or in the properties file. Choose **one** of the configurations below. Run provider configuration only in the FastAPI terminal. The integrated Streamlit UI needs only BLACKWING_UI_API_URL and an optional timeout; it does not need model credentials. In hosted mode, the key is read only from `BLACKWING_LLM_API_KEY`.
 
 ### Option A: local Ollama
 
@@ -41,7 +40,7 @@ Pull the model once:
 ollama pull qwen3:8b
 ```
 
-From the repository root, export these variables in the terminal used to start the API. Repeat the same exports in the UI terminal:
+From the repository root, export these variables in the terminal used to start the API. The frontend uses only the API URL:
 
 ```bash
 export BLACKWING_CONFIG="$PWD/config/blackwing.properties"
@@ -61,7 +60,7 @@ export BLACKWING_UI_TIMEOUT_SECONDS="2400"
 
 ### Option B: hosted OpenAI-compatible API
 
-Use this instead of Option A when connecting to a hosted provider. Replace the three angle-bracket values with your provider's endpoint, exact model ID, and API key. Do not commit the key or place it in `config/blackwing.properties`. Run this full block in the API terminal and repeat it in the UI terminal:
+Use this instead of Option A when connecting to a hosted provider. Replace the three angle-bracket values with your provider's endpoint, exact model ID, and API key. Do not commit the key or place it in `config/blackwing.properties`. Run this full block in the API terminal only:
 
 ```bash
 export BLACKWING_CONFIG="$PWD/config/blackwing.properties"
@@ -87,7 +86,7 @@ If the app says `BLACKWING_LLM_PROVIDER is not set` or reports an invalid provid
 export BLACKWING_LLM_PROVIDER="ollama"
 ```
 
-For the hosted API setup, use `export BLACKWING_LLM_PROVIDER="openai_compatible"`. Restart the affected process after exporting the variable, and repeat the export in the other terminal because the API and UI have separate environments.
+For the hosted API setup, use `export BLACKWING_LLM_PROVIDER="openai_compatible"`. Restart the backend after exporting the variable. The frontend does not select a model provider.
 
 ## Install and run
 
@@ -101,7 +100,7 @@ pip install -e .
 uvicorn blackwing.api:app --host "$BLACKWING_API_HOST" --port "$BLACKWING_API_PORT"
 ```
 
-The API starts on `http://127.0.0.1:8000`. Open a second terminal at the repository root, repeat the **same selected provider configuration block** there, activate `.venv`, then run:
+The API starts on `http://127.0.0.1:8000`. Open a second terminal at the repository root, set `BLACKWING_UI_API_URL` to the backend address, activate `.venv`, then run:
 
 `BLACKWING_RAG_EMBEDDING_MODEL` is optional: the properties file defaults it to `BAAI/bge-small-en-v1.5`. Set the variable only to override that model.
 
@@ -130,3 +129,25 @@ The vertical-slice test uses a mocked model runner. It exercises the runway-incu
 - The system does not assign blame, determine legal liability, issue operational instructions, or make binding regulatory decisions.
 - Candidate retrieval is not proof of source authenticity or regulatory applicability.
 - A qualified human must verify sources, applicability, findings and recommendations.
+
+
+## Integrated Streamlit UI (PowerShell)
+
+Keep the configured FastAPI backend running with one worker. From the repository root in a second terminal:
+
+```powershell
+$env:BLACKWING_UI_API_URL = "http://127.0.0.1:8000"
+.\.venv\Scripts\python.exe -m streamlit run .\blackwing\cloud\streamlit_app.py --server.address 127.0.0.1 --server.port 8501
+```
+
+Open `http://127.0.0.1:8501`. This UI uses backend SQLite history, backend categorical risk and a separate report-quality checklist. It never opens a session case database or calls a model directly. See [the UI delivery report](docs/streamlit-ui-integration.md) for file changes, source-branch comparison, endpoint usage, 128 passing tests and remaining live-testing limits.
+
+
+## Live investigation diagnostics
+
+Agent-start, physical model-wait, completion/failure and restart-interruption events are now persisted incrementally and exposed through run progress, trace and audit. Streamlit explains report HTTP 409 by running/failed/interrupted state. See [the diagnostics and recovery guide](docs/live-diagnostics.md) for event meanings, sanitized errors, server-failure boundaries and 141 passing tests. The historical JFK process-stop cause remains undetermined; no live model replay was performed.
+
+
+## Independent completeness results
+
+The integrated v2 rubric separately reports Prompt Completeness (supplied intake) and Report Completeness (investigation documentation), with weighted checks and disclosed integrity ceilings. Aviation risk remains in its independent backend-calculated view, and Sunayana's original evidence checklist is retained. See [the scorer integration and saved-report evaluation](docs/quality-scorer-v2.md): 158 regression tests passed; existing JFK/Austin reports scored 84/58 for report completeness without model calls or report changes.

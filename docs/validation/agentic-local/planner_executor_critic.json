@@ -1,0 +1,331 @@
+[
+  {
+    "scenario": "successful_targeted_correction",
+    "outcome": {
+      "execution_steps": 10,
+      "correction_attempts": 1,
+      "unresolved_issues": 1
+    },
+    "agent_calls": [
+      "investigation",
+      "risk",
+      "mitigation",
+      "critic",
+      "mitigation",
+      "verification"
+    ],
+    "events": [
+      {
+        "step": "planner",
+        "status": "complete",
+        "detail": {
+          "task_modes": {
+            "investigation": "model_with_grounding",
+            "similar_case": "deterministic_tool",
+            "compliance": "unassessed",
+            "risk": "model_then_reference_tool_per_hazard",
+            "mitigation": "model_with_hazard_links",
+            "critic": "model_and_deterministic_audit",
+            "verification": "model_and_deterministic_checks",
+            "report": "deterministic_assembly"
+          },
+          "tool_requirements": {
+            "retrieve_evidence": "preflight retrieval when requested; use supplied evidence otherwise",
+            "find_similar_incidents": "compare supplied historical records, including explicit no-match results",
+            "assess_reference_risk": "execute only for returned hazards after citation validation"
+          },
+          "tasks": [
+            "investigation",
+            "similar_case",
+            "compliance",
+            "risk",
+            "mitigation",
+            "critic",
+            "verification",
+            "report"
+          ],
+          "tools": [
+            "retrieve_evidence",
+            "find_similar_incidents",
+            "assess_reference_risk"
+          ],
+          "decisions": {
+            "investigation": "ground supplied evidence; preserve unknowns",
+            "similar_case": "compare historical records separately",
+            "compliance": "unassessed: authoritative rules missing",
+            "risk": "score only supported severity and likelihood",
+            "correction": "one evidence-gated target; unresolved issues require human review"
+          },
+          "source_counts": {
+            "investigation": 1,
+            "similar_case": 1,
+            "compliance": 0,
+            "risk": 1
+          },
+          "max_execution_steps": 10,
+          "max_corrections": 1
+        }
+      },
+      {
+        "step": "correction_decision",
+        "status": "target_selected",
+        "detail": {
+          "target": "mitigation",
+          "reason": "existing evidence supports one correction"
+        }
+      },
+      {
+        "step": "targeted_correction",
+        "status": "started",
+        "detail": {
+          "target": "mitigation",
+          "issues": [
+            {
+              "issue_type": "regulatory_context_gap",
+              "severity": "review",
+              "affected_output": "compliance",
+              "description": "Regulatory applicability was not assessed.",
+              "suggested_correction": "Retrieve source versions and verify jurisdiction and incident date; do not allege violations."
+            },
+            {
+              "issue_type": "no_grounded_mitigations",
+              "severity": "review",
+              "affected_output": "mitigation",
+              "description": "No evidence-linked mitigation option is ready for review.",
+              "suggested_correction": "Collect hazard/barrier information and propose traceable options."
+            }
+          ]
+        }
+      },
+      {
+        "step": "correction_outcome",
+        "status": "corrected",
+        "detail": {
+          "target": "mitigation",
+          "resolved_issues": [
+            {
+              "issue_type": "no_grounded_mitigations",
+              "severity": "review",
+              "affected_output": "mitigation",
+              "description": "No evidence-linked mitigation option is ready for review.",
+              "suggested_correction": "Collect hazard/barrier information and propose traceable options."
+            }
+          ],
+          "human_review_required": true
+        }
+      },
+      {
+        "step": "investigation_outcome",
+        "status": "requires_human_review",
+        "detail": {
+          "execution_steps": 10,
+          "correction_attempts": 1,
+          "unresolved_issues": 1
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "impossible_correction",
+    "outcome": {
+      "execution_steps": 9,
+      "correction_attempts": 0,
+      "unresolved_issues": 4
+    },
+    "agent_calls": [
+      "investigation",
+      "risk",
+      "mitigation",
+      "critic",
+      "verification"
+    ],
+    "events": [
+      {
+        "step": "planner",
+        "status": "complete",
+        "detail": {
+          "task_modes": {
+            "investigation": "model_with_grounding",
+            "similar_case": "deterministic_tool",
+            "compliance": "unassessed",
+            "risk": "model_then_reference_tool_per_hazard",
+            "mitigation": "model_with_hazard_links",
+            "critic": "model_and_deterministic_audit",
+            "verification": "model_and_deterministic_checks",
+            "report": "deterministic_assembly"
+          },
+          "tool_requirements": {
+            "retrieve_evidence": "preflight retrieval when requested; use supplied evidence otherwise",
+            "find_similar_incidents": "compare supplied historical records, including explicit no-match results",
+            "assess_reference_risk": "execute only for returned hazards after citation validation"
+          },
+          "tasks": [
+            "investigation",
+            "similar_case",
+            "compliance",
+            "risk",
+            "mitigation",
+            "critic",
+            "verification",
+            "report"
+          ],
+          "tools": [
+            "retrieve_evidence",
+            "find_similar_incidents",
+            "assess_reference_risk"
+          ],
+          "decisions": {
+            "investigation": "ground supplied evidence; preserve unknowns",
+            "similar_case": "compare historical records separately",
+            "compliance": "unassessed: authoritative rules missing",
+            "risk": "score only supported severity and likelihood",
+            "correction": "one evidence-gated target; unresolved issues require human review"
+          },
+          "source_counts": {
+            "investigation": 0,
+            "similar_case": 1,
+            "compliance": 0,
+            "risk": 0
+          },
+          "max_execution_steps": 10,
+          "max_corrections": 1
+        }
+      },
+      {
+        "step": "correction_decision",
+        "status": "human_review",
+        "detail": {
+          "target": null,
+          "reason": "no supported correctable issue; retain unresolved findings"
+        }
+      },
+      {
+        "step": "investigation_outcome",
+        "status": "requires_human_review",
+        "detail": {
+          "execution_steps": 9,
+          "correction_attempts": 0,
+          "unresolved_issues": 4
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "failed_targeted_correction",
+    "outcome": {
+      "execution_steps": 10,
+      "correction_attempts": 1,
+      "unresolved_issues": 2
+    },
+    "agent_calls": [
+      "investigation",
+      "risk",
+      "mitigation",
+      "critic",
+      "mitigation",
+      "verification"
+    ],
+    "events": [
+      {
+        "step": "planner",
+        "status": "complete",
+        "detail": {
+          "task_modes": {
+            "investigation": "model_with_grounding",
+            "similar_case": "deterministic_tool",
+            "compliance": "unassessed",
+            "risk": "model_then_reference_tool_per_hazard",
+            "mitigation": "model_with_hazard_links",
+            "critic": "model_and_deterministic_audit",
+            "verification": "model_and_deterministic_checks",
+            "report": "deterministic_assembly"
+          },
+          "tool_requirements": {
+            "retrieve_evidence": "preflight retrieval when requested; use supplied evidence otherwise",
+            "find_similar_incidents": "compare supplied historical records, including explicit no-match results",
+            "assess_reference_risk": "execute only for returned hazards after citation validation"
+          },
+          "tasks": [
+            "investigation",
+            "similar_case",
+            "compliance",
+            "risk",
+            "mitigation",
+            "critic",
+            "verification",
+            "report"
+          ],
+          "tools": [
+            "retrieve_evidence",
+            "find_similar_incidents",
+            "assess_reference_risk"
+          ],
+          "decisions": {
+            "investigation": "ground supplied evidence; preserve unknowns",
+            "similar_case": "compare historical records separately",
+            "compliance": "unassessed: authoritative rules missing",
+            "risk": "score only supported severity and likelihood",
+            "correction": "one evidence-gated target; unresolved issues require human review"
+          },
+          "source_counts": {
+            "investigation": 1,
+            "similar_case": 1,
+            "compliance": 0,
+            "risk": 1
+          },
+          "max_execution_steps": 10,
+          "max_corrections": 1
+        }
+      },
+      {
+        "step": "correction_decision",
+        "status": "target_selected",
+        "detail": {
+          "target": "mitigation",
+          "reason": "existing evidence supports one correction"
+        }
+      },
+      {
+        "step": "targeted_correction",
+        "status": "started",
+        "detail": {
+          "target": "mitigation",
+          "issues": [
+            {
+              "issue_type": "regulatory_context_gap",
+              "severity": "review",
+              "affected_output": "compliance",
+              "description": "Regulatory applicability was not assessed.",
+              "suggested_correction": "Retrieve source versions and verify jurisdiction and incident date; do not allege violations."
+            },
+            {
+              "issue_type": "no_grounded_mitigations",
+              "severity": "review",
+              "affected_output": "mitigation",
+              "description": "No evidence-linked mitigation option is ready for review.",
+              "suggested_correction": "Collect hazard/barrier information and propose traceable options."
+            }
+          ]
+        }
+      },
+      {
+        "step": "correction_outcome",
+        "status": "failed_requires_human_review",
+        "detail": {
+          "target": "mitigation",
+          "resolved_issues": [],
+          "human_review_required": true
+        }
+      },
+      {
+        "step": "investigation_outcome",
+        "status": "requires_human_review",
+        "detail": {
+          "execution_steps": 10,
+          "correction_attempts": 1,
+          "unresolved_issues": 2
+        }
+      }
+    ]
+  }
+]

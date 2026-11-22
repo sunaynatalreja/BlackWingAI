@@ -200,8 +200,20 @@ async def create_report(
     narrative: str,
     evidence: list[dict[str, Any]],
     prior_outputs: Mapping[str, dict[str, Any]],
+    deterministic: bool = False,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """Plan and draft report sections as small, independently validated tasks."""
+    if deterministic:
+        # Bounded investigation: format existing outputs without five extra model tasks.
+        sections = []
+        for task_id in REPORT_TASK_ORDER:
+            section = ReportSection.model_validate(_fallback_section(task_id, _task_source_outputs(task_id, prior_outputs))).model_dump(mode="json")
+            section["title"] = _TASKS[task_id]["title"]
+            sections.append(section)
+        sections = _ground_sections(sections, {"agent_outputs": prior_outputs, "retrieved_evidence": evidence})
+        output = ReportAgentOutput(executive_summary=sections[0]["summary"][:2200], sections=sections,
+                                   human_approval_required=True).model_dump(mode="json")
+        return output, [{"step": "report_assembly", "status": "deterministic_fallback"}]
     planner = AgentSpec(
         key="report_planner",
         name="Report Task Planner",

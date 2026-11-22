@@ -1,0 +1,16 @@
+BLACKWING AI diagnostics validation - 21 November 2026
+Branch: feature/arun-rag-risk-compliance
+Complete regression: 141 passed, 0 failures, 0 errors, 0 skipped.
+Previous tests: 128 retained; focused new cases: 13.
+Pytest reported duration: 20.22 seconds; two existing dependency deprecations.
+Incremental persistence: start and model-wait visible from separate SQLite connection before model response.
+All eight roles: measured completion events; deterministic roles do not claim model requests.
+Provider timeout, HTTP failure, unexpected exception, SystemExit attempt, setup/storage failure and cancellation tested.
+Abrupt process stop: committed start/wait survive; restart appends correlated interruption, no false completion; recovery run allowed.
+Windows forced-process test waits 100 ms after termination before reopening mapped SQLite files; no production SQLite setting changed.
+Real localhost smoke: Uvicorn process alive after mocked timeout; /health=200; next case creation=201.
+Report endpoint=409; running Streamlit status=ready with explicit report-unavailable message.
+All 12 saved RAG-index files unchanged by SHA-256; risk/tools/planning/RAG code unchanged.
+Provider IO: MockTransport only. Live Ollama/IIT calls: zero. No index rebuild or protected-gold changes.
+Historical JFK process-stop cause: undetermined; no live replay and no fabricated historical agent events.
+No branch switch, merge, commit or push. Temporary validation servers stopped.

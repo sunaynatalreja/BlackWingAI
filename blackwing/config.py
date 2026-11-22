@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
@@ -45,7 +45,7 @@ class Settings:
     ollama_max_output_tokens: int
     api_base_url: str
     api_model: str
-    api_key: str
+    api_key: str = field(repr=False)
     api_timeout_seconds: float
     api_temperature: float
     api_max_output_tokens: int

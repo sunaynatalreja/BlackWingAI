@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 import json
+import asyncio
 import logging
 import os
 from typing import Any, Awaitable, Callable
@@ -32,6 +33,8 @@ from blackwing.schemas import (
 from blackwing.agents.base import AgentExecutionError
 from blackwing.service import analyze_incident
 from blackwing.rag.retriever import retriever
+from blackwing.tools import retrieve_evidence, tool_audit
+from blackwing.diagnostics import lifecycle_event, safe_error
 
 AnalysisRunner = Callable[..., Awaitable[dict[str, Any]]]
 logger = logging.getLogger("blackwing.runs")
@@ -95,73 +98,122 @@ async def _execute_run(
     runner: AnalysisRunner,
     use_agent_retrieval: bool = True,
 ) -> None:
+    """Contain background failures; cooperative server shutdown still propagates."""
+    try:
+        await _execute_run_body(run_id, case, retrieved, settings, repo, runner, use_agent_retrieval)
+    except asyncio.CancelledError as exc:
+        _record_run_failure(run_id, case, repo, exc, interrupted=True)
+        raise
+    except (Exception, SystemExit) as exc:
+        _record_run_failure(run_id, case, repo, exc)
+
+
+def _record_run_failure(run_id, case, repo, exc, *, interrupted=False):
+    diagnostic = safe_error(exc, "interrupted" if interrupted else None)
+    logger.error("Background investigation stopped; run=%s code=%s error_type=%s", run_id, diagnostic["code"], diagnostic["type"])
+    event = lifecycle_event("workflow_execution", "execution_interrupted" if interrupted else "execution_failed",
+                            case_id=case.get("case_id"), error=diagnostic)
+    # Error handling must not become a second unhandled background exception.
+    # Disk/storage failures may prevent durability; log their types explicitly.
+    operations = [("append_failure_event", lambda: getattr(repo, "append_event", lambda *_: None)(run_id, event))]
+    operations.extend([
+        ("patch_failed_run", lambda: repo.patch_run(run_id, {"status": "failed", "error_code": diagnostic["code"],
+            "error": diagnostic["message"], "completed_at": datetime.now(timezone.utc)})),
+        ("update_case", lambda: repo.update_case(case["case_id"], {"status": "analysis_failed"})),
+    ])
+    for operation, persist in operations:
+        try:
+            persist()
+        except Exception as storage_exc:
+            logger.error("Could not persist background failure; run=%s operation=%s error_type=%s", run_id, operation, type(storage_exc).__name__)
+
+
+async def _execute_run_body(
+    run_id: str,
+    case: dict[str, Any],
+    retrieved: list[dict[str, Any]],
+    settings: Settings,
+    repo: MemoryRepository,
+    runner: AnalysisRunner,
+    use_agent_retrieval: bool = True,
+) -> None:
     repo.patch_run(run_id, {"status": "running", "started_at": datetime.now(timezone.utc)})
     evidence = [*case.get("evidence", []), *retrieved]
-    try:
-        agent_evidence = None
-        if use_agent_retrieval and os.getenv("BLACKWING_AGENT_RAG", "0") == "1":
-            # Keep integration outside agent packages and UI. No LLM calls here.
-            from blackwing.rag.agent_router import build_agent_packets
-            agent_evidence = build_agent_packets(
-                retriever=retriever, narrative=case["narrative"],
-                case_id=case.get("source_incident_id") or case["case_id"],
-                jurisdiction=case.get("jurisdiction"), incident_date=str(case.get("incident_date"))
-                    if case.get("incident_date") else None,
-                documents=repo.list_documents(), uploaded_evidence=case.get("evidence", []),
-                embedding_model=settings.rag_embedding_model,
-                method=os.getenv("BLACKWING_AGENT_RAG_METHOD", "hybrid").strip().lower(),
-                limit_per_agent=3,
-            )
-        result = await runner(
-            case["narrative"],
-            settings,
-            case_id=case["case_id"],
-            source_incident_id=case.get("source_incident_id"),
-            evidence=evidence,
-            retrieval_count=len(retrieved),
-            jurisdiction=case.get("jurisdiction"),
-            incident_date=str(case.get("incident_date")) if case.get("incident_date") else None,
-            **({"agent_evidence": agent_evidence} if agent_evidence is not None else {}),
-        )
-        events = []
-        for sequence, event in enumerate(result.get("trace", []), 1):
-            events.append({
-                "sequence": sequence,
-                "step": event.get("step", "unknown"),
-                "agent": event.get("agent"),
-                "status": event.get("status", "complete"),
-                "model": event.get("model", result.get("model")),
-                "detail": str(event.get("detail") or event.get("retrieved_document_count")) if event.get("detail") or event.get("retrieved_document_count") is not None else None,
-                "timestamp": datetime.now(timezone.utc),
-            })
-        repo.patch_run(run_id, {
-            "status": "completed",
-            "model": result.get("model", settings.model_name),
-            "progress": [{"step": event["step"], "status": event["status"]} for event in result.get("trace", [])],
-            "trace": events,
-            "result": result,
-            "completed_at": datetime.now(timezone.utc),
+    stored = repo.get_run(run_id) if hasattr(repo, "get_run") else {}
+    invocation_events = list((stored or {}).get("preflight_trace", []))
+    def record_event(event):
+        invocation_events.append(event)
+        if hasattr(repo, "append_event"):
+            repo.append_event(run_id, event)
+        else:
+            repo.patch_run(run_id, {"audit_events": list(invocation_events)})
+    def checkpoint(state):
+        repo.patch_run(run_id, {"partial_outputs": state.get("outputs", {}), "plan": state.get("plan"),
+                               "execution_steps": state.get("execution_steps", 0),
+                               "progress": [{"step": e["step"], "status": e["status"]} for e in state.get("trace", [])] + [e for e in invocation_events if e.get("event_id")]})
+        record_event({"step": "state_update", "status": "complete", "detail": state.get("trace", [])[-1:]})
+    record_event(lifecycle_event("workflow_execution", "execution_started", case_id=case["case_id"]))
+    agent_evidence = None
+    if use_agent_retrieval and os.getenv("BLACKWING_AGENT_RAG", "0") == "1":
+        # Keep integration outside agent packages and UI. No LLM calls here.
+        from blackwing.rag.agent_router import build_agent_packets
+        try:
+            with tool_audit(case["case_id"], record_event):
+                agent_evidence = retrieve_evidence(build_agent_packets, input_identifiers=[case["case_id"]],
+                    retriever=retriever, narrative=case["narrative"],
+                    case_id=case.get("source_incident_id") or case["case_id"],
+                    jurisdiction=case.get("jurisdiction"), incident_date=str(case.get("incident_date"))
+                        if case.get("incident_date") else None,
+                    documents=repo.list_documents(), uploaded_evidence=case.get("evidence", []),
+                    embedding_model=settings.rag_embedding_model,
+                    method=os.getenv("BLACKWING_AGENT_RAG_METHOD", "hybrid").strip().lower(),
+                    limit_per_agent=3,
+                )
+        except Exception:
+            from blackwing.rag.agent_router import AGENT_ROLES, _case_uploads
+            uploads = _case_uploads(case.get("evidence", []), case.get("source_incident_id") or case["case_id"])
+            agent_evidence = {role: ([] if role == "similar_case" else uploads) for role in AGENT_ROLES}
+    record_event(lifecycle_event("workflow_execution", "invoking_workflow", case_id=case["case_id"]))
+    result = await runner(
+        case["narrative"],
+        settings,
+        case_id=case["case_id"],
+        source_incident_id=case.get("source_incident_id"),
+        evidence=evidence,
+        retrieval_count=len(retrieved),
+        jurisdiction=case.get("jurisdiction"),
+        incident_date=str(case.get("incident_date")) if case.get("incident_date") else None,
+        **({"on_update": checkpoint, "on_tool_event": record_event, "on_execution_event": record_event} if runner is analyze_incident else {}),
+        **({"agent_evidence": agent_evidence} if agent_evidence is not None else {}),
+    )
+    existing_trace = result.get("trace", [])
+    seen = {e.get("invocation_id") for e in existing_trace if e.get("invocation_id")}
+    extra_tools = [e for e in invocation_events
+                   if e.get("tool") and e.get("invocation_id") not in seen]
+    result["trace"] = [*extra_tools, *existing_trace]
+    events = []
+    for sequence, event in enumerate(result.get("trace", []), 1):
+        events.append({
+            **{key: event[key] for key in ("tool", "invocation_id", "case_id", "input_identifiers", "result_summary", "duration_ms", "error", "event_id", "execution_id", "agent_key", "provider", "request_id", "attempt") if key in event},
+            "sequence": sequence,
+            "step": event.get("step", "unknown"),
+            "agent": event.get("agent"),
+            "status": event.get("status", "complete"),
+            "model": event.get("model", result.get("model")),
+            "detail": str(event.get("detail") or event.get("retrieved_document_count")) if event.get("detail") or event.get("retrieved_document_count") is not None else None,
+            "timestamp": datetime.fromisoformat(event["timestamp"]) if event.get("timestamp") else datetime.now(timezone.utc),
         })
-        repo.update_case(case["case_id"], {"status": "analysis_complete"})
-    except AgentExecutionError as exc:
-        logger.warning("Analysis run %s failed at agent %s with code %s", run_id, exc.agent, exc.code)
-        repo.patch_run(run_id, {
-            "status": "failed",
-            "error_code": exc.code,
-            "error": f"{exc.agent} agent failed: {exc.public_message}",
-            "progress": [{"step": exc.agent, "status": "failed"}],
-            "completed_at": datetime.now(timezone.utc),
-        })
-        repo.update_case(case["case_id"], {"status": "analysis_failed"})
-    except Exception as exc:
-        logger.error("Analysis run %s failed with unexpected error type %s", run_id, type(exc).__name__)
-        repo.patch_run(run_id, {
-            "status": "failed",
-            "error_code": "internal_agent_error",
-            "error": "Analysis failed because of an internal processing error. Check the local service log for the run ID.",
-            "completed_at": datetime.now(timezone.utc),
-        })
-        repo.update_case(case["case_id"], {"status": "analysis_failed"})
+    repo.patch_run(run_id, {
+        "status": "completed",
+        "model": result.get("model", settings.model_name),
+        "progress": [{"step": event["step"], "status": event["status"]} for event in result.get("trace", [])],
+        "trace": events,
+        "result": result,
+        "report_references": {"run_id": run_id, "json": f"/api/v1/cases/{case['case_id']}/report/export?format=json", "markdown": f"/api/v1/cases/{case['case_id']}/report/export?format=md"},
+        "completed_at": datetime.now(timezone.utc),
+    })
+    repo.update_case(case["case_id"], {"status": "analysis_complete"})
+    record_event(lifecycle_event("workflow_execution", "execution_completed", case_id=case["case_id"]))
 
 
 @app.get("/health", tags=["system"])
@@ -182,7 +234,7 @@ async def capabilities() -> dict[str, Any]:
             "keyword_retrieval": True,
             "hybrid_retrieval": True,
             "seeded_reference_cases": True,
-            "risk_matrix_scoring": False,
+            "risk_matrix_scoring": True,
             "human_review_recording": True,
         },
     }
@@ -270,17 +322,26 @@ async def create_analysis_run(
     if case["status"] == "analysis_running":
         raise HTTPException(status_code=409, detail="An analysis run is already active for this case")
     query = " ".join(part for part in [case["narrative"], case.get("location"), "runway incursion"] if part)
-    retrieved = retriever.search(
-        query,
-        repo.list_documents(),
-        embedding_model=settings.rag_embedding_model,
-        document_types=["incident_report", "regulation", "procedure", "guidance"],
-        jurisdiction=case.get("jurisdiction"),
-        incident_date=str(case.get("incident_date")) if case.get("incident_date") else None,
-        limit=5,
-    )["results"] if request.include_retrieval else []
     run_id = str(uuid4())
     run = repo.create_run(run_id, case_id, request.workflow, settings.model_name)
+    preflight = []
+    def record(event):
+        preflight.append(event)
+        repo.append_event(run_id, event)
+    with tool_audit(case_id, record):
+        try:
+            retrieved = retrieve_evidence(
+                retriever.search, input_identifiers=[case.get("source_incident_id") or case_id],
+                query=query, documents=repo.list_documents(), embedding_model=settings.rag_embedding_model,
+                document_types=["incident_report", "regulation", "procedure", "guidance"],
+                jurisdiction=case.get("jurisdiction"),
+                incident_date=str(case.get("incident_date")) if case.get("incident_date") else None,
+                limit=5,
+            )["results"] if request.include_retrieval else []
+        except Exception:
+            # Continue with uploads, disclose retrieval failure, never invent sources.
+            retrieved = []
+    repo.patch_run(run_id, {"preflight_trace": preflight})
     background.add_task(_execute_run, run_id, case, retrieved, settings, repo, runner, request.include_retrieval)
     return _run_response(run)
 
@@ -304,7 +365,20 @@ async def get_trace(run_id: str, repo: MemoryRepository = Depends(get_repository
     run = repo.get_run(run_id)
     if run is None:
         raise HTTPException(status_code=404, detail="Run not found")
-    return TraceResponse(run_id=run_id, events=run.get("trace", []))
+    events = list(run.get("trace", []))
+    known_events = {e.get("event_id") for e in events if e.get("event_id")}
+    known_tools = {e.get("invocation_id") for e in events if e.get("invocation_id")}
+    for event in run.get("audit_events", []):
+        if event.get("event_id") and event["event_id"] not in known_events or event.get("tool") and event.get("invocation_id") not in known_tools:
+            copy = dict(event)
+            if copy.get("detail") is not None and not isinstance(copy["detail"], str):
+                copy["detail"] = json.dumps(copy["detail"], ensure_ascii=False)
+            events.append(copy)
+    def event_time(event):
+        value = event.get("timestamp") or run["created_at"]
+        return datetime.fromisoformat(value) if isinstance(value, str) else value
+    events.sort(key=event_time)
+    return TraceResponse(run_id=run_id, events=[{**event, "sequence": index} for index, event in enumerate(events, 1)])
 
 
 @app.get("/api/v1/cases/{case_id}/report", response_model=ReportResponse, tags=["reports"])
@@ -313,7 +387,16 @@ async def get_report(case_id: str, repo: MemoryRepository = Depends(get_reposito
     runs = repo.list_case_runs(case_id)
     completed = [run for run in runs if run["status"] == "completed"]
     if not completed:
-        raise HTTPException(status_code=409, detail="No completed analysis report exists for this case")
+        latest = max(runs, key=lambda run: run["created_at"]) if runs else None
+        if latest and latest.get("error_code") == "interrupted":
+            detail = "Report unavailable: execution was interrupted. Trace history is preserved; start a new recovery run."
+        elif latest and latest["status"] in {"queued", "running"}:
+            detail = "Report unavailable: investigation is still running. Refresh run status and inspect the execution trace."
+        elif latest and latest["status"] == "failed":
+            detail = "Report unavailable: investigation failed. Inspect the execution trace before starting a new run."
+        else:
+            detail = "Report unavailable: no investigation has completed for this case."
+        raise HTTPException(status_code=409, detail=detail)
     latest = max(completed, key=lambda run: run["created_at"])
     return ReportResponse.model_validate({
         "case_id": case_id,
@@ -444,3 +527,13 @@ async def search_knowledge(
         retrieval_method=search_result["retrieval_method"],
         limitations=search_result["limitations"],
     )
+
+
+@app.get("/api/v1/runs/{run_id}/audit", tags=["analysis"])
+async def get_run_audit(run_id: str, repo: MemoryRepository = Depends(get_repository)) -> dict[str, Any]:
+    run = repo.get_run(run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    return {"run_id": run_id, "events": run.get("audit_events", []), "plan": run.get("plan"),
+            "partial_outputs": run.get("partial_outputs", {}), "execution_steps": run.get("execution_steps", 0),
+            "execution_state": run.get("execution_state"), "resumable": False, "recovery": "Create a new run after interruption; prior run history is retained."}

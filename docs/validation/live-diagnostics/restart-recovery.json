@@ -1,0 +1,152 @@
+{
+  "scenario": "synthetic separate-process termination during MockTransport await",
+  "status": "failed",
+  "error_code": "interrupted",
+  "events": [
+    {
+      "step": "workflow_execution",
+      "status": "execution_started",
+      "case_id": "case",
+      "event_id": "87e8019c-55b2-430c-9f6c-4f55a96de2a0",
+      "timestamp": "2026-11-21T11:55:19.215385+00:00"
+    },
+    {
+      "step": "workflow_execution",
+      "status": "invoking_workflow",
+      "case_id": "case",
+      "event_id": "2e5f58e5-6350-406e-b8b5-454f6907895c",
+      "timestamp": "2026-11-21T11:55:19.216031+00:00"
+    },
+    {
+      "step": "workflow_execution",
+      "status": "workflow_started",
+      "case_id": "case",
+      "event_id": "799cd7b5-5fab-48d8-960d-3ccef20d52be",
+      "timestamp": "2026-11-21T11:55:19.216666+00:00",
+      "detail": {
+        "phase": "initializing_model_client"
+      }
+    },
+    {
+      "step": "workflow_execution",
+      "status": "workflow_ready",
+      "case_id": "case",
+      "event_id": "53264310-4e7d-42ae-bcf3-6c12cdc5a20f",
+      "timestamp": "2026-11-21T11:55:19.233857+00:00"
+    },
+    {
+      "step": "state_update",
+      "status": "complete",
+      "detail": [
+        {
+          "step": "planner",
+          "status": "complete",
+          "detail": {
+            "task_modes": {
+              "investigation": "model_with_grounding",
+              "similar_case": "deterministic_tool",
+              "compliance": "unassessed",
+              "risk": "model_then_reference_tool_per_hazard",
+              "mitigation": "model_with_hazard_links",
+              "critic": "model_and_deterministic_audit",
+              "verification": "model_and_deterministic_checks",
+              "report": "deterministic_assembly"
+            },
+            "tool_requirements": {
+              "retrieve_evidence": "preflight retrieval when requested; use supplied evidence otherwise",
+              "find_similar_incidents": "compare supplied historical records, including explicit no-match results",
+              "assess_reference_risk": "execute only for returned hazards after citation validation"
+            },
+            "tasks": [
+              "investigation",
+              "similar_case",
+              "compliance",
+              "risk",
+              "mitigation",
+              "critic",
+              "verification",
+              "report"
+            ],
+            "tools": [
+              "retrieve_evidence",
+              "find_similar_incidents",
+              "assess_reference_risk"
+            ],
+            "decisions": {
+              "investigation": "ground supplied evidence; preserve unknowns",
+              "similar_case": "compare historical records separately",
+              "compliance": "unassessed: authoritative rules missing",
+              "risk": "score only supported severity and likelihood",
+              "correction": "one evidence-gated target; unresolved issues require human review"
+            },
+            "source_counts": {
+              "investigation": 0,
+              "similar_case": 0,
+              "compliance": 0,
+              "risk": 0
+            },
+            "max_execution_steps": 10,
+            "max_corrections": 1
+          }
+        }
+      ]
+    },
+    {
+      "step": "agent_execution",
+      "status": "agent_started",
+      "case_id": "case",
+      "event_id": "230814bb-b839-4078-873e-ce6250a044ee",
+      "timestamp": "2026-11-21T11:55:19.239789+00:00",
+      "agent_key": "investigation",
+      "agent": "Investigation Agent",
+      "execution_id": "661ac92c-4d81-4e30-91be-1e495df2c425",
+      "provider": "ollama",
+      "model": "qwen3:8b",
+      "detail": {
+        "execution_mode": "model_with_grounding"
+      },
+      "duration_ms": 0
+    },
+    {
+      "step": "agent_execution",
+      "status": "waiting_for_model_response",
+      "case_id": "case",
+      "event_id": "3461bc43-eb21-4441-b4dd-2679d414a9cc",
+      "timestamp": "2026-11-21T11:55:19.242274+00:00",
+      "agent_key": "investigation",
+      "agent": "Investigation Agent",
+      "execution_id": "661ac92c-4d81-4e30-91be-1e495df2c425",
+      "provider": "ollama",
+      "model": "qwen3:8b",
+      "detail": {
+        "execution_mode": "model_with_grounding"
+      },
+      "request_id": "5445b457-1b01-4b6c-9e08-caad18d32bef",
+      "attempt": 1,
+      "duration_ms": 0
+    },
+    {
+      "step": "agent_execution",
+      "status": "execution_interrupted",
+      "case_id": "case",
+      "event_id": "09c72948-931a-40a6-850e-458a2137ca23",
+      "timestamp": "2026-11-21T11:55:19.841357+00:00",
+      "execution_id": "661ac92c-4d81-4e30-91be-1e495df2c425",
+      "agent": "Investigation Agent",
+      "agent_key": "investigation",
+      "provider": "ollama",
+      "model": "qwen3:8b",
+      "error": {
+        "code": "interrupted",
+        "type": "ApplicationRestart",
+        "message": "Application restarted before this run completed; no checkpoint resumption was attempted."
+      },
+      "detail": {
+        "last_known_status": "waiting_for_model_response",
+        "agent_started_observed": true,
+        "resumable": false
+      }
+    }
+  ],
+  "resumable": false
+}

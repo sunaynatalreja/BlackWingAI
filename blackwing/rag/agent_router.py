@@ -182,16 +182,36 @@ def build_agent_packets(*, retriever: Any, narrative: str, case_id: str,
     # deterministic in the existing service. It must never receive case uploads.
     return {
         "investigation": current,
-        "similar_case": _unique(historical, limit_per_agent),
-        # A compliance comparison needs both the rule and the current incident
-        # evidence; guidance is supplementary and never silently binding.
-        "compliance": _unique([*rules[:2], *current[:1], *guidance], limit_per_agent),
-        "risk": _unique([*current[:2], *guidance], limit_per_agent),
-        "mitigation": _unique([*guidance, *current[:1]], limit_per_agent),
-        "critic": _unique([*current[:2], *rules], limit_per_agent),
-        "verification": _unique([*current[:2], *rules], limit_per_agent),
-    }
 
+        "similar_case": _unique(
+            historical, limit_per_agent
+        ),
+
+        "compliance": _unique(
+            [*rules[:1], *current[:1], *guidance[:1]],
+            limit_per_agent
+        ),
+
+        "risk": _unique(
+            [*current[:2], *guidance[:1]],
+            limit_per_agent
+        ),
+
+        "mitigation": _unique(
+            [*guidance[:1], *current[:1]],
+            limit_per_agent
+        ),
+
+        "critic": _unique(
+            [*current[:2], *rules[:1]],
+            limit_per_agent
+        ),
+
+        "verification": _unique(
+            [*current[:2], *rules[:1]],
+            limit_per_agent
+        ),
+    }
 
 def packet_diagnostics(packets: Mapping[str, list[dict[str, Any]]]) -> dict[str, Any]:
     """Structural check only; NOT retrieval Recall or model report accuracy."""

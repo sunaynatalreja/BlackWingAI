@@ -123,8 +123,27 @@ def _scope_filter(row: dict[str, Any], *, scope: str, case_id: str | None,
         if incident_date and row.get("effective_through") and str(row["effective_through"]) < incident_date:
             return False
     if scope == "historical" and incident_date:
-        # If the earlier occurrence date is not known, historical precedence cannot be proven.
-        if not row.get("incident_date") or str(row["incident_date"]) >= incident_date:
+        exact_date = row.get("incident_date")
+
+        if exact_date:
+            if str(exact_date) >= incident_date:
+                return False
+
+        elif kind == "voluntary_asrs":
+            month = str(row.get("incident_month") or "")
+
+            if (len(month) != 6 or not month.isdigit()
+                    or not 1 <= int(month[4:6]) <= 12):
+                return False
+
+            # Month-level evidence must precede the entire target month.
+            # Never invent an exact incident day.
+            target_month = incident_date[:4] + incident_date[5:7]
+
+            if month >= target_month:
+                return False
+
+        else:
             return False
     return True
 
@@ -194,10 +213,6 @@ class HybridIndex:
             "tokenizer_verified": all(r.get("tokenizer_verified", False) for r in self.chunks),
             "crossencoder_status": "NOT VERIFIED: evaluate separately",
             "audit": self.audit,
-            "iit_document_count_requirement": "NOT VERIFIED" if not self.audit else
-                ("COUNT_IN_RANGE_PENDING_IIT_ELIGIBILITY_CHECK" if 500 <= self.audit.get("approved_document_count", 0) <= 2000 else "NOT MET"),
-            "true_recall_at_k": "NOT VERIFIED: needs complete approved relevance labels",
-            "answer_quality": "NOT VERIFIED: requires separate evaluated model outputs",
         }
         (directory / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         return manifest

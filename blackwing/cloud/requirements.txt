@@ -1,0 +1,3 @@
+# Integrated frontend uses the same package and compatible API contracts.
+-r ../../requirements.txt
+streamlit==1.67.0

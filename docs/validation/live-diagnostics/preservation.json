@@ -1,0 +1,29 @@
+{
+  "rag_index_files_compared": 12,
+  "rag_index_files_changed": 0,
+  "rag_sha256": {
+    "rag_indexes/austin_local_bge_v1/audit.json": "0eb25fa98ce276144bd64482aa1d8e394fb143c65056a9087bcf7a796d6204ea",
+    "rag_indexes/austin_local_bge_v1/chunks.jsonl": "7dc00205d44f915f33c83e30057329c38b11dea3efcbaaf7b3103fe65ba76fe8",
+    "rag_indexes/austin_local_bge_v1/manifest.json": "002b02e2823ebc9d1b4fd0e4db3d4491ad36e1d11a968a6cba041d8dc2f34216",
+    "rag_indexes/austin_local_bge_v1/sources.csv": "31b6ade9a18d90d1a9ee14cbe0b9974c44cdad9f2904ba72c9ac64a3df671c98",
+    "rag_indexes/austin_local_bge_v1/vectors.npy": "9b8eb88be4f100092acd24d1e2cdb6f9f7ed02c9709e095b0178eb31d352047d",
+    "rag_indexes/expanded_bge_asrs_20261121/chunks.jsonl": "3b0b4ee27b39a855e25573b004cd874ad061725692b1748ca1d5b140858012e2",
+    "rag_indexes/expanded_bge_asrs_20261121/manifest.json": "7c12b1239a730c19af8e6c3f3302c9383f6004e290f6749dbc4d5d5dd5f3a61a",
+    "rag_indexes/expanded_bge_asrs_20261121/vectors.npy": "2ee2dc5fa94bc8302ab1c7b683481b55d92c1401930e8d65e8065b789de3d4b7",
+    "rag_indexes/expanded_bge_asrs_metadata_v2/chunks.jsonl": "94da9754bdf9018519b9de20028c47ecd9e0c1f8d7defb29ae693662dba51d7f",
+    "rag_indexes/expanded_bge_asrs_metadata_v2/manifest.json": "03a29f3a008e699a4126e51927934ecdffa22232314e90ebd2f6676483489b26",
+    "rag_indexes/expanded_bge_asrs_metadata_v2/vectors.npy": "2ee2dc5fa94bc8302ab1c7b683481b55d92c1401930e8d65e8065b789de3d4b7",
+    "rag_indexes/expanded_bm25_v1/BW-IX-001-FTS5-TRIAL.sqlite": "e75d0a6b8e7feada6833e6f7f6190eeaedd5615bf03faf5f6ae30baa7399eb88"
+  },
+  "risk_tools_planning_and_rag_modules_unchanged": true,
+  "preexisting_python_files_changed": [
+    "blackwing/agents/runtime.py",
+    "blackwing/api.py",
+    "blackwing/copilot.py",
+    "blackwing/copilot_state.py",
+    "blackwing/copilot_ui.py",
+    "blackwing/repository.py",
+    "blackwing/schemas.py",
+    "blackwing/service.py"
+  ]
+}

@@ -248,3 +248,10 @@ FastAPI validation errors use its standard `detail` response shape. Other endpoi
 Changes that remove or rename fields require a new API major version. Additive optional fields may be added within v1. Category IDs, run status values, agent role names and evidence-state values are API enums once formally frozen. The current Pydantic models reject unknown request properties to surface client/server mismatches early.
 
 The report export currently supports JSON and Markdown. The Streamlit UI displays the Report Agent's readable report on screen; it does not generate a PDF. Resumable graph checkpoints, authentication, and tenant/case authorization remain target-architecture work and are not exposed as working v1 endpoints yet.
+
+
+## Local agentic additions (21 November 2026)
+
+Existing request fields and run status enum values remain compatible. Trace events add optional `tool`, `invocation_id`, `case_id`, `input_identifiers`, `result_summary`, `duration_ms` and sanitized `error` fields. The trace endpoint exposes executed tools for active/failed runs as well as completed traces.
+
+`GET /api/v1/runs/{run_id}/audit` adds durable audit events, the plan, partial outputs, execution step count, `resumable=false` and controlled-recovery guidance. Interrupted queued/running runs retain status `failed` with `error_code=interrupted`; post a new case run to recover. Reports remain preliminary and contain all existing agent-output keys. See [the delivery guide](local-agentic-delivery.md) for validation and UI requirements.

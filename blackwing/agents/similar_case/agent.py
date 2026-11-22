@@ -23,7 +23,13 @@ def build_output(narrative: str, evidence: Sequence[Mapping[str, Any]], *,
                  current_incident_id: str | None = None) -> dict[str, Any]:
     reports: dict[str, Mapping[str, Any]] = {}
     for item in evidence:
-        if str(item.get("document_type") or "").casefold() != "incident_report":
+        dtype = str(item.get("document_type") or "").casefold()
+        if dtype not in {"incident_report", "voluntary_incident_report"}:
+            continue
+        if dtype == "voluntary_incident_report" and (
+            item.get("source_type") != "voluntary_asrs"
+            or item.get("evidence_role") != "historical_analogy"
+        ):
             continue
         case_id = str(item.get("incident_id") or "")
         if current_incident_id and case_id.casefold() == current_incident_id.casefold():
@@ -49,6 +55,8 @@ def build_output(narrative: str, evidence: Sequence[Mapping[str, Any]], *,
     matches = []
     for score, ref, item, features in scored[:3]:
         notes = list(item.get("comparison_notes") or [])
+        if item.get("source_type") == "voluntary_asrs":
+            notes.append("Voluntary ASRS self-report: historical analogy only; not verified official causal findings or current-case evidence.")
         if not features:
             notes.append("No specific shared operational feature was established from available excerpts.")
         if not item.get("incident_date"):

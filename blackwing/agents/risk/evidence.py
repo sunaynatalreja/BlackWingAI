@@ -60,8 +60,47 @@ def ground_risk_output(
             )
     if result.hazards and not any_direct_citation:
         note.append("Candidate hazards are hypotheses, not established current-incident findings.")
+    # Deterministic risk assessment after citation validation.
+    from blackwing.tools import assess_reference_risk
+
+    classified = 0
+
+    for hazard in result.hazards:
+        # Historical analogies and guidance cannot establish
+        # incident-specific severity or likelihood.
+        direct_ids = [
+            ref for ref in hazard.evidence_ids
+            if _type(allowed[ref]) in _DIRECT_TYPES
+        ]
+
+        assessment = assess_reference_risk(
+            severity=hazard.severity,
+            likelihood=hazard.likelihood,
+            evidence_ids=direct_ids,
+            severity_basis=hazard.severity_basis,
+            likelihood_basis=hazard.likelihood_basis,
+        )
+
+        hazard.risk_index = assessment["risk_index"]
+        hazard.risk_level = assessment["risk_level"]
+        hazard.scoring_status = assessment["status"]
+
+        if hazard.risk_level is not None:
+            classified += 1
+        else:
+            # Do not publish unsupported model-generated ratings.
+            hazard.severity = None
+            hazard.likelihood = None
+            hazard.severity_basis = ""
+            hazard.likelihood_basis = ""
+
+    # FAA reference classification is categorical, not numeric.
     result.numeric_score = None
-    result.assessment_status = "provisional_no_approved_risk_matrix"
+    result.assessment_status = (
+        "provisional_reference_matrix_requires_human_review"
+        if classified
+        else "unassessed_insufficient_inputs"
+    )
     if note:
         result.risk_notes = (result.risk_notes + " " + " ".join(dict.fromkeys(note))).strip()
     result.missing_inputs = list(dict.fromkeys(missing))[:12]
