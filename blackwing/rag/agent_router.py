@@ -17,7 +17,7 @@ TOPIC_QUERIES = {
 }
 
 
-def _unique(items: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
+def _unique(items: list[dict[str, Any]], limit: int | None) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     seen: set[str] = set()
     for item in items:
@@ -26,7 +26,7 @@ def _unique(items: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
             continue
         seen.add(key)
         results.append(item)
-        if len(results) == limit:
+        if limit is not None and len(results) == limit:
             break
     return results
 
@@ -176,7 +176,8 @@ def build_agent_packets(*, retriever: Any, narrative: str, case_id: str,
         row["evidence_role"] = "general_guidance"
         row["caution"] = "Advisory, not a binding determination"
     direct = _diverse_current(direct_candidates, limit_per_agent)
-    current = _unique([*uploads, *direct], limit_per_agent)
+    # Never drop user-supplied case documents because of the RAG top-k setting.
+    current = _unique([*uploads, *direct], None)
 
     # One coherent, bounded evidence packet per agent; similar_case is
     # deterministic in the existing service. It must never receive case uploads.

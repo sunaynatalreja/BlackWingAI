@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
-import os
+from pathlib import Path
 from typing import Any, TypedDict
 from uuid import uuid4
 
@@ -12,7 +12,7 @@ import httpx
 from langgraph.graph import END, START, StateGraph
 from pydantic import ValidationError
 
-from blackwing.agents.base import AgentExecutionError, AgentSpec
+from blackwing.agents.base import AgentExecutionError, AgentOutputValidationError, AgentSpec
 from blackwing.agents.compliance.agent import unassessed_output as compliance_unassessed_output
 from blackwing.agents.compliance.evidence import ground_compliance_output
 from blackwing.agents.risk.evidence import ground_risk_output
@@ -173,6 +173,25 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
             raise AgentExecutionError(role, "model_http_error", f"The configured model provider returned HTTP {exc.response.status_code}. Check provider, model, and API key settings.") from exc
         except httpx.RequestError as exc:
             raise AgentExecutionError(role, "model_unreachable", "The API could not connect to the configured model provider.") from exc
+        except AgentOutputValidationError as exc:
+            debug_detail = (
+                f"validation_details={exc.diagnostic} response_preview={exc.response_preview}"
+            )
+            raise AgentExecutionError(
+                role, "invalid_agent_output",
+                "The model response did not match the agent's required JSON schema.",
+                debug_detail=debug_detail,
+            ) from exc
+        except (json.JSONDecodeError, ValidationError) as exc:
+            if isinstance(exc, ValidationError):
+                detail = json.dumps(exc.errors(include_input=False, include_url=False), ensure_ascii=False)
+            else:
+                detail = json.dumps({"message": exc.msg, "line": exc.lineno, "column": exc.colno})
+            raise AgentExecutionError(
+                role, "invalid_agent_output",
+                "The model response did not match the agent's required JSON schema.",
+                debug_detail=f"error_type={type(exc).__name__} details={detail}",
+            ) from exc
         except ValueError as exc:
             if "token_budget" in str(exc).casefold():
                 raise AgentExecutionError(
@@ -180,9 +199,18 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
                     "context_budget_exceeded",
                     "The agent input exceeded the safe model context budget; no model response was produced.",
                 ) from exc
-            raise AgentExecutionError(role, "invalid_agent_output", "The model response did not match the agent's required JSON schema.") from exc
-        except (json.JSONDecodeError, ValidationError) as exc:
-            raise AgentExecutionError(role, "invalid_agent_output", "The model response did not match the agent's required JSON schema.") from exc
+            if "token preflight unavailable" in str(exc).casefold():
+                raise AgentExecutionError(
+                    role,
+                    "tokenizer_unavailable",
+                    "The required local Qwen tokenizer is unavailable; cache the configured tokenizer before starting the API.",
+                    debug_detail=f"error_type={type(exc).__name__} detail={str(exc)[:500]}",
+                ) from exc
+            raise AgentExecutionError(
+                role, "invalid_agent_output",
+                "The model response did not match the agent's required JSON schema.",
+                debug_detail=f"error_type={type(exc).__name__} detail={str(exc)[:1000]}",
+            ) from exc
         except Exception as exc:
             raise AgentExecutionError(role, "agent_processing_error", "The agent failed while processing the model response.") from exc
         outputs = dict(state.get("outputs", {}))
@@ -287,6 +315,24 @@ def _build_graph(client: httpx.AsyncClient, settings: Settings, on_update=None):
     return graph.compile()
 
 
+def _case_narrative_evidence(case_id: str, narrative: str) -> dict[str, Any]:
+    """Give the submitted account a stable, case-scoped citation identity.
+
+    This is explicitly an unverified user report. It is passed only through the
+    current run and is never added to the shared retrieval corpus.
+    """
+    return {
+        "evidence_id": f"CASE-NARRATIVE:{case_id}",
+        "source_id": f"CASE-NARRATIVE:{case_id}",
+        "source_type": "user_submitted",
+        "evidence_role": "reported",
+        "evidence_status": "USER_REPORTED_UNVERIFIED",
+        "title": "Submitted incident narrative",
+        "excerpt": narrative.strip(),
+        "incident_id": case_id,
+    }
+
+
 async def analyze_incident(
     narrative: str,
     settings: Settings,
@@ -312,14 +358,28 @@ async def analyze_incident(
             if row.get("incident_id") and str(row.get("evidence_role") or "").casefold() == "case_factual"
         ), None)
     source_incident_id = source_incident_id or case_id
+    narrative_evidence = _case_narrative_evidence(case_id, narrative)
+    # The user's submitted account is reportable as an observation, not as an
+    # independently verified finding. Keep it scoped to this analysis run.
+    run_evidence = [narrative_evidence, *(evidence or [])]
+    run_agent_evidence = None
+    if agent_evidence is not None:
+        run_agent_evidence = {key: list(rows) for key, rows in agent_evidence.items()}
+        for role in ("investigation", "compliance", "risk", "mitigation", "critic", "verification"):
+            rows = run_agent_evidence.get(role, [])
+            # Put user narrative first so it survives each agent's bounded packet.
+            run_agent_evidence[role] = [narrative_evidence, *[
+                row for row in rows
+                if str(row.get("evidence_id") or row.get("chunk_id")) != narrative_evidence["evidence_id"]
+            ]]
     initial_state: CaseState = {
         "case_id": case_id,
         "narrative": narrative.strip(),
         "jurisdiction": jurisdiction,
         "incident_date": incident_date,
         "source_incident_id": source_incident_id,
-        "evidence": evidence or [],
-        "agent_evidence": agent_evidence,
+        "evidence": run_evidence,
+        "agent_evidence": run_agent_evidence,
         "outputs": {},
         "trace": [
             {"step": "case_created", "status": "complete"},
@@ -350,8 +410,7 @@ async def analyze_incident(
 
     outputs = dict(final_state["outputs"])
     generated_report = outputs.pop("report", None)
-    # Retain the evidence-validated risk assessment from the Risk Agent.
-    # Numeric score remains null; the FAA-reference index is categorical.
+    # Retain the evidence-grounded provisional 5x5 risk assessment.
     trace = [
         *final_state["trace"],
         *tool_events,

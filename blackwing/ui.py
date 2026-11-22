@@ -1,15 +1,16 @@
-"""Integrated BLACKWING workstation; existing brand/report rendering retained."""
-from pathlib import Path
-import sys
+from __future__ import annotations
+
+from io import BytesIO
+import time
 from html import escape
+from typing import Any
 
-root = str(Path(__file__).resolve().parents[1])
-if root not in sys.path:
-    sys.path.insert(0, root)
-
+import httpx
 import streamlit as st
-from blackwing.reporting import safe_report_text
-from blackwing.copilot_state import risk_display
+from blackwing.config import Settings
+from blackwing.rag.datasets import load_demo_inputs
+from blackwing.reporting import render_markdown_report, safe_report_text
+from blackwing.agents.risk.scoring import LIKELIHOOD_LEVELS, SEVERITY_LEVELS
 
 
 def render_brand():
@@ -87,7 +88,71 @@ def render_brand():
     )
 
 
-def _render_report(generated: dict, report: dict, case_id: str, run_id: str, *, reference_case=None) -> None:
+golden_cases = load_demo_inputs("golden")
+golden_case = golden_cases[0] if golden_cases else None
+use_golden_demo = st.checkbox(
+    "Load golden demo input (held out from the RAG index)",
+    help="Prefills the demo request. Attach its preliminary report below as current-case evidence.",
+    disabled=golden_case is None,
+)
+
+with st.form("incident_form"):
+    st.markdown('<div class="bw-kicker">Start an investigation</div>', unsafe_allow_html=True)
+    narrative = st.text_area(
+        "Incident narrative",
+        value=golden_case["narrative"] if use_golden_demo and golden_case else "",
+        key=f"incident_narrative_{'golden' if use_golden_demo else 'custom'}",
+        height=210,
+        placeholder="Describe the event and include any known date, airport, aircraft, and source references.",
+    )
+    uploaded_report = st.file_uploader(
+        "Attach source report (optional)",
+        type=["pdf", "txt"],
+        help="Uploaded text is attached to this case as unverified evidence; it is not added to the shared RAG index.",
+    )
+    submitted = st.form_submit_button("Analyze incident", type="primary")
+
+
+def _uploaded_evidence(file: Any) -> list[dict]:
+    if file is None:
+        return []
+    filename = file.name
+    if filename.lower().endswith(".txt"):
+        pages = [file.getvalue().decode("utf-8-sig", errors="replace")]
+    else:
+        try:
+            from pypdf import PdfReader
+        except ImportError as exc:
+            raise ValueError("PDF attachment support requires `pip install -r requirements-rag.txt`.") from exc
+        try:
+            reader = PdfReader(BytesIO(file.getvalue()))
+            if reader.is_encrypted and not reader.decrypt(""):
+                raise ValueError("The attached PDF is password protected and could not be read.")
+            pages = [(page.extract_text() or "") for page in reader.pages]
+        except Exception as exc:
+            if isinstance(exc, ValueError):
+                raise
+            raise ValueError(f"Could not extract text from the attached PDF ({type(exc).__name__}).") from exc
+    evidence = []
+    for page_number, content in enumerate(pages, 1):
+        content = content.strip()
+        if not content:
+            continue
+        # Split extracted pages for transport while preserving every character.
+        for offset in range(0, len(content), 19_500):
+            excerpt = content[offset:offset + 19_500]
+            evidence.append({
+                "title": filename[:300],
+                "document_type": "incident_report",
+                "source_status": "uploaded_unverified",
+                "page_number": page_number,
+                "section_reference": f"text segment {offset // 19_500 + 1}" if len(content) > 19_500 else None,
+                "excerpt": excerpt,
+            })
+    return evidence
+
+
+def _render_report(generated: dict, report: dict, case_id: str, run_id: str) -> None:
     st.markdown("## Preliminary incident report")
     st.caption(f"Case {case_id}  ·  Run {run_id}  ·  {report.get('model', 'Configured model')}")
     st.markdown(
@@ -98,28 +163,43 @@ def _render_report(generated: dict, report: dict, case_id: str, run_id: str, *, 
 
     agent_outputs = report.get("agent_outputs", {})
     similar = agent_outputs.get("similar_case", {})
-    score_status = (agent_outputs.get("risk") or {}).get("assessment_status", "provisional")
+    risk_output = agent_outputs.get("risk") or {}
+    risk_score = risk_output.get("numeric_score")
     left, middle, right, review = st.columns(4)
-    display = risk_display(report)
-    indices = list(dict.fromkeys(row["Risk index"] for row in display["rows"] if row["Risk index"] != "Unassessed"))
-    left.metric("Case match", "Seen" if reference_case is True else "No reference match" if reference_case is False else "Unknown")
-    middle.metric("Aviation risk", " · ".join(indices) if indices else "Unassessed")
+    left.metric("Case match", "Unseen" if str(similar.get("case_status", "")).startswith("unseen_case") else "Compared")
+    score_display = (
+        f"{risk_score}/25 · {risk_output.get('risk_rating')}"
+        if risk_score is not None else "Not scored"
+    )
+    score_label = "Risk score (partial)" if "partial" in str(risk_output.get("assessment_status", "")) else "Risk score (provisional)"
+    middle.metric(score_label, score_display)
     right.metric("Review", "Required" if generated.get("human_approval_required", True) else "Pending")
     review.metric(
         "Evidence check",
-        "Needs verification" if (agent_outputs.get("verification") or {}).get("completeness_status") == "incomplete" else "Human verification required",
+        "Needs verification" if (agent_outputs.get("verification") or {}).get("completeness_status") == "incomplete" else "Reviewed",
     )
-
-    st.caption("Case match identifies a preserved reference case, not model training exposure. Historical analogies are displayed separately.")
-    st.caption(display["framework"])
-    st.caption(display["notice"])
-    if display["rows"]:
-        st.dataframe([{key:row[key] for key in ("Hazard","Severity","Likelihood","Risk index","Classification","Status")}
-                      for row in display["rows"]], hide_index=True, alt="Backend hazard severity, likelihood and categorical risk indexes")
-    if not indices:
-        st.info("This saved backend assessment has no evidence-backed severity and likelihood pair, so no A1/C3-style risk index was assigned. The UI does not invent ratings.")
-    for missing in display["missing_inputs"]:
-        st.caption("Risk assessment gap: " + str(missing))
+    st.caption(
+        "Provisional 5×5 score = severity × likelihood; overall score is the highest scored hazard. "
+        "Severity: 1 Negligible–5 Catastrophic; likelihood: 1 Rare–5 Almost certain. "
+        "Bands: 1–4 Low, 5–9 Moderate, 10–16 High, 17–25 Extreme. Human review required."
+    )
+    if risk_output.get("hazards"):
+        risk_rows = []
+        for hazard in risk_output["hazards"]:
+            severity = hazard.get("severity")
+            likelihood = hazard.get("likelihood")
+            risk_rows.append({
+                "Hazard": hazard.get("hazard_id", ""),
+                "Severity": f"{severity} · {SEVERITY_LEVELS.get(severity, 'Unrated')}" if severity else "Unrated",
+                "Likelihood": f"{likelihood} · {LIKELIHOOD_LEVELS.get(likelihood, 'Unrated')}" if likelihood else "Unrated",
+                "Score": f"{hazard.get('score')}/25 · {hazard.get('risk_rating')}" if hazard.get("score") is not None else "Not scored",
+                "Hazard": hazard.get("description", ""),
+                "Severity basis": hazard.get("severity_rationale", ""),
+                "Likelihood basis": hazard.get("likelihood_rationale", ""),
+            })
+        st.dataframe(risk_rows, hide_index=True, use_container_width=True)
+    for missing in risk_output.get("missing_inputs", []):
+        st.caption("Risk scoring gap: " + safe_report_text(missing))
 
     fallback_sections = [s for s in generated.get("sections", []) if s.get("generation_method") == "deterministic_fallback"]
     if fallback_sections:
@@ -146,10 +226,109 @@ def _render_report(generated: dict, report: dict, case_id: str, run_id: str, *, 
 
     st.markdown("<div class='bw-footer'>This report is preliminary. Human verification and approval are required.</div>", unsafe_allow_html=True)
 
-def main(*, cloud=False):
-    from blackwing.copilot_ui import main as workspace
-    workspace(brand=render_brand, render_report=_render_report, cloud=cloud)
 
+if submitted:
+    if use_golden_demo and uploaded_report is None:
+        st.error("Attach the golden case's preliminary report as evidence before starting this demo.")
+    elif len(narrative.strip()) < 20:
+        st.error("Enter at least 20 characters of incident narrative.")
+    else:
+        settings = None
+        try:
+            uploaded_evidence = _uploaded_evidence(uploaded_report)
+            if use_golden_demo and not uploaded_evidence:
+                raise ValueError("The attached report has no extractable text. Scanned PDFs need OCR before this demo can use them.")
+            settings = Settings.load()
+            with httpx.Client(timeout=settings.ui_request_timeout_seconds) as client:
+                case_response = client.post(
+                    f"{settings.ui_api_url}/api/v1/cases",
+                    json={
+                        "category": "runway_incursion",
+                        "narrative": narrative,
+                        "evidence": uploaded_evidence,
+                        **({
+                            "source_incident_id": golden_case["case_id"],
+                            "incident_date": golden_case["incident_date"],
+                            "jurisdiction": golden_case["jurisdiction"],
+                            "location": golden_case["case_name"],
+                        } if use_golden_demo and golden_case else {}),
+                    },
+                )
+                case_response.raise_for_status()
+                case = case_response.json()
+                with st.spinner("Agents are reviewing evidence and drafting the report in focused sections…"):
+                    run_response = client.post(f"{settings.ui_api_url}/api/v1/cases/{case['case_id']}/runs", json={})
+                    run_response.raise_for_status()
+                    run = run_response.json()
+                    deadline = time.monotonic() + settings.ui_request_timeout_seconds
+                    poll_errors = 0
+                    while run["status"] in {"queued", "running"} and time.monotonic() < deadline:
+                        time.sleep(2)
+                        try:
+                            status_response = client.get(f"{settings.ui_api_url}/api/v1/runs/{run['run_id']}")
+                            status_response.raise_for_status()
+                            run = status_response.json()
+                            poll_errors = 0
+                        except httpx.RequestError:
+                            poll_errors += 1
+                            st.warning(f"The API connection dropped while checking the run (attempt {poll_errors}); reconnecting…")
+                            time.sleep(min(2 * poll_errors, 10))
 
-if __name__ == "__main__":
-    main()
+            st.markdown("## Investigation run")
+            st.caption(f"Case ID: {case['case_id']}  ·  Run ID: {run['run_id']}  ·  Status: {run['status']}")
+            if run["status"] == "completed":
+                response = httpx.get(
+                    f"{settings.ui_api_url}/api/v1/cases/{case['case_id']}/report",
+                    timeout=settings.ui_request_timeout_seconds,
+                )
+                response.raise_for_status()
+                result = response.json()
+                report = result["report"]
+                generated = report.get("generated_report")
+                if generated:
+                    report_tab, agents_tab, trace_tab = st.tabs(["Investigation report", "Agent details", "Run trace"])
+                    with report_tab:
+                        _render_report(generated, report, case["case_id"], run["run_id"])
+                    with agents_tab:
+                        st.markdown("### Source agent work products")
+                        st.caption("Structured JSON stays available for review and citation checking.")
+                        for name, output in report.get("agent_outputs", {}).items():
+                            with st.expander(name.replace("_", " ").title(), expanded=False):
+                                if name == "similar_case" and str(output.get("case_status", "")).startswith("unseen_case"):
+                                    st.info("Retrieved reports are historical analogies, not findings about this incident.")
+                                st.json(output)
+                    with trace_tab:
+                        trace_response = httpx.get(
+                            f"{settings.ui_api_url}/api/v1/runs/{run['run_id']}/trace",
+                            timeout=settings.ui_request_timeout_seconds,
+                        )
+                        trace_response.raise_for_status()
+                        st.json({"trace": trace_response.json(), "report_tasks": generated.get("sections", [])})
+                        with st.expander("Limitations and review boundary", expanded=True):
+                            st.write(report.get("limitations", []))
+                            st.info(result.get("notice", "Human review required."))
+                else:
+                    # Backward compatibility for reports created before the Report Agent.
+                    st.markdown(render_markdown_report(result))
+                    for name, output in report.get("agent_outputs", {}).items():
+                        with st.expander(name.replace("_", " ").title(), expanded=False):
+                            st.json(output)
+            elif run["status"] == "failed":
+                st.error(run.get("error") or "The analysis run failed.")
+            else:
+                st.info(f"Run is still {run['status']}. Poll GET /api/v1/runs/{run['run_id']} for status.")
+        except httpx.ConnectError as exc:
+            api_url = settings.ui_api_url if settings else "configured API URL"
+            st.error(f"Could not connect to the BlackWing API at {api_url}. Check that its server is running and that the UI API URL matches its host and port. ({exc})")
+        except httpx.TimeoutException:
+            st.error("The BlackWing API request timed out. Check the API run status and hosted model response time.")
+        except httpx.HTTPStatusError as exc:
+            try:
+                detail = exc.response.json().get("detail", "")
+            except ValueError:
+                detail = ""
+            st.error(f"The BlackWing API returned HTTP {exc.response.status_code}. {detail}")
+        except httpx.HTTPError as exc:
+            st.error(f"The BlackWing API request failed: {exc}")
+        except (ValueError, OSError) as exc:
+            st.error(f"Could not load application settings or case evidence: {exc}")

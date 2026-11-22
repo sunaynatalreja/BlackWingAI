@@ -63,22 +63,22 @@ class EvidenceInput(APIModel):
     effective_date: date | None = None
     page_number: int | None = Field(default=None, ge=1)
     section_reference: str | None = Field(default=None, max_length=200)
-    excerpt: str = Field(min_length=1, max_length=20_000)
+    excerpt: str = Field(min_length=1)
 
 
 class CaseCreate(APIModel):
     source_incident_id: str | None = Field(default=None, min_length=3, max_length=100, description="External incident source identifier for matching indexed factual reports.")
     category: IncidentCategory = IncidentCategory.RUNWAY_INCURSION
-    narrative: str = Field(min_length=20, max_length=30_000)
+    narrative: str = Field(min_length=20)
     incident_date: date | None = None
     jurisdiction: str | None = Field(default=None, max_length=100)
     location: str | None = Field(default=None, max_length=300)
-    evidence: list[EvidenceInput] = Field(default_factory=list, max_length=30)
+    evidence: list[EvidenceInput] = Field(default_factory=list)
 
 
 class CasePatch(APIModel):
     source_incident_id: str | None = Field(default=None, min_length=3, max_length=100)
-    narrative: str | None = Field(default=None, min_length=20, max_length=30_000)
+    narrative: str | None = Field(default=None, min_length=20)
     incident_date: date | None = None
     jurisdiction: str | None = Field(default=None, max_length=100)
     location: str | None = Field(default=None, max_length=300)
@@ -250,6 +250,7 @@ class AnalysisTraceEntry(APIModel):
     agent: str | None = None
     model: str | None = None
     status: str
+    detail: str | None = None
     retrieved_document_count: int | None = None
 
 

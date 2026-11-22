@@ -94,7 +94,7 @@ def _ground_sections(sections: list[dict[str, Any]], prior: Mapping[str, dict[st
     return sections
 
 
-def _claim_points(rows: Any, default_classification: str, limit: int = 4) -> list[dict[str, Any]]:
+def _claim_points(rows: Any, default_classification: str) -> list[dict[str, Any]]:
     if not isinstance(rows, list):
         return []
     result = []
@@ -105,26 +105,26 @@ def _claim_points(rows: Any, default_classification: str, limit: int = 4) -> lis
         "analytical_inference": "hypothesis",
         "unknown": "verification_gap",
     }
-    for row in rows[:limit]:
+    for row in rows:
         if isinstance(row, str):
             text = row
             state = default_classification
             evidence_ids = []
             source_ids = []
         elif isinstance(row, dict):
-            text = row.get("text") or row.get("description") or row.get("event")
+            text = row.get("text") or row.get("description") or row.get("event") or row.get("rationale")
             state = row.get("evidence_state")
             evidence_ids = row.get("evidence_ids", [])
-            source_ids = row.get("source_ids", [])
+            source_ids = row.get("source_ids", []) or ([row["source_id"]] if row.get("source_id") else [])
         else:
             continue
         if not text:
             continue
         result.append({
-            "text": str(text)[:600],
+            "text": str(text),
             "classification": state_map.get(str(state or ""), default_classification),
-            "evidence_ids": evidence_ids[:5],
-            "source_ids": source_ids[:5],
+            "evidence_ids": evidence_ids,
+            "source_ids": source_ids,
         })
     return result
 
@@ -141,19 +141,18 @@ def _fallback_section(task_id: str, prior: Mapping[str, dict[str, Any]]) -> dict
 
     if task_id == "overview":
         summary = investigation.get("incident_summary") or "An incident narrative was submitted for review."
-        points += _claim_points(investigation.get("documented_facts"), "verification_gap", 3)
-        points += _claim_points(investigation.get("reported_observations"), "reported_observation", 2)
-        points = points[:5]
+        points += _claim_points(investigation.get("timeline_events"), "reported_observation")
+        points += _claim_points(investigation.get("documented_facts"), "verification_gap")
+        points += _claim_points(investigation.get("reported_observations"), "reported_observation")
     elif task_id == "findings_and_causes":
         summary = "The agent review does not establish a probable cause. Candidate explanations remain provisional until primary evidence is verified."
-        points += _claim_points(investigation.get("hypotheses"), "hypothesis", 2)
-        points += _claim_points(investigation.get("contributing_factors"), "hypothesis", 2)
-        points += _claim_points(verification.get("claims_needing_source"), "verification_gap", 2)
-        points = points[:5]
+        points += _claim_points(investigation.get("hypotheses"), "hypothesis")
+        points += _claim_points(investigation.get("contributing_factors"), "hypothesis")
+        points += _claim_points(verification.get("claims_needing_source"), "verification_gap")
     elif task_id == "comparisons_and_compliance":
         summary = str(similar.get("assessment") or "Historical comparisons are analogies only.")
         summary += " Compliance status: " + str(compliance.get("overall_applicability") or "not assessed") + "."
-        for match in similar.get("matches", [])[:2]:
+        for match in similar.get("matches", []):
             if isinstance(match, dict):
                 points.append({
                     "text": f"{match.get('title') or 'Historical case'}: {match.get('similarity') or 'comparison requires review'}",
@@ -161,26 +160,59 @@ def _fallback_section(task_id: str, prior: Mapping[str, dict[str, Any]]) -> dict
                     "evidence_ids": [],
                     "source_ids": [str(match["source_id"])] if match.get("source_id") else [],
                 })
-        points += _claim_points(compliance.get("missing_context"), "verification_gap", 2)
+        points += _claim_points(compliance.get("checks"), "verification_gap")
+        points += _claim_points(compliance.get("missing_context"), "verification_gap")
     else:
-        summary = str(risk.get("risk_notes") or "Candidate hazards remain unscored without an approved risk matrix.")
-        points += _claim_points(risk.get("hazards"), "hypothesis", 3)
-        for recommendation in mitigation.get("recommendations", [])[:2]:
+        score = risk.get("numeric_score")
+        rating = risk.get("risk_rating")
+        score_summary = (
+            f"Provisional 5×5 risk score: {score}/25 ({rating}); highest scored hazard. "
+            if score is not None else
+            "Provisional risk score unavailable because severity or likelihood is missing. "
+        )
+        summary = score_summary + str(risk.get("risk_notes") or "Candidate hazards require human review.")
+        points += _claim_points(risk.get("hazards"), "hypothesis")
+        for recommendation in mitigation.get("recommendations", []):
             if isinstance(recommendation, dict) and recommendation.get("action"):
                 points.append({
                     "text": str(recommendation["action"]), "classification": "proposal",
                     "evidence_ids": [], "source_ids": [],
                 })
-        points += _claim_points(verification.get("claims_needing_source"), "verification_gap", 2)
-        points += _claim_points(critic.get("issues"), "verification_gap", 1)
-        points = points[:5]
+        points += _claim_points(verification.get("claims_needing_source"), "verification_gap")
+        points += _claim_points(critic.get("issues"), "verification_gap")
 
     return {
         "task_id": task_id,
-        "summary": str(summary)[:1500],
+        "summary": str(summary),
         "key_points": points,
         "generation_method": "deterministic_fallback",
     }
+
+
+def _merge_source_detail(section: dict[str, Any], task_id: str,
+                         prior: Mapping[str, dict[str, Any]]) -> dict[str, Any]:
+    """Restore source-agent details a short-model draft may have omitted.
+
+    These points are copied from already validated agent outputs; this step
+    does not invent or upgrade claims. The report schema allows ten combined
+    source and model points.
+    """
+    source_points = _fallback_section(task_id, prior).get("key_points", [])
+    combined: list[dict[str, Any]] = []
+    seen: set[tuple[str, tuple[str, ...]]] = set()
+    # Source details lead so they remain visible if a model draft is repetitive.
+    for point in [*source_points, *(section.get("key_points") or [])]:
+        text = str(point.get("text") or "").strip()
+        refs = tuple(sorted(str(ref) for ref in [
+            *(point.get("evidence_ids") or []), *(point.get("source_ids") or [])
+        ]))
+        key = (text.casefold(), refs)
+        if not text or key in seen:
+            continue
+        seen.add(key)
+        combined.append(point)
+    section["key_points"] = combined
+    return section
 
 
 def _task_spec(task_id: str, source_keys: tuple[str, ...]) -> AgentSpec:
@@ -248,6 +280,7 @@ async def create_report(
             draft["task_id"] = task_id
             draft["generation_method"] = "model"
             section = ReportSection.model_validate(draft).model_dump(mode="json")
+            section = _merge_source_detail(section, task_id, source_outputs)
             trace.append({"step": f"report_{task_id}", "agent": spec.name, "status": "complete"})
         except Exception as exc:
             logger.warning(
@@ -263,7 +296,7 @@ async def create_report(
     overview = next((item for item in sections if item["task_id"] == "overview"), None)
     executive_summary = (overview or {}).get("summary") or "Preliminary analysis assembled from the agent work products."
     output = ReportAgentOutput(
-        executive_summary=executive_summary[:2200],
+        executive_summary=executive_summary,
         sections=sections,
         human_approval_required=True,
     ).model_dump(mode="json")

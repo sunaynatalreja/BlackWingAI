@@ -11,7 +11,10 @@ from typing import Any
 
 SOURCE_TYPES = {"official_factual", "official_preliminary", "official_final", "voluntary_asrs",
                 "regulation", "operational_order", "advisory", "user_submitted"}
-GUARD = re.compile(r"(^|[/_\\-])(GOLD|EVALUATION|HELDOUT|HOLDOUT|DO_NOT_INDEX|REPORT_DRAFT)([/_\\.-]|$)", re.I)
+GUARD = re.compile(
+    r"(^|[/_\\-])(GOLD(?:EN)?|EVALUATION|HELDOUT|HOLDOUT|UNSEEN|VALIDATION|"
+    r"DO_NOT_INDEX|REPORT_DRAFT)([/_\\.-]|$)", re.I
+)
 
 
 @dataclass
@@ -50,10 +53,23 @@ def _text_units(path: Path, entry: dict[str, Any]) -> list[tuple[int | None, str
         except ImportError as exc:
             raise RuntimeError("Install pypdf from requirements-rag.txt to ingest PDFs") from exc
         reader = PdfReader(str(path))
+        if reader.is_encrypted:
+            try:
+                unlocked = reader.decrypt("")
+            except Exception as exc:
+                raise RuntimeError(f"Cannot open encrypted PDF {path.name} without a password") from exc
+            if not unlocked:
+                raise RuntimeError(f"PDF {path.name} requires a password; it was not indexed")
         units = []
         fallback_pdf = None
         try:
-            for page_number, page in enumerate(reader.pages, 1):
+            try:
+                pages = reader.pages
+                page_count = len(pages)
+            except Exception as exc:
+                raise RuntimeError(f"Cannot read PDF page tree in {path.name}: {type(exc).__name__}") from exc
+            for page_number in range(1, page_count + 1):
+                page = pages[page_number - 1]
                 try:
                     page_text = page.extract_text() or ""
                 except Exception as primary_error:
@@ -104,7 +120,12 @@ def _text_units(path: Path, entry: dict[str, Any]) -> list[tuple[int | None, str
     raise ValueError(f"Unsupported source format {suffix}")
 
 
-def load_manifest(manifest_path: str | Path, root: str | Path) -> tuple[list[dict[str, Any]], CorpusAudit]:
+def load_manifest(
+    manifest_path: str | Path,
+    root: str | Path,
+    *,
+    allowed_path_prefixes: tuple[str, ...] | None = None,
+) -> tuple[list[dict[str, Any]], CorpusAudit]:
     """Load source pages/records; never silently approve or count ASRS narratives as IIT documents."""
     m = json.loads(Path(manifest_path).read_text(encoding="utf-8-sig"))
     entries = m["sources"] if isinstance(m, dict) and "sources" in m else m
@@ -124,11 +145,19 @@ def load_manifest(manifest_path: str | Path, root: str | Path) -> tuple[list[dic
             audit.record_exclusion(source_id, "duplicate source ID")
             continue
         source_ids.add(source_id)
+        if allowed_path_prefixes and not any(
+            rel.startswith(prefix.rstrip("/") + "/") for prefix in allowed_path_prefixes
+        ):
+            audit.record_exclusion(source_id, "outside the configured knowledge-base source directory")
+            continue
         if GUARD.search(rel) or GUARD.search(source_id) or entry.get("evaluation_exclusion"):
             audit.record_exclusion(source_id, "protected evaluation or generated material")
             continue
         if entry.get("approved") is not True:
             audit.record_exclusion(source_id, "not explicitly approved")
+            continue
+        if entry.get("trial_index_eligible") is False:
+            audit.record_exclusion(source_id, "manifest marks source as not eligible for trial indexing")
             continue
         kind = entry.get("source_type")
         if kind not in SOURCE_TYPES:

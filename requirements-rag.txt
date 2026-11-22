@@ -1,5 +1,6 @@
 numpy>=1.26,<3
-pypdf[crypto]>=5,<7
+pypdf[crypto][crypto]>=5,<7
+fonttools>=4.40
 transformers>=4.40,<6
 sentence-transformers>=3,<6
 # fastembed, httpx and pytest are provided by requirements(-dev).txt.

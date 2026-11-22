@@ -55,7 +55,10 @@ def get_repository() -> MemoryRepository:
 
 def get_settings() -> Settings:
     try:
-        return Settings.load()
+        settings = Settings.load()
+        retriever.configure_index_dir(settings.rag_index_dir)
+        retriever.configure_embedding_settings(settings)
+        return settings
     except (ValueError, OSError) as exc:
         raise HTTPException(status_code=503, detail=f"Application configuration unavailable: {exc}") from exc
 
