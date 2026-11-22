@@ -14,6 +14,7 @@ import traceback
 from uuid import uuid4
 
 import httpx
+from pydantic import ValidationError
 
 from blackwing.agents.base import AgentExecutionError
 
@@ -60,6 +61,9 @@ def safe_error(exc, code=None):
     if code not in MESSAGES:
         code = "internal_agent_error"
     error = {"code": code, "type": type(origin).__name__, "message": MESSAGES[code]}
+    if isinstance(origin, ValidationError):
+        error['validation_fields'] = [{'type':item['type'], 'location':list(item['loc'])}
+                                      for item in origin.errors(include_input=False, include_url=False)[:12]]
     if isinstance(origin, httpx.HTTPStatusError):
         error["http_status"] = origin.response.status_code
     if origin.__traceback__:

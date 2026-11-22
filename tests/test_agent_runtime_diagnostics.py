@@ -7,6 +7,7 @@ import logging
 import httpx
 import pytest
 
+from blackwing.agents.base import AgentOutputValidationError
 from blackwing.agents.registry import AGENT_BY_ID
 from blackwing.agents.runtime import invoke_agent
 from blackwing.config import Settings
@@ -37,12 +38,13 @@ def test_invalid_agent_response_logs_validation_details_and_response_preview(cap
     )
     client = InvalidJSONClient()
     with caplog.at_level(logging.WARNING, logger="blackwing.agents.runtime"):
-        with pytest.raises(json.JSONDecodeError):
+        with pytest.raises(AgentOutputValidationError) as error:
             asyncio.run(invoke_agent(
                 AGENT_BY_ID["critic"], client=client, settings=settings,
                 narrative="Synthetic runway incident narrative.", evidence=[], prior_outputs={},
             ))
 
+    assert isinstance(error.value.__cause__, json.JSONDecodeError)
     assert client.calls == 2  # first attempt plus one schema correction retry
     assert "agent=critic provider=ollama model=qwen3:8b attempt=1/2" in caplog.text
     assert "validation_details" in caplog.text

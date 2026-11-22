@@ -12,14 +12,23 @@ from blackwing.copilot_state import findings_from_backend, report_availability
 from blackwing.schemas import CaseResponse, RunResponse, ReportResponse, TraceResponse, ReviewResponse
 
 
+def backend_url():
+    return os.getenv("BLACKWING_UI_API_URL", "http://127.0.0.1:8001").rstrip("/")
+
+
 def client():
-    return httpx.Client(base_url=os.getenv("BLACKWING_UI_API_URL", "http://127.0.0.1:8000").rstrip("/"),
+    return httpx.Client(base_url=backend_url(),
                         timeout=float(os.getenv("BLACKWING_UI_TIMEOUT_SECONDS", "30")))
 
 
 def request(method, path, *, json=None, allow_report_missing=False):
+    # Status and intake calls must not inherit the 1800-second inference wait.
+    # Foreground Q&A and explicit gold evaluation retain their longer budgets.
+    quick = method.upper() == "GET" or (method.upper() == "POST" and path.startswith("/api/v1/cases")
+                                       and not path.endswith("gold-comparison"))
+    options = {"timeout": httpx.Timeout(10, connect=3)} if quick else {}
     with client() as connection:
-        response = connection.request(method, path, **({"json": json} if json is not None else {}))
+        response = connection.request(method, path, **({"json": json} if json is not None else {}), **options)
     if allow_report_missing and response.status_code == 409:
         return None
     response.raise_for_status()
@@ -111,7 +120,11 @@ def get_run(run_id):
 def get_case(case_id):
     incident = CaseResponse.model_validate(request("GET", f"/api/v1/cases/{case_id}")).model_dump(mode="json")
     runs = [RunResponse.model_validate(r).model_dump(mode="json") for r in request("GET", f"/api/v1/cases/{case_id}/runs")]
-    response = request("GET", f"/api/v1/cases/{case_id}/report", allow_report_missing=True)
+    # Poll run status while queued/running/failed. A report is requested only
+    # after a completed run exists, avoiding expected HTTP 409 responses on
+    # every timer tick. Keep an earlier completed report visible during reruns.
+    response = (request("GET", f"/api/v1/cases/{case_id}/report", allow_report_missing=True)
+                if any(run["status"] == "completed" for run in runs) else None)
     envelope = ReportResponse.model_validate(response).model_dump(mode="json") if response else None
     reviews = [ReviewResponse.model_validate(r).model_dump(mode="json") for r in request("GET", f"/api/v1/cases/{case_id}/reviews")]
     report = envelope["report"] if envelope else None

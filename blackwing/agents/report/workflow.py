@@ -113,6 +113,8 @@ def _claim_points(rows: Any, default_classification: str) -> list[dict[str, Any]
             source_ids = []
         elif isinstance(row, dict):
             text = row.get("text") or row.get("description") or row.get("event") or row.get("rationale")
+            if row.get("event") and row.get("time_reference"):
+                text = str(row["time_reference"]) + ": " + str(text)
             state = row.get("evidence_state")
             evidence_ids = row.get("evidence_ids", [])
             source_ids = row.get("source_ids", []) or ([row["source_id"]] if row.get("source_id") else [])
@@ -163,14 +165,12 @@ def _fallback_section(task_id: str, prior: Mapping[str, dict[str, Any]]) -> dict
         points += _claim_points(compliance.get("checks"), "verification_gap")
         points += _claim_points(compliance.get("missing_context"), "verification_gap")
     else:
-        score = risk.get("numeric_score")
-        rating = risk.get("risk_rating")
-        score_summary = (
-            f"Provisional 5×5 risk score: {score}/25 ({rating}); highest scored hazard. "
-            if score is not None else
-            "Provisional risk score unavailable because severity or likelihood is missing. "
-        )
-        summary = score_summary + str(risk.get("risk_notes") or "Candidate hazards require human review.")
+        indices = [str(h["risk_index"]) + " (" + str(h.get("risk_level")) + ")"
+                   for h in risk.get("hazards", [])
+                   if h.get("scoring_status") == "provisional_reference_only" and h.get("risk_index")]
+        assessment = ("Reference risk index: " + ", ".join(indices) + ". " if indices else
+                      "Risk unassessed: evidence-backed severity and likelihood are insufficient. ")
+        summary = assessment + str(risk.get("risk_notes") or "Qualified human review required.")
         points += _claim_points(risk.get("hazards"), "hypothesis")
         for recommendation in mitigation.get("recommendations", []):
             if isinstance(recommendation, dict) and recommendation.get("action"):

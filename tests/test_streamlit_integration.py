@@ -152,29 +152,21 @@ def test_upload_validation_prevents_silent_truncation(filename, data):
 def test_streamlit_create_upload_run_review_and_exports(backend):
     at = AppTest.from_file(str(ROOT / "blackwing/ui.py"), default_timeout=15).run()
     assert not at.exception
-    at.button(key="home-new").click().run()
-    at.text_input(key="intake-location").set_value("Synthetic airport")
-    at.text_input(key="intake-jurisdiction").set_value("IN")
-    at.text_area(key="intake-narrative").set_value("Synthetic runway crossing involving a taxiing aircraft.")
-    at.file_uploader(key="intake-files").upload("witness.txt", b"Aircraft crossed the runway while taxiing.")
-    at.text_input(key="intake-provenance").set_value("Synthetic source")
-    at.button(key="create-investigation").click().run()
-    assert not at.exception
-    assert len(backend.cases) == 1 and not backend.runs
+    assert "home-new" not in [b.key for b in at.button]
+    at.text_area(key="incident_narrative_custom").set_value("Synthetic runway crossing involving a taxiing aircraft.")
+    at.file_uploader(key="source-upload").upload("witness.txt", b"Aircraft crossed the runway while taxiing.")
+    at.button(key="analyze-incident").click().run()
+    assert not at.exception and len(backend.runs) == 1 and len(backend.cases) == 1
     assert backend.list_cases(None, 100, 0)[0][0]["evidence"]
-    at.button(key="run-investigation").click().run()
-    assert not at.exception and len(backend.runs) == 1
-    assert len(at.tabs) == 9
+    assert [tab.label for tab in at.tabs] == ["Investigation report", "Agent details", "Run trace"]
     risk_frames = [df.value for df in at.dataframe if "Risk index" in df.value.columns]
     assert risk_frames[0].iloc[0]["Risk index"] == "C3"
-    assert any("not a binding" in w.value for w in at.warning)
+    assert any("not a binding" in c.value for c in at.caption)
     at.text_input(key="reviewer-name").set_value("Reviewer")
     at.text_area(key="review-rationale").set_value("Verified actual source text")
     at.checkbox(key="review-confirmed").check()
     at.button(key="accept-finding").click().run()
-    assert not at.exception
-    assert at.get_by_key("export-pdf")
-    # A rerun never triggers another investigation or creates another case DB.
+    assert not at.exception and at.get_by_key("export-pdf")
     at.run()
     assert len(backend.runs) == 1 and len(backend.cases) == 1
 
@@ -189,24 +181,24 @@ def test_cloud_entrypoint_uses_same_backend_and_no_temp_database(backend):
 
 def test_streamlit_missing_risk_and_intake_quality(backend):
     at = AppTest.from_file(str(ROOT / "blackwing/ui.py"), default_timeout=15).run()
-    at.button(key="home-new").click().run()
-    at.button(key="check-intake").click().run()
+    at.button(key="analyze-incident").click().run()
+    assert not at.exception and not backend.cases
+    assert any("20 characters" in e.value for e in at.error)
+    at.text_area(key="incident_narrative_custom").set_value("Synthetic runway crossing with missing evidence.")
+    at.button(key="analyze-incident").click().run()
     assert not at.exception
-    assert any(m.label == "Prompt Completeness" and m.value == "0%" for m in at.metric)
-    at.text_area(key="intake-narrative").set_value("Synthetic runway crossing with missing evidence.")
-    at.button(key="create-investigation").click().run()
-    assert not at.exception
-    assert any("Unassessed" in alert.value for alert in at.info)
+    metrics={m.label:m.value for m in at.metric}
+    assert metrics["Aviation risk"]=="Unassessed"
+    assert "Prompt Completeness" in metrics and "Report Completeness" in metrics
 
 
 def test_backend_history_survives_new_frontend_session(backend):
     case, _ = prepared_case()
-    at = AppTest.from_file(str(ROOT / "blackwing/ui.py"), default_timeout=15).run()
-    at.button(key="home-history").click().run()
-    assert not at.exception
-    assert case["incident"]["case_id"] in at.selectbox(key="saved-case").options or len(at.selectbox(key="saved-case").options) == 1
-    at.button(key="resume-case").click().run()
-    assert not at.exception and len(backend.runs) == 1
+    at = AppTest.from_file(str(ROOT / "blackwing/ui.py"), default_timeout=15)
+    at.query_params["case_id"] = case["incident"]["case_id"]
+    at.run()
+    assert not at.exception and len(backend.runs)==1
+    assert any(case["incident"]["case_id"] in c.value for c in at.caption)
 
 
 def test_corrupt_pdf_reports_a_controlled_upload_error():

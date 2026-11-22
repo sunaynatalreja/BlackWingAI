@@ -83,11 +83,11 @@ class Settings:
 
     @property
     def model_name(self) -> str:
-        return self.api_model
+        return self.ollama_model if self.llm_provider == "ollama" else self.api_model
 
     @property
     def model_timeout_seconds(self) -> float:
-        return self.api_timeout_seconds
+        return self.ollama_timeout_seconds if self.llm_provider == "ollama" else self.api_timeout_seconds
 
     @classmethod
     def load(cls) -> "Settings":

@@ -24,6 +24,7 @@ from blackwing.agents.report.workflow import create_report
 from blackwing.agents.registry import AGENT_SPECS
 from blackwing.agents.runtime import invoke_agent
 from blackwing.config import Settings
+from blackwing.case_inputs import synthetic_accounts, unassessed_synthetic_risk
 from blackwing.diagnostics import execution_audit, agent_execution, emit, safe_error, MESSAGES
 from blackwing.tools import tool_audit, find_similar_incidents
 from blackwing.planning import plan_investigation, correction_target, review_correction, MAX_EXECUTION_STEPS
@@ -75,6 +76,14 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
             elif role == "similar_case":
                 output = find_similar_incidents(narrative=state["narrative"], evidence=evidence,
                                              current_incident_id=state.get("source_incident_id"))
+                if not state.get("incident_date"):
+                    output["limitations"] = [*output.get("limitations", []),
+                        "Current event date is unknown. Retrieved archive cases are candidate analogies, not established chronological predecessors."]
+            elif role == "risk" and state.get("plan", {}).get("task_modes", {}).get("risk") == "unassessed_synthetic":
+                output = ground_risk_output(unassessed_synthetic_risk(state, evidence), evidence)
+                emit("assessment_abstained", step="risk", detail={
+                    "reason": "Unverified synthetic accounts lack severity and occurrence/exposure support.",
+                    "human_review_required": True})
             elif role == "compliance" and (state.get("plan", {}).get("task_modes", {}).get("compliance") == "unassessed" or not any(
                 str(item.get("document_type", "")).casefold() in compliance_sources
                 or str(item.get("source_type", "")).casefold() in compliance_sources
@@ -351,6 +360,8 @@ async def analyze_incident(
     case_id = case_id or str(uuid4())
     # The source incident reference is different from the application's UUID.
     # If older callers omit it, recover from a scoped official case-factual chunk.
+    from blackwing.incident_identity import resolve_incident_reference
+    source_incident_id = resolve_incident_reference(narrative, source_incident_id)
     if not source_incident_id:
         source_incident_id = next((
             str(row["incident_id"])
@@ -361,14 +372,15 @@ async def analyze_incident(
     narrative_evidence = _case_narrative_evidence(case_id, narrative)
     # The user's submitted account is reportable as an observation, not as an
     # independently verified finding. Keep it scoped to this analysis run.
-    run_evidence = [narrative_evidence, *(evidence or [])]
+    supplied_cards = synthetic_accounts(narrative, case_id)
+    run_evidence = [narrative_evidence, *supplied_cards, *(evidence or [])]
     run_agent_evidence = None
     if agent_evidence is not None:
         run_agent_evidence = {key: list(rows) for key, rows in agent_evidence.items()}
         for role in ("investigation", "compliance", "risk", "mitigation", "critic", "verification"):
             rows = run_agent_evidence.get(role, [])
             # Put user narrative first so it survives each agent's bounded packet.
-            run_agent_evidence[role] = [narrative_evidence, *[
+            run_agent_evidence[role] = [narrative_evidence, *supplied_cards, *[
                 row for row in rows
                 if str(row.get("evidence_id") or row.get("chunk_id")) != narrative_evidence["evidence_id"]
             ]]
@@ -413,7 +425,7 @@ async def analyze_incident(
 
     outputs = dict(final_state["outputs"])
     generated_report = outputs.pop("report", None)
-    # Retain the evidence-grounded provisional 5x5 risk assessment.
+    # Retain the evidence-grounded categorical reference risk assessment.
     trace = [
         *final_state["trace"],
         *tool_events,

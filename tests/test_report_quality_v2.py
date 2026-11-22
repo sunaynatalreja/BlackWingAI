@@ -186,7 +186,7 @@ def test_ui_displays_both_independent_scores_and_preserves_workspace(backend):
     at.session_state["workspace_view"] = "case"
     at.session_state["workspace_case"] = case["incident"]["case_id"]
     at.run()
-    assert not at.exception and len(at.tabs) == 9
+    assert not at.exception and len(at.tabs) == 3
     metrics = {metric.label: metric.value for metric in at.metric}
     assert metrics["Prompt Completeness"] == str(assess_quality(case["incident"])["score"]) + "%"
     assert metrics["Report Completeness"] == str(assess_quality(case["incident"], case["report"])["score"]) + "%"

@@ -8,6 +8,8 @@ import os
 from typing import Any, Awaitable, Callable
 from uuid import uuid4
 
+import httpx
+
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Response, status
 
 from blackwing.config import Settings
@@ -35,6 +37,7 @@ from blackwing.service import analyze_incident
 from blackwing.rag.retriever import retriever
 from blackwing.tools import retrieve_evidence, tool_audit
 from blackwing.diagnostics import lifecycle_event, safe_error
+from blackwing.incident_identity import resolve_incident_reference, declared_intake_metadata
 
 AnalysisRunner = Callable[..., Awaitable[dict[str, Any]]]
 logger = logging.getLogger("blackwing.runs")
@@ -95,7 +98,7 @@ def _run_response(run: dict[str, Any]) -> RunResponse:
 async def _execute_run(
     run_id: str,
     case: dict[str, Any],
-    retrieved: list[dict[str, Any]],
+    retrieved: list[dict[str, Any]] | None,
     settings: Settings,
     repo: MemoryRepository,
     runner: AnalysisRunner,
@@ -134,14 +137,14 @@ def _record_run_failure(run_id, case, repo, exc, *, interrupted=False):
 async def _execute_run_body(
     run_id: str,
     case: dict[str, Any],
-    retrieved: list[dict[str, Any]],
+    retrieved: list[dict[str, Any]] | None,
     settings: Settings,
     repo: MemoryRepository,
     runner: AnalysisRunner,
     use_agent_retrieval: bool = True,
 ) -> None:
+    case = {**case, "source_incident_id": resolve_incident_reference(case["narrative"], case.get("source_incident_id"))}
     repo.patch_run(run_id, {"status": "running", "started_at": datetime.now(timezone.utc)})
-    evidence = [*case.get("evidence", []), *retrieved]
     stored = repo.get_run(run_id) if hasattr(repo, "get_run") else {}
     invocation_events = list((stored or {}).get("preflight_trace", []))
     def record_event(event):
@@ -155,14 +158,39 @@ async def _execute_run_body(
                                "execution_steps": state.get("execution_steps", 0),
                                "progress": [{"step": e["step"], "status": e["status"]} for e in state.get("trace", [])] + [e for e in invocation_events if e.get("event_id")]})
         record_event({"step": "state_update", "status": "complete", "detail": state.get("trace", [])[-1:]})
-    record_event(lifecycle_event("workflow_execution", "execution_started", case_id=case["case_id"]))
+    record_event(lifecycle_event("workflow_execution", "execution_started", case_id=case["case_id"],
+        detail="Retrieval incident reference: " + str(case.get("source_incident_id") or "unspecified")))
+    if retrieved is None:
+        record_event(lifecycle_event("evidence_retrieval", "retrieval_started", case_id=case["case_id"],
+                                    detail="Searching the existing evidence index"))
+        def initial_retrieval():
+            query = " ".join(part for part in [case["narrative"], case.get("location"), "runway incursion"] if part)
+            with tool_audit(case["case_id"], record_event):
+                return retrieve_evidence(retriever.search,
+                    input_identifiers=[case.get("source_incident_id") or case["case_id"]],
+                    query=query, documents=repo.list_documents(), embedding_model=settings.rag_embedding_model,
+                    document_types=["incident_report", "regulation", "procedure", "guidance"],
+                    jurisdiction=case.get("jurisdiction"),
+                    incident_date=str(case.get("incident_date")) if case.get("incident_date") else None,
+                    limit=5)["results"]
+        try:
+            retrieved = await asyncio.to_thread(initial_retrieval)
+            status = "retrieval_completed"
+        except Exception:
+            retrieved = []
+            status = "retrieval_failed"
+        repo.patch_run(run_id, {"preflight_trace": [e for e in invocation_events if e.get("tool")]})
+        record_event(lifecycle_event("evidence_retrieval", status, case_id=case["case_id"]))
+    evidence = [*case.get("evidence", []), *retrieved]
     agent_evidence = None
     if use_agent_retrieval and os.getenv("BLACKWING_AGENT_RAG", "0") == "1":
         # Keep integration outside agent packages and UI. No LLM calls here.
         from blackwing.rag.agent_router import build_agent_packets
-        try:
+        record_event(lifecycle_event("evidence_retrieval", "retrieval_started", case_id=case["case_id"],
+                                    detail="Preparing agent-specific evidence packets"))
+        def agent_retrieval():
             with tool_audit(case["case_id"], record_event):
-                agent_evidence = retrieve_evidence(build_agent_packets, input_identifiers=[case["case_id"]],
+                return retrieve_evidence(build_agent_packets, input_identifiers=[case["case_id"]],
                     retriever=retriever, narrative=case["narrative"],
                     case_id=case.get("source_incident_id") or case["case_id"],
                     jurisdiction=case.get("jurisdiction"), incident_date=str(case.get("incident_date"))
@@ -170,8 +198,11 @@ async def _execute_run_body(
                     documents=repo.list_documents(), uploaded_evidence=case.get("evidence", []),
                     embedding_model=settings.rag_embedding_model,
                     method=os.getenv("BLACKWING_AGENT_RAG_METHOD", "hybrid").strip().lower(),
-                    limit_per_agent=3,
+                    limit_per_agent=5,
                 )
+        try:
+            agent_evidence = await asyncio.to_thread(agent_retrieval)
+            record_event(lifecycle_event("evidence_retrieval", "retrieval_completed", case_id=case["case_id"]))
         except Exception:
             from blackwing.rag.agent_router import AGENT_ROLES, _case_uploads
             uploads = _case_uploads(case.get("evidence", []), case.get("source_incident_id") or case["case_id"])
@@ -250,6 +281,10 @@ async def create_case(
 ) -> CaseResponse:
     case_id = str(uuid4())
     payload = request.model_dump(mode="json")
+    for key, value in declared_intake_metadata(payload['narrative']).items():
+        if payload.get(key) is None:
+            payload[key] = value
+    payload["source_incident_id"] = resolve_incident_reference(payload["narrative"], payload.get("source_incident_id"))
     evidence = []
     for item in payload.pop("evidence", []):
         evidence.append({**item, "evidence_id": str(uuid4()), "created_at": datetime.now(timezone.utc).isoformat()})
@@ -324,28 +359,12 @@ async def create_analysis_run(
     case = _case_or_404(repo, case_id)
     if case["status"] == "analysis_running":
         raise HTTPException(status_code=409, detail="An analysis run is already active for this case")
-    query = " ".join(part for part in [case["narrative"], case.get("location"), "runway incursion"] if part)
     run_id = str(uuid4())
     run = repo.create_run(run_id, case_id, request.workflow, settings.model_name)
-    preflight = []
-    def record(event):
-        preflight.append(event)
-        repo.append_event(run_id, event)
-    with tool_audit(case_id, record):
-        try:
-            retrieved = retrieve_evidence(
-                retriever.search, input_identifiers=[case.get("source_incident_id") or case_id],
-                query=query, documents=repo.list_documents(), embedding_model=settings.rag_embedding_model,
-                document_types=["incident_report", "regulation", "procedure", "guidance"],
-                jurisdiction=case.get("jurisdiction"),
-                incident_date=str(case.get("incident_date")) if case.get("incident_date") else None,
-                limit=5,
-            )["results"] if request.include_retrieval else []
-        except Exception:
-            # Continue with uploads, disclose retrieval failure, never invent sources.
-            retrieved = []
-    repo.patch_run(run_id, {"preflight_trace": preflight})
-    background.add_task(_execute_run, run_id, case, retrieved, settings, repo, runner, request.include_retrieval)
+    # Return 202 before retrieval or inference. Their synchronous adapters run
+    # in worker threads so health, status, trace and UI polling remain responsive.
+    background.add_task(_execute_run, run_id, case, None if request.include_retrieval else [],
+                        settings, repo, runner, request.include_retrieval)
     return _run_response(run)
 
 
@@ -547,17 +566,36 @@ _gold_locks: dict[str, asyncio.Lock] = {}
 
 
 def _gold_context(case_id, run_id, repo):
-    from blackwing.gold_comparison import match_gold, report_hash, VERSION, gold_path
+    from blackwing.gold_comparison import match_gold, report_hash, VERSION, gold_path, comparison_progress
     case = _case_or_404(repo, case_id)
     run = repo.get_run(run_id)
     if not run or run['case_id'] != case_id:
         raise HTTPException(status_code=404, detail='Report run not found')
     if run['status'] != 'completed' or not run.get('result'):
         raise HTTPException(status_code=409, detail='A completed report is required for gold comparison.')
-    report = ReportResponse.model_validate({
-        'case_id':case_id,'run_id':run_id,'case_status':case['status'],
-        'analysis_status':'completed','report':run['result'],'reviews':[],'is_final':False,
-        'notice':'Human review required.'}).report.model_dump(mode='json')
+    from pydantic import ValidationError
+    try:
+        report = ReportResponse.model_validate({
+            'case_id':case_id,'run_id':run_id,'case_status':case['status'],
+            'analysis_status':'completed','report':run['result'],'reviews':[],'is_final':False,
+            'notice':'Human review required.'}).report.model_dump(mode='json')
+    except ValidationError:
+        item = match_gold(case)
+        context = {'status':'not_assessable','score':None,'label':'Gold comparison score',
+            'error_code':'legacy_report_schema_incompatible', 'reference_case':bool(item),
+            'reason':'This saved report does not satisfy the current backend schema. '
+                     'Its risk values and history have not been converted. Create a new investigation '
+                     'with the current backend before comparison; the original report is preserved.'}
+        if item:
+            context.update(gold_id=item['gold_id'],gold_case=item['case_label'])
+        return case, run, {}, context
+    from blackwing.case_inputs import is_synthetic_case
+    if is_synthetic_case(case.get('narrative')):
+        from blackwing.synthetic_gold import context as synthetic_context
+        context = synthetic_context(case, report, run)
+        if run.get('gold_comparison_error') and context.get('status') != 'proposed':
+            context['last_error'] = run['gold_comparison_error']
+        return case, run, report, context
     item = match_gold(case)
     context = {'status':'not_applicable','score':None,'label':'Gold comparison score',
                'reason':'No uniquely matching preserved gold case; fictional and unrelated cases are not compared.'}
@@ -571,7 +609,7 @@ def _gold_context(case_id, run_id, repo):
         cached = run.get('gold_comparison') or {}
         if (context['status'] != 'unavailable' and cached.get('report_hash') == report_hash(report)
                 and cached.get('gold_sha256') == item['sha256'] and cached.get('rubric_version') == VERSION):
-            context = cached
+            context = comparison_progress(cached)
     if run.get('gold_comparison_error') and context.get('status') not in {'proposed','not_applicable'}:
         context['last_error'] = run['gold_comparison_error']
     return case, run, report, context
@@ -596,7 +634,10 @@ async def create_gold_comparison(case_id: str, run_id: str,
         if active:
             raise HTTPException(status_code=409, detail='Wait for active investigations to finish before gold comparison.')
         try:
-            result = await compare_report(case, report, run_id, settings)
+            if cached['status'] == 'evaluation_incomplete':
+                result = await compare_report(case, report, run_id, settings, prior=cached)
+            else:
+                result = await compare_report(case, report, run_id, settings)
         except Exception as exc:
             from pypdf.errors import DependencyError
             diagnostic = safe_error(exc)
@@ -617,3 +658,7 @@ async def create_gold_comparison(case_id: str, run_id: str,
             raise HTTPException(status_code=503, detail=error) from exc
         repo.patch_run(run_id, {'gold_comparison':result,'gold_comparison_error':None})
         return result
+
+
+from blackwing.qa_routes import build_router as build_qa_router
+app.include_router(build_qa_router(get_repository, get_settings))

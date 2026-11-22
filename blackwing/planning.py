@@ -1,5 +1,6 @@
 """Deterministic investigation planning and evidence-gated correction policy."""
 from blackwing.agents.critic.grounding import audit_critic_output
+from blackwing.case_inputs import synthetic_risk_unassessed
 
 MAX_EXECUTION_STEPS = 10
 CORRECTABLE = {"ungrounded_fact": "investigation", "ungrounded_hazard": "risk",
@@ -18,6 +19,9 @@ def plan_investigation(state):
              "risk": "model_then_reference_tool_per_hazard", "mitigation": "model_with_hazard_links",
              "critic": "model_and_deterministic_audit", "verification": "model_and_deterministic_checks",
              "report": "deterministic_assembly"}
+    abstain_risk = synthetic_risk_unassessed(state, sources("risk"))
+    if abstain_risk:
+        modes["risk"] = "unassessed_synthetic"
     return {"task_modes": modes, "tool_requirements": {
                 "retrieve_evidence": "preflight retrieval when requested; use supplied evidence otherwise",
                 "find_similar_incidents": "compare supplied historical records, including explicit no-match results",
@@ -26,7 +30,7 @@ def plan_investigation(state):
             "decisions": {"investigation": "ground supplied evidence; preserve unknowns",
                           "similar_case": "compare historical records separately",
                           "compliance": "compare authoritative rules" if has_rules else "unassessed: authoritative rules missing",
-                          "risk": "score only supported severity and likelihood",
+                          "risk": "unassessed: unverified synthetic accounts provide no rated-input basis" if abstain_risk else "score only supported severity and likelihood",
                           "correction": "one evidence-gated target; unresolved issues require human review"},
             "source_counts": {role: len(sources(role)) for role in ("investigation", "similar_case", "compliance", "risk")},
             "max_execution_steps": MAX_EXECUTION_STEPS, "max_corrections": 1}
@@ -47,7 +51,8 @@ def correction_target(state):
             packets = state.get("agent_evidence")
             evidence = packets.get(role, []) if packets is not None else state.get("evidence", [])
             if any(str(e.get("source_type") or e.get("document_type")) in {"official_factual", "official_preliminary", "user_submitted", "user_report"}
-                   and e.get("evidence_role") not in {"historical_analogy", "historical"} for e in evidence):
+                   and e.get("evidence_role") not in {"historical_analogy", "historical"}
+                   and not str(e.get("chunk_id") or e.get("evidence_id") or "").startswith("CASE-NARRATIVE:") for e in evidence):
                 return role
     return None
 

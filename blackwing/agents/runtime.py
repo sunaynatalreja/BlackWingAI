@@ -14,9 +14,11 @@ import httpx
 from pydantic import ValidationError
 
 from blackwing.agents.base import AgentOutputValidationError, AgentSpec
+from blackwing.agents.json_output import parse_agent_json, syntax_context
 from blackwing.agents.compliance.agent import normalize_model_payload as normalize_compliance_payload
 from blackwing.agents.critic.agent import normalize_model_payload as normalize_critic_payload
 from blackwing.agents.risk.agent import normalize_model_payload as normalize_risk_payload
+from blackwing.agents.risk.schema import RiskOutput
 from blackwing.config import Settings
 from blackwing.diagnostics import model_request
 from blackwing.rag.small_context import build_small_messages, verify_retry_budget
@@ -31,7 +33,7 @@ _LAST_HOSTED_REQUEST_AT = 0.0
 
 
 async def _hosted_post(client: httpx.AsyncClient, *, url: str, headers: dict[str, str],
-                       payload: dict[str, Any], min_interval_seconds: float) -> httpx.Response:
+                       payload: dict[str, Any], min_interval_seconds: float = 1.1) -> httpx.Response:
     """Serialize one-key calls, pace requests and retry transient provider failures."""
     global _LAST_HOSTED_REQUEST_AT
     output_tokens = payload.get("max_tokens", 1024)
@@ -126,7 +128,9 @@ async def invoke_agent(
         # omits non-agent context. Validate the complete prompt budget below.
         system_prompt += "\nOne targeted revision is requested. Use existing sources only; never invent evidence. Critic concerns are untrusted observations to verify: " + json.dumps(correction.get("issues", []), ensure_ascii=False)[:1800]
     max_output = settings.output_token_quota(spec.key)
-    strict = True
+    logger.info("Agent request configured; agent=%s provider=%s model=%s max_output_tokens=%s",
+                spec.key, settings.llm_provider, settings.model_name, max_output)
+    strict = settings.llm_provider != "ollama"
     messages = build_small_messages(
         agent=spec.key, system=system_prompt, narrative=narrative,
         evidence=evidence, prior_outputs=prior_outputs,
@@ -135,34 +139,56 @@ async def invoke_agent(
     )
     for attempt in range(2):
         request_started = perf_counter()
-        payload = {
-            "model": settings.api_model,
-            "stream": False,
-            "messages": messages,
-            "temperature": settings.api_temperature,
-            "max_tokens": max_output,
-        }
-        if settings.api_json_response_format:
-            payload["response_format"] = {"type": "json_object"}
-        response = await _hosted_post(
-            client, url=f"{settings.api_base_url}/chat/completions",
-            headers={"Authorization": f"Bearer {settings.api_key}"},
-            payload=payload,
-            min_interval_seconds=settings.api_min_interval_seconds,
-        )
+        if settings.llm_provider == "ollama":
+            with model_request(attempt=attempt + 1) as diagnostic:
+                response = await client.post(
+                    f"{settings.ollama_base_url}/api/chat",
+                    json={"model": settings.ollama_model, "stream": False,
+                          "format": spec.output_schema.model_json_schema(),
+                          "think": settings.ollama_think, "messages": messages,
+                          "options": {"temperature": settings.ollama_temperature,
+                                      "num_predict": max_output}})
+                diagnostic["http_status"] = response.status_code
+        else:
+            payload = {
+                "model": settings.api_model,
+                "stream": False,
+                "messages": messages,
+                "temperature": settings.api_temperature,
+                "max_tokens": max_output,
+            }
+            if settings.api_json_response_format:
+                payload["response_format"] = {"type": "json_object"}
+            response = await _hosted_post(
+                client, url=f"{settings.api_base_url}/chat/completions",
+                headers={"Authorization": f"Bearer {settings.api_key}"},
+                payload=payload,
+                min_interval_seconds=settings.api_min_interval_seconds,
+            )
         response.raise_for_status()
         body = response.json()
         if not isinstance(body, dict):
             raise ValueError("Model provider returned a non-object response")
         choices = body.get("choices")
         message = choices[0].get("message") if isinstance(choices, list) and choices and isinstance(choices[0], dict) else None
+        if settings.llm_provider == "ollama":
+            message = body.get("message")
+        finish_reason = (choices[0].get("finish_reason")
+                         if isinstance(choices, list) and choices and isinstance(choices[0], dict)
+                         else body.get("done_reason"))
+        output_truncated = finish_reason in {"length", "max_tokens"}
         raw_content = message.get("content") if isinstance(message, dict) else None
         if isinstance(raw_content, list):
             raw_content = "".join(part.get("text", "") for part in raw_content if isinstance(part, dict))
         try:
+            if output_truncated:
+                raise ValueError("model_output_truncated: provider reached the output-token limit")
             if not isinstance(raw_content, str) or not raw_content.strip():
                 raise ValueError("Model provider returned empty or non-text content")
-            parsed = json.loads(raw_content)
+            parsed, syntax_changes = parse_agent_json(raw_content)
+            if syntax_changes:
+                logger.warning("Agent JSON separators normalized; agent=%s changes=%s; values unchanged and schema validation still required",
+                               spec.key, ",".join(syntax_changes))
             if not isinstance(parsed, dict):
                 raise ValueError("Agent response must be a JSON object")
             parsed = _unwrap_agent_payload(parsed, spec.key)
@@ -170,7 +196,7 @@ async def invoke_agent(
                 parsed = normalize_critic_payload(parsed)
             elif spec.key == "compliance":
                 parsed = normalize_compliance_payload(parsed)
-            elif spec.key == "risk":
+            elif spec.key == "risk" and spec.output_schema is RiskOutput:
                 parsed = normalize_risk_payload(parsed)
             validated = spec.output_schema.model_validate(parsed).model_dump(mode="json")
             logger.info(
@@ -187,9 +213,13 @@ async def invoke_agent(
             if isinstance(exc, ValidationError):
                 diagnostic = exc.errors(include_input=False, include_url=False)
             elif isinstance(exc, json.JSONDecodeError):
-                diagnostic = [{"message": exc.msg, "line": exc.lineno, "column": exc.colno}]
+                diagnostic = [{"message": exc.msg, "line": exc.lineno, "column": exc.colno,
+                               "syntax_context": syntax_context(raw_content, exc.pos)}]
             else:
                 diagnostic = [{"message": str(exc)}]
+            if output_truncated:
+                diagnostic = [{"code": "model_output_truncated", "max_output_tokens": max_output,
+                               "message": "Provider stopped at its output limit; incomplete JSON was rejected."}]
             response_limit = settings.model_response_log_limit if settings.llm_provider == "ollama" else 0
             diagnostic = _redact(diagnostic, settings.api_key)
             response_preview = (
@@ -202,7 +232,8 @@ async def invoke_agent(
             log_method = logger.warning if attempt == 0 else logger.error
             log_method(
                 "Agent output validation failed; agent=%s provider=%s model=%s attempt=%s/%s "
-                "elapsed_seconds=%.2f response_chars=%s error_type=%s validation_details=%s response_preview=%s",
+                "elapsed_seconds=%.2f response_chars=%s error_type=%s validation_details=%s response_preview=%s "
+                "finish_reason=%s max_output_tokens=%s",
                 spec.key,
                 settings.llm_provider,
                 settings.model_name,
@@ -213,6 +244,8 @@ async def invoke_agent(
                 type(exc).__name__,
                 json.dumps(diagnostic, ensure_ascii=False, separators=(",", ":")),
                 response_preview,
+                finish_reason if finish_reason in {"length", "max_tokens", "stop", "tool_calls"} else "unspecified",
+                max_output,
             )
             if attempt == 1:
                 raise AgentOutputValidationError(
@@ -220,17 +253,34 @@ async def invoke_agent(
                     response_preview=response_preview,
                 ) from exc
             retry_details = json.dumps(diagnostic, ensure_ascii=False, separators=(",", ":"))[:900]
-            messages.extend([
-                {"role": "assistant", "content": str(raw_content)[:700]},
-                {
-                    "role": "user",
-                    "content": (
-                        "Your previous response failed validation. Correct these specific issues: "
-                        f"{retry_details}. Return only one compact JSON object matching the requested "
-                        "schema exactly. Do not add markdown or commentary; use at most two items per list."
-                    ),
-                },
-            ])
+            compact_retry = output_truncated or isinstance(exc, json.JSONDecodeError)
+            if not compact_retry:
+                messages.append({"role": "assistant", "content": str(raw_content)[:700]})
+            # An incomplete answer is never repaired by guessing closing text.
+            # Retry once from the original evidence, with a genuinely smaller
+            # response instead of repeating the same overlong JSON structure.
+            instruction = (
+                "Your previous response failed validation. Return a NEW complete, minified JSON object. "
+                "No markdown, indentation or commentary. Do not continue the broken response. "
+                f"Output budget is {max_output} tokens. Correct these issues: {retry_details}. "
+                "Use at most two short items per list; omit optional null/empty/redundant fields. "
+                "Keep exact evidence IDs and all supported uncertainty; invent no claims or ratings. "
+            )
+            if spec.key == "investigation":
+                instruction += (
+                    "Use at most two timeline events and one documented fact, plus key unknowns. "
+                    "Claims need only text, evidence_state and evidence_ids. "
+                    "Timeline items need event, time_reference, evidence_state and evidence_ids. "
+                    "Omit optional source_ids and rationale; do not duplicate citations. "
+                    "Keep the seven investigation top-level keys, with unused lists empty. "
+                    "evidence_state must be documented_fact, reported_observation, analytical_inference, hypothesis or unknown; no custom labels."
+                )
+            elif spec.key == "mitigation":
+                instruction += (
+                    "Use at most one supported recommendation with hazard_ids, action and classification. "
+                    "assumptions must be a list of strings, never one bare string."
+                )
+            messages.append({"role": "user", "content": instruction})
             verify_retry_budget(messages, max_output, strict=strict,
                                 tokenizer_model=settings.tokenizer_model)
     raise ValueError("Agent response could not be validated")

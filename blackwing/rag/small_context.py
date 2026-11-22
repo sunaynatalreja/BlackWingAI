@@ -322,8 +322,8 @@ def build_small_messages(*, agent: str, system: str, narrative: str,
                          strict_tokens: bool = False,
                          tokenizer_model: str = "Qwen/Qwen3-8B") -> list[dict[str, str]]:
     """Fit one agent request to a conservative token budget, or refuse preflight."""
-    if not 1 <= output_tokens < HARD_TOTAL_TOKENS:
-        raise ValueError(f"Per-call model output must be between 1 and {HARD_TOTAL_TOKENS - 1} tokens")
+    if not 1 <= output_tokens <= 1024:
+        raise ValueError(f"Per-call model output must be between 1 and 1024 tokens")
     limit = HARD_TOTAL_TOKENS - output_tokens - TOKEN_SAFETY_MARGIN
     report_agent = agent.startswith("report")
     payload = {

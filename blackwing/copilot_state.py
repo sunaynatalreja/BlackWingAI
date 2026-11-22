@@ -100,7 +100,8 @@ def report_availability(runs, report):
 
 
 def execution_label(progress):
-    labels = {"agent_started": "Agent started", "waiting_for_model_response": "Waiting for model response",
+    labels = {"retrieval_started": "Retrieving evidence", "retrieval_completed": "Evidence retrieved",
+              "retrieval_failed": "Retrieval unavailable; checking supplied evidence", "agent_started": "Agent started", "waiting_for_model_response": "Waiting for model response",
               "agent_completed": "Agent completed", "agent_failed": "Agent failed",
               "execution_interrupted": "Execution interrupted", "execution_failed": "Investigation failed",
               "model_request_failed": "Model request failed", "model_response_received": "Model response received",

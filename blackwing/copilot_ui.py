@@ -114,14 +114,15 @@ def show_review(case):
             st.rerun()
 
 
-def show_evidence(case):
+def show_evidence(case, *, include_quality=True):
     st.subheader("Evidence gaps")
     incident = case["incident"]
     checklist = build_evidence_checklist({**incident, "event_date": incident.get("incident_date")},
                                         [{"text": e["excerpt"]} for e in case["evidence"]])
     st.caption("Preserved source-branch checklist: topic mentions in supplied text, not verified facts or a requirement to obtain protected final reports.")
     st.dataframe(checklist, hide_index=True, alt="Evidence topic coverage checklist")
-    quality_panel(incident, case["report"])
+    if include_quality:
+        quality_panel(incident, case["report"])
     st.subheader("Submitted sources")
     for item in case["evidence"]:
         with st.expander(item["title"]):
@@ -243,35 +244,21 @@ def workspace(case, render_report):
         st.json(latest.get("progress") or [])
     report = case["report"] or {}
     roles = report.get("agent_outputs") or {}
-    labels = ("Q&A", "Overview and timeline", "Historical comparison", "Regulatory context", "Hazards and risk", "Mitigation plan", "Evidence and verification", "Report", "Run history")
-    tabs = st.tabs(labels)
+    tabs = st.tabs(["Investigation report", "Agent details", "Run trace"])
     with tabs[0]:
-        show_saved_qa(case)
-    with tabs[1]:
-        st.subheader("Case overview")
-        st.text(incident["narrative"])
-        st.json(roles.get("investigation") or {"status": "Not yet investigated"})
-    with tabs[2]:
-        st.info("Historical incidents, including voluntary ASRS reports, are analogies only and cannot establish current-case findings.")
-        st.json(roles.get("similar_case") or {"status": "Not yet investigated"})
-    with tabs[3]:
-        st.caption(f"Jurisdiction · {incident.get('jurisdiction') or 'unspecified'} · Date · {incident.get('incident_date') or 'unspecified'}")
-        st.info("Verify issuing authority, effective edition and local applicability before any compliance conclusion.")
-        st.json(roles.get("compliance") or {"overall_applicability": "not_assessed"})
-    with tabs[4]:
-        show_risk(report)
-    with tabs[5]:
-        st.subheader("Hazard-linked mitigation plan")
-        st.json(roles.get("mitigation") or {"recommendations": []})
-    with tabs[6]:
-        show_evidence(case)
-        st.subheader("Critic findings")
-        st.json(roles.get("critic") or {"issues": []})
-        st.subheader("Verification")
-        st.json(roles.get("verification") or {"human_approval_required": True})
-    with tabs[7]:
+        quality_panel(incident, case["report"])
         show_report(case, render_report)
-    with tabs[8]:
+    with tabs[1]:
+        st.subheader("Source agent work products")
+        st.caption("Historical analogies cannot establish current-case findings.")
+        for name, output in roles.items():
+            with st.expander(name.replace("_", " ").title()):
+                st.json(output)
+        show_risk(report)
+        # Preserve Sunayana's original evidence checklist and human review.
+        show_evidence(case, include_quality=False)
+        show_saved_qa(case)
+    with tabs[2]:
         if case["runs"]:
             selected = st.selectbox("Inspect a backend run", [r["run_id"] for r in reversed(case["runs"])], key="history-run")
             if st.button("Load trace and audit", key="load-trace"):
@@ -343,7 +330,10 @@ def show_gold_comparison(case):
             st.info('Restart FastAPI with the updated code to enable gold comparison.')
             return
         raise
-    reference_case = bool(result.get('gold_id'))
+    reference_case = result.get('reference_case', bool(result.get('gold_id')))
+    policy_mode = result.get('comparison_mode') == 'synthetic_safety_policy'
+    if result.get('scope_notice'):
+        st.caption(result['scope_notice'])
     if result.get('last_error'):
         st.error(result['last_error']['message'])
     if result['status'] in {'not_applicable','unavailable'}:
@@ -354,8 +344,11 @@ def show_gold_comparison(case):
     if result['status'] in {'not_requested','evaluation_incomplete'}:
         st.metric('Gold comparison score', 'Not assessed')
         if result['status'] == 'evaluation_incomplete':
-            st.warning('The comparison could not be validated. No numerical score has been assigned.')
-        if st.button('Compare with gold report', key='compare-gold-'+case['report_run_id']):
+            st.warning('Some comparisons need validation. No final numerical score has been assigned. '
+                       'Validated judgments are preserved; retry checks only the remaining items.')
+        button_label = ('Retry unvalidated comparisons' if result['status'] == 'evaluation_incomplete'
+                        else 'Compare with gold evaluation' if policy_mode else 'Compare with gold report')
+        if st.button(button_label, key='compare-gold-'+case['report_run_id']):
             try:
                 with st.spinner('Comparing the completed report with its matching gold reference…'):
                     result = copilot.compare_with_gold(case['incident']['case_id'],case['report_run_id'])
@@ -371,11 +364,21 @@ def show_gold_comparison(case):
                 st.error('Gold comparison connection failed. The report is preserved; refresh before retrying.')
                 return reference_case
             st.rerun()
-        return reference_case
-    st.metric('Gold comparison score', f"{result['score']:g}/100" if result.get('score') is not None else 'Not assessable')
+    else:
+        st.metric('Gold comparison score', f"{result['score']:g}/100" if result.get('score') is not None else 'Not assessable')
+    if result.get('reason'):
+        st.info(result['reason'])
+    if result.get('comparisons'):
+        rows = result['comparisons']
+        validated = sum(not bool(row.get('validation_error')) for row in rows)
+        st.caption(f"Validated comparisons: {validated}/{len(rows)}. Pending: {len(rows)-validated}. "
+                   'An evaluator failure does not mean the report claim is false.')
     st.caption(result.get('method',''))
     st.info(result.get('notice','Human review required.'))
-    st.caption(f"Factual claims compared: {result.get('factual_claims',0)}. Run: {case['report_run_id']}")
+    if policy_mode:
+        st.caption(f"Applicable safety policies compared: {result.get('criteria_compared',0)}; not applicable: {result.get('criteria_not_applicable',0)}. Incident facts were not gold-validated.")
+    else:
+        st.caption(f"Factual claims compared: {result.get('factual_claims',0)}. Run: {case['report_run_id']}")
     if result.get('comparisons'):
         st.dataframe(result['comparisons'], hide_index=True, alt='Claim comparisons with matching gold-page quotations')
     if result.get('improvements'):

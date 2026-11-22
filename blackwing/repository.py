@@ -31,6 +31,20 @@ class MemoryRepository:
         # The approved dataset index is configured separately. Do not seed a
         # protected final report into in-memory retrieval documents.
         self.documents: dict[str, dict[str, Any]] = {}
+        self.qa_answers: dict[str, dict[str, Any]] = {}
+
+    def save_qa_answer(self, answer_id: str, record: dict[str, Any]) -> dict[str, Any]:
+        with self._lock:
+            self.qa_answers[answer_id] = record
+            return record
+
+    def get_qa_answer(self, answer_id: str) -> dict[str, Any] | None:
+        with self._lock:
+            return self.qa_answers.get(answer_id)
+
+    def list_qa_answers(self) -> list[dict[str, Any]]:
+        with self._lock:
+            return sorted(self.qa_answers.values(), key=lambda r: r["created_at"], reverse=True)
 
     def create_case(self, case_id: str, data: dict[str, Any]) -> dict[str, Any]:
         timestamp = now()
@@ -227,7 +241,7 @@ class SQLiteRepository(MemoryRepository):
         self._db.execute("PRAGMA synchronous=FULL")
         self._db.execute("CREATE TABLE IF NOT EXISTS records (kind TEXT, id TEXT, payload TEXT NOT NULL, PRIMARY KEY(kind,id))")
         self._db.execute("CREATE TABLE IF NOT EXISTS audit_events (run_id TEXT, sequence INTEGER, payload TEXT NOT NULL, PRIMARY KEY(run_id,sequence))")
-        for kind in ("cases", "runs", "reviews", "documents"):
+        for kind in ("cases", "runs", "reviews", "documents", "qa_answers"):
             rows = self._db.execute("SELECT id,payload FROM records WHERE kind=?", (kind,)).fetchall()
             if rows:
                 setattr(self, kind, {key: json.loads(payload, object_hook=_decode) for key, payload in rows})
@@ -253,7 +267,7 @@ class SQLiteRepository(MemoryRepository):
 
     def _flush(self):
         with self._db:
-            for kind in ("cases", "runs", "reviews", "documents"):
+            for kind in ("cases", "runs", "reviews", "documents", "qa_answers"):
                 self._db.executemany("INSERT OR REPLACE INTO records VALUES (?,?,?)", [
                     (kind, key, json.dumps(value, default=_encode))
                     for key, value in getattr(self, kind).items()])
@@ -282,7 +296,7 @@ def _durable_mutation(name):
     return mutate
 
 
-for _method in ("create_case", "update_case", "add_evidence", "create_run", "patch_run", "add_review", "add_document"):
+for _method in ("create_case", "update_case", "add_evidence", "create_run", "patch_run", "add_review", "add_document", "save_qa_answer"):
     setattr(SQLiteRepository, _method, _durable_mutation(_method))
 
 

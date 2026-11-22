@@ -35,10 +35,11 @@ def test_citations_remain_true_ids():
     assert x["effective_date"] == "2024-01-01"
 
 
-def test_compact_output_remains_bounded_and_warns_truncation():
+def test_full_narrative_is_preserved_within_token_budget():
     messages = build_small_messages(agent="risk", system="Generate JSON", narrative="X" * 4000,
                                     evidence=DOCS, prior_outputs={}, upstream_roles=(), output_tokens=512)
-    assert "TRUNCATED" in messages[1]["content"]
+    import json
+    assert json.loads(messages[1]["content"])["incident_narrative"] == "X" * 4000
     assert "PAST-1" not in messages[1]["content"]
 
 
