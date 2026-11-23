@@ -1,0 +1,135 @@
+{
+  "approval": "Arun & Sunayna approve",
+  "branch": "feature/arun-rag-risk-compliance",
+  "repository": "C:\\Users\\arunk\\OneDrive\\Desktop\\Capstone Project - IIT\\BLACKWING_AI_PILOT_MASTER PROJECT\\BLACKWING_AI_REORG\\BlackWingAI-Arun-Git",
+  "rubric_version": "synthetic_policy_v2",
+  "files": [
+    {
+      "path": "blackwing/agents/critic/grounding.py",
+      "sha256_before": "1ee5fb885f4d37b334464fce24ff37f419edecfca8e821e160c7b1273bd6b1a9",
+      "sha256_after": "6997e2bb8292e9759f7f18ce2012d19afc0fe85685f49d3d16188f2a1a13043b"
+    },
+    {
+      "path": "blackwing/agents/critic/prompt.md",
+      "sha256_before": "bc287e7d1a15539742fe72976d504b2ed2eafa53ff3c235db1f76b3906843a53",
+      "sha256_after": "cdce906ef898811093d579a0e6b47a766a6aab696aa4a15aec1b6066d9113ec9"
+    },
+    {
+      "path": "blackwing/agents/investigation/prompt.md",
+      "sha256_before": "b64beec00ce5843f85f53feaec1549f959b89f6c95246b62775a6bc6b43224d3",
+      "sha256_after": "9baa85b066488544a9b9c5c38b01f7a89713b42cf7c85daf22a02a40eed7ff94"
+    },
+    {
+      "path": "blackwing/agents/report/workflow.py",
+      "sha256_before": "0903f09f5e303ebc827ae3102ac04d3ee8addbab3384ec4279be1881cea2dabe",
+      "sha256_after": "c954d9f8d66564517597026e060112ec22b2a55e5b7f2366a13750f3cc29827f"
+    },
+    {
+      "path": "blackwing/agents/verification/prompt.md",
+      "sha256_before": "6fd8af8df41dd4c5600793a96ef7ea7d6bee83b5479d719c041aa9fe89c83f99",
+      "sha256_after": "1aa87deec90770d5140040fad58d633d1c6883309943ab17eea0a44a61e5455a"
+    },
+    {
+      "path": "blackwing/case_inputs.py",
+      "sha256_before": "0a46dec848decff4b26c6a01cb522ad17054d517ee9f9a1c0b47fda99e04a076",
+      "sha256_after": "65ba96500fc515d10a1115c1b3fcd32f8799753319a4f6e27e95e92de09d2f7a"
+    },
+    {
+      "path": "blackwing/synthetic_gold.py",
+      "sha256_before": "280a751421d07686f002e74cbfe6a7e45db9b37432934794ce7dd17624d0f5b2",
+      "sha256_after": "204de41754190ea9354f05e1246dcb2b5f2cae54496a5d6e1f413093c4794ccf"
+    },
+    {
+      "path": "tests/test_synthetic_report_scoring.py",
+      "sha256_before": null,
+      "sha256_after": "8959fb0a307600f099e5189daf19436aee5975690983d928b856860575790f5e"
+    }
+  ],
+  "validation": {
+    "focused_tests_passed": 43,
+    "full_suite_rerun": false,
+    "runs": [
+      {
+        "tests_passed": 42,
+        "command": "python -m pytest -q tests/test_synthetic_report_scoring.py tests/test_report_provenance.py tests/test_five_agent_grounding.py tests/test_gold_comparison.py --tb=short"
+      },
+      {
+        "tests_passed": 1,
+        "command": "python -m pytest -q tests/test_synthetic_report_scoring.py::test_synthetic_score_reaches_existing_ui_endpoint_and_cached_reads_use_no_judge --tb=short"
+      }
+    ],
+    "test_location": "Isolated staging copy; applied files verified byte-for-byte identical.",
+    "provider_transport": "mocked; external networking blocked in tests",
+    "saved_report_checks": [
+      {
+        "run_id": "4c102e79-bd51-413e-b2d0-ff65ab9fb837",
+        "case_id": "3cc2c2dd-41d1-47bd-a7da-da948536257c",
+        "saved_summary": "A training crew received a taxi-route amendment but did not fully read it due to a cabin call.",
+        "prospective_attributed_summary": "Unverified fictional scenario. Supplied account: \"ORIGINAL FICTIONAL training scenario at Birch Ferry Airport. A training crew reports receiving a taxi-route amendment while a cabin call interrupted the readback. The controller note records an acknowledgement but does not identify the words used. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.\"",
+        "saved_report_changed": false,
+        "visible_report_fields": 37,
+        "exact_packet_input_token_min": 1370,
+        "exact_packet_input_token_max": 1379,
+        "output_reserve": 768,
+        "safety_reserve": 256,
+        "fits_8192": true,
+        "risk_status_preserved": "unassessed_insufficient_inputs",
+        "live_laaJ_score": null,
+        "hosted_calls": 0,
+        "notice": "Offline formatting and input-budget check only. No model judgment or numerical report score produced."
+      },
+      {
+        "run_id": "0c38e41e-cb1f-4901-afdf-5b29cbbaeab0",
+        "case_id": "ec80e691-e0fe-4a6a-8f63-459e11c8f3f1",
+        "saved_summary": "An operations vehicle inspected a runway light, but its position relative to the protected area is unclear.",
+        "prospective_attributed_summary": "Unverified fictional scenario. Supplied account: \"ORIGINAL FICTIONAL training scenario at Coral Basin Aerodrome. An operations vehicle was tasked with checking a runway light. A radio note says the inspection ended, while a camera screenshot cannot place the vehicle relative to the protected area. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.\"",
+        "saved_report_changed": false,
+        "visible_report_fields": 38,
+        "exact_packet_input_token_min": 1399,
+        "exact_packet_input_token_max": 1408,
+        "output_reserve": 768,
+        "safety_reserve": 256,
+        "fits_8192": true,
+        "risk_status_preserved": "unassessed_insufficient_inputs",
+        "live_laaJ_score": null,
+        "hosted_calls": 0,
+        "notice": "Offline formatting and input-budget check only. No model judgment or numerical report score produced."
+      }
+    ],
+    "live_laaJ_score": null,
+    "hosted_model_calls": 0
+  },
+  "preservation": {
+    "guarded_files": 15,
+    "mismatches": 0,
+    "assets": [
+      {
+        "group": "gold",
+        "checked_files": 13,
+        "changed": 0
+      },
+      {
+        "group": "index",
+        "checked_files": 18,
+        "changed": 0
+      }
+    ],
+    "ui_layout_changed": false,
+    "completeness_weights_changed": false,
+    "aviation_risk_matrix_changed": false,
+    "rag_index_rebuilt": false,
+    "saved_reports_rewritten": false
+  },
+  "usage": [
+    "Restart FastAPI in the terminal with the existing IIT environment configured.",
+    "Refresh the existing Streamlit page. No Streamlit layout changes were made.",
+    "Generate a new investigation to use the revised summary and agent prompts. Saved reports remain unchanged.",
+    "Click Compare with gold report on a saved synthetic report to request the new safety-policy LaaJ.",
+    "The first comparison under rubric v2 evaluates five policies. Older v1 judgments are not silently reused.",
+    "Further retries reuse validated compatible v2 results and judge only unresolved items.",
+    "Report completeness, synthetic-policy adherence and aviation risk remain separate."
+  ],
+  "committed": false,
+  "merged": false,
+  "pushed": false
+}

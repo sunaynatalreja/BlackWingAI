@@ -1,0 +1,333 @@
+{
+  "date": "2026-11-24",
+  "approval": "Arun & Sunayna approve",
+  "branch": "feature/arun-rag-risk-compliance",
+  "repository": "C:\\Users\\arunk\\OneDrive\\Desktop\\Capstone Project - IIT\\BLACKWING_AI_PILOT_MASTER PROJECT\\BLACKWING_AI_REORG\\BlackWingAI-Arun-Git",
+  "supersedes_status_only": "BLACKWING_TASK_LIST_LAAJ_RECALL_20261123; original review remains historical",
+  "applied_files": [
+    {
+      "path": "blackwing/agents/risk/prompt.md",
+      "sha256_before": "ffbfea09f48d7d2906aa37f52036555aa526a580f2adc7b1b30ac5b6f10c5d96",
+      "sha256_after": "80be02ad3a6d484f8cefd23cf449b49a62fcfb33fa882fe6350f547e6319a68b"
+    },
+    {
+      "path": "blackwing/agents/verification/prompt.md",
+      "sha256_before": "635886ec0e2490007a47c98fb3a5090462a7257a2b76818560d15a725840e40d",
+      "sha256_after": "6fd8af8df41dd4c5600793a96ef7ea7d6bee83b5479d719c041aa9fe89c83f99"
+    },
+    {
+      "path": "blackwing/api.py",
+      "sha256_before": "fe4286ab33812819a2927b166d298a534c6065e4e2a6b5629a7d12f0bd898c99",
+      "sha256_after": "361eb0e9ecae6d0fa4b8de09393f169ee3b50dbb23fbe8394b59f3f4ccf2d5fe"
+    },
+    {
+      "path": "blackwing/evaluation/__init__.py",
+      "sha256_before": null,
+      "sha256_after": "ca088f1916385bca4e4ad587558c591111de9efa65725e0c4c27804cf80a86ea"
+    },
+    {
+      "path": "blackwing/evaluation/cli.py",
+      "sha256_before": null,
+      "sha256_after": "62f928014d2e46fedac78370ec66a8392433b50cfa371d468886af4c577b8ecc"
+    },
+    {
+      "path": "blackwing/evaluation/materials.py",
+      "sha256_before": null,
+      "sha256_after": "70c736f1624e08877cc062ffdd11e636092de0d25c7afa735a9d92fcdd464a48"
+    },
+    {
+      "path": "blackwing/evaluation/report_judge.py",
+      "sha256_before": null,
+      "sha256_after": "f55efae4f226930e84acd5f50ab6adda4921257e97d66f88c660bd0dd0d90989"
+    },
+    {
+      "path": "blackwing/evaluation/retrieval.py",
+      "sha256_before": null,
+      "sha256_after": "cd255b5f748bc1f3c824786b5bd78972baa28e7dcd10c7c54706f76a77541ae1"
+    },
+    {
+      "path": "blackwing/evaluation_routes.py",
+      "sha256_before": null,
+      "sha256_after": "e165aca55483ddebcbd25c1521b80acb09d20a54c2d04957275d1dbb14645f84"
+    },
+    {
+      "path": "blackwing/rag/prompt_baseline.py",
+      "sha256_before": "da2413c7904e421a111dab8c8d08d19f003f13f80c0b0c15c04ce8ca925eea11",
+      "sha256_after": "941507703cb6addad26e4853cd79f33ab8931f9762920e2415de2d8d59087ab0"
+    },
+    {
+      "path": "blackwing/rag/small_context.py",
+      "sha256_before": "f6f9c1ddd3eec068670082485472d22b1808f9572a66019367e2c20145eb306f",
+      "sha256_after": "0a84b5aa8bfa4b91f0a7a4ef6bb5e8c920c3f6c18386c4ceaade4b18734b2182"
+    },
+    {
+      "path": "docs/vscode-evaluation.txt",
+      "sha256_before": null,
+      "sha256_after": "c80324cbd45c959ef1877c6697d32db1916ae5b4526466cdd043d6e7230d1095"
+    },
+    {
+      "path": "evaluation_results/recall5q_20261123/bm25_metrics.json",
+      "sha256_before": null,
+      "sha256_after": "55a465291d4a444bd35560b6624a895b122eae9159b53cae1782099132f42882"
+    },
+    {
+      "path": "evaluation_results/recall5q_20261123/bm25_rankings.json",
+      "sha256_before": null,
+      "sha256_after": "f935aeaebf3abe5d48388bd092de53ea13cfe783ed0ee819d6115ac719e63f75"
+    },
+    {
+      "path": "evaluation_results/recall5q_20261123/qrels_document.json",
+      "sha256_before": null,
+      "sha256_after": "4af4ba9c8d94b54b55e525bdcad4fe9cd40786f8a047174d494ec90b95912911"
+    },
+    {
+      "path": "evaluation_results/report_quality_audit_20261124/completeness_audit.json",
+      "sha256_before": null,
+      "sha256_after": "571925270db8a587bfed355b9d34622cae2a4080cd6c29090175cf739aafcbfe"
+    },
+    {
+      "path": "evaluation_results/report_quality_audit_20261124/JFK_token_preflight.json",
+      "sha256_before": null,
+      "sha256_after": "e2b4aebd344d544a9b381ab78a52eb268d0e733aa140189dcea86ad53ed33f6d"
+    },
+    {
+      "path": "scripts/report_evaluation.ps1",
+      "sha256_before": null,
+      "sha256_after": "82aa1729ef93e3cf2527af36640433efaa91c2660c00f75c267dc0975829f81f"
+    },
+    {
+      "path": "tests/test_chat_token_count.py",
+      "sha256_before": null,
+      "sha256_after": "cbf48019adc865fe1b6519a882929768d2419db7c575523f2c6449e7addfc13c"
+    },
+    {
+      "path": "tests/test_question_report_evaluation.py",
+      "sha256_before": null,
+      "sha256_after": "4551f646f7f9e7a881d6668aee1e5b9914da809107ef8b0de1b1f6488b279a13"
+    },
+    {
+      "path": "tests/test_responsive_run.py",
+      "sha256_before": "ee2fbab50ce1db60da060cda4db286e8c3195ecf36f2732579737f6336018366",
+      "sha256_after": "8d5be10d28e9f6903de210a2b62587178b4373a9a165bed21fa230ee00572f64"
+    },
+    {
+      "path": "tests/test_retrieval_recall.py",
+      "sha256_before": null,
+      "sha256_after": "6f43d4cfe3a455527ae288da2f9d7a098e9b536a709d41f1a69fcf2a89e1f69c"
+    },
+    {
+      "path": "tests/test_streamlit_integration.py",
+      "sha256_before": "d256190d1efdaffa14618609581d82937077f1da317f07ff80bf9c0e8eb2ddf5",
+      "sha256_after": "0665b0bdfc56ac67dd0b8273331e835544c4d61f6b194d2b09f4769b70f93171"
+    }
+  ],
+  "regression": {
+    "command": "python -m pytest -q --tb=short",
+    "location": "C:\\Users\\arunk\\OneDrive\\Desktop\\Capstone Project - IIT\\BLACKWING_AI_PILOT_MASTER PROJECT\\BLACKWING_AI_REORG\\BlackWingAI-Arun-Git",
+    "tests": 263,
+    "passed": 263,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "providers": "mocked; outbound networking blocked"
+  },
+  "completeness": {
+    "cached": false,
+    "saved_reports_audited": 15,
+    "distribution": {
+      "97": 10,
+      "92": 2,
+      "62": 2,
+      "54": 1
+    },
+    "reason_for_97": "Critic review and issue handling: 2/5; three points lost. Preserve unresolved issues.",
+    "rubric_version": "2.1",
+    "weights_changed_in_this_batch": false
+  },
+  "retrieval": {
+    "unit": "document",
+    "method": "BM25; document ranked by best passage",
+    "questions": 5,
+    "eligible_sources": 50,
+    "index_source_records": 777,
+    "recall_at_5": 0.4,
+    "recall_at_10": 0.5333333333333333,
+    "scope_limit": "Only 50 reviewed unchanged sources. Not whole-corpus, passage or dense/hybrid/rerank recall."
+  },
+  "question_evaluation": {
+    "backend": "IMPLEMENTED_OFFLINE_TESTED",
+    "endpoint": "/api/v1/cases/{case_id}/runs/{run_id}/report-evaluation",
+    "post": "Explicit background job; consumes model quota only when requested",
+    "get": "Saved status; no model call",
+    "features": [
+      "Evaluate answers present in the saved report, not hidden agent outputs",
+      "Question-specific matching gold excerpts and quote validation",
+      "Separate input answerability and justified abstention",
+      "Deterministic question aggregation; withhold unresolved scores",
+      "Incremental SQLite persistence and interrupted-process recovery",
+      "Cache bound to report/run/reference/anchors/model/prompt/input identity"
+    ],
+    "saved_JFK_preparation": {
+      "questions": 10,
+      "hosted_calls": 0,
+      "score": null,
+      "input_tokens_min": 2384,
+      "input_tokens_max": 2639,
+      "output_reserve": 768,
+      "safety_reserve": 256,
+      "all_fit_8192": true
+    },
+    "UI_connection": "COMPLETED_OFFLINE_VALIDATED: question evaluation integrated into existing Gold comparison score panel; legacy claim/policy scope retained only where approved question coverage is unavailable.",
+    "live_validation": "PENDING: controlled IIT pilot and human calibration. No hosted inference calls or actual-case question scores produced.",
+    "UI_behavior": "Read-only status on display; explicit click queues inference; refresh reads persisted progress. Scores appear only for validated completed question evaluation."
+  },
+  "risk_verification_prompts": "Structured internal evidence checks and concise public rationales added; no private reasoning transcript or schema/risk-matrix changes.",
+  "token_preflight_fix": "Count tokenizer input_ids, not BatchEncoding mapping fields; shared and baseline paths fixed.",
+  "preservation": {
+    "protected_assets": [
+      {
+        "group": "gold",
+        "files_checked": 13,
+        "changed_files": []
+      },
+      {
+        "group": "index",
+        "files_checked": 18,
+        "changed_files": []
+      }
+    ],
+    "layout_risk_scorer_workflow_guards": 13,
+    "guard_mismatches": 0,
+    "applied_files_checked": 10,
+    "applied_file_mismatches": 0
+  },
+  "remaining": [
+    {
+      "priority": 1,
+      "task": "Controlled seen-case IIT pilot, compare quoted judgments manually, calibrate then freeze the evaluator."
+    },
+    {
+      "priority": 2,
+      "task": "Complete passage-level and dense/hybrid/reranker qrels/rankings; present scope and unavailable results honestly."
+    },
+    {
+      "priority": 3,
+      "task": "Resolve independent input/reference/provenance gaps for seven of the ten additional candidates; do not treat all ten as ready."
+    },
+    {
+      "priority": 4,
+      "task": "Run frozen seen/unseen UI evaluation and assemble submission evidence, traces and packaging."
+    }
+  ],
+  "committed": false,
+  "merged": false,
+  "pushed": false,
+  "indexes_rebuilt": false,
+  "UI_runtime_check": {
+    "type": "MOCK_ONLY_STREAMLIT_RUNTIME_CHECK",
+    "model_calls": 0,
+    "saved_case_writes": 0,
+    "actual_case_score": null,
+    "snapshots": [
+      {
+        "stage": "runtime_open",
+        "status": "ready",
+        "observed_at": "2026-11-23T19:43:08Z",
+        "mock_score_display": [
+          "Not assessed"
+        ],
+        "submissions": [
+          "Mock evaluation submissions: 0"
+        ]
+      },
+      {
+        "stage": "runtime_rerun",
+        "status": "ready",
+        "observed_at": "2026-11-23T19:44:01Z",
+        "mock_score_display": [
+          "Not assessed"
+        ],
+        "submissions": [
+          "Mock evaluation submissions: 0"
+        ]
+      },
+      {
+        "stage": "runtime_queued",
+        "status": "ready",
+        "observed_at": "2026-11-23T19:44:22Z",
+        "mock_score_display": [
+          "Not assessed"
+        ],
+        "submissions": [
+          "Mock evaluation submissions: 1"
+        ]
+      },
+      {
+        "stage": "runtime_completed",
+        "status": "ready",
+        "observed_at": "2026-11-23T19:44:42Z",
+        "mock_score_display": [
+          "75/100"
+        ],
+        "submissions": [
+          "Mock evaluation submissions: 1"
+        ]
+      }
+    ],
+    "notice": "75/100 is a synthetic UI fixture value, not a measured BLACKWING report score. Temporary servers were stopped."
+  },
+  "ui_connection_files": [
+    {
+      "path": "blackwing/copilot.py",
+      "sha256_before": "8aeb4c37588331cd59fdbc074f76b04f133182efb0f4e3aa282ad39e8c2ab493",
+      "sha256_after": "56a2863af6c926f5aea5ccc807632b90b8607943e5ff36394f619a4d91921526"
+    },
+    {
+      "path": "blackwing/copilot_ui.py",
+      "sha256_before": "b7b37723cad5ca5b490515a45a817fd46fc6e8356e6b91c79a8560932825c998",
+      "sha256_after": "8f3ce0160f03b979abfbc55cd45cb5e58db25de7e697abf1a6f3ec1e7f6c985e"
+    },
+    {
+      "path": "blackwing/evaluation/materials.py",
+      "sha256_before": "70c736f1624e08877cc062ffdd11e636092de0d25c7afa735a9d92fcdd464a48",
+      "sha256_after": "8c784650c8057b3d9cc95d56f6086326484a4d199d310638557cb295a93f8185"
+    },
+    {
+      "path": "blackwing/evaluation/report_judge.py",
+      "sha256_before": "f55efae4f226930e84acd5f50ab6adda4921257e97d66f88c660bd0dd0d90989",
+      "sha256_after": "f57630b1e9778b2764b45931d20ee79aa862b5984ab3396e57306595203a1ca1"
+    },
+    {
+      "path": "blackwing/evaluation_routes.py",
+      "sha256_before": "e165aca55483ddebcbd25c1521b80acb09d20a54c2d04957275d1dbb14645f84",
+      "sha256_after": "d86e5b99fad395958e8f30742f2bea92db513f5363cb52d1459c8392043577dc"
+    },
+    {
+      "path": "blackwing/evaluation_ui.py",
+      "sha256_before": null,
+      "sha256_after": "591a6fc592c16b40dbd6b107db6243a63029d3f30fd23c2405c1a515745827b2"
+    },
+    {
+      "path": "docs/vscode-evaluation.txt",
+      "sha256_before": "c80324cbd45c959ef1877c6697d32db1916ae5b4526466cdd043d6e7230d1095",
+      "sha256_after": "20bdb1bf4431001e2226840c8e5239ce66e0af04b4ff6f7d765aa96f9ce181ee"
+    },
+    {
+      "path": "tests/test_gold_comparison.py",
+      "sha256_before": "6841c668d3d1d6573161340ad5d234287ec1c9f1bdaacf91a9587765ea4877a5",
+      "sha256_after": "e22e45b36351ebbace284c64d71fffc99dcdaf154dc454444f9d58bb9519858d"
+    },
+    {
+      "path": "tests/test_report_evaluation_ui.py",
+      "sha256_before": null,
+      "sha256_after": "da7e49d919eb661f44c0330dae5bbb9baa28c36126579956fdb9a8274de1fa3f"
+    },
+    {
+      "path": "tests/test_report_display_and_gold_errors.py",
+      "sha256_before": "2fcdbeacccfac962402b8304c9e47775743a646fcb132284266ee182881ef801",
+      "sha256_after": "6f896dacc5621118ed58c7e62970dddf7d3b0af627807bfa490fa5a843df2175"
+    }
+  ],
+  "UI_layout": "Existing layout, tabs, Q&A page, report rendering, aviation risk calculation, completeness weights and original evidence checklist preserved. Only existing comparison-panel behavior connected.",
+  "temporary_servers_running": false
+}

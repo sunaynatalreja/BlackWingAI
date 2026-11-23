@@ -1,0 +1,12 @@
+[
+  {
+    "path": "blackwing/synthetic_gold.py",
+    "sha256_before": "204de41754190ea9354f05e1246dcb2b5f2cae54496a5d6e1f413093c4794ccf",
+    "sha256_after": "6937199ee9e5f5dbbe1824aa20127e8f817ba99d06fbfcf943d6f7179fccca72"
+  },
+  {
+    "path": "tests/test_synthetic_report_scoring.py",
+    "sha256_before": "8959fb0a307600f099e5189daf19436aee5975690983d928b856860575790f5e",
+    "sha256_after": "d2bef3f63e9e8a504efb920eef2358dfb488f290b742aafccaf34d85efab107e"
+  }
+]

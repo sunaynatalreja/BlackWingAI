@@ -1,0 +1,53 @@
+{
+  "type": "MOCK_ONLY_STREAMLIT_RUNTIME_CHECK",
+  "model_calls": 0,
+  "saved_case_writes": 0,
+  "actual_case_score": null,
+  "snapshots": [
+    {
+      "stage": "runtime_open",
+      "status": "ready",
+      "observed_at": "2026-11-23T19:43:08Z",
+      "mock_score_display": [
+        "Not assessed"
+      ],
+      "submissions": [
+        "Mock evaluation submissions: 0"
+      ]
+    },
+    {
+      "stage": "runtime_rerun",
+      "status": "ready",
+      "observed_at": "2026-11-23T19:44:01Z",
+      "mock_score_display": [
+        "Not assessed"
+      ],
+      "submissions": [
+        "Mock evaluation submissions: 0"
+      ]
+    },
+    {
+      "stage": "runtime_queued",
+      "status": "ready",
+      "observed_at": "2026-11-23T19:44:22Z",
+      "mock_score_display": [
+        "Not assessed"
+      ],
+      "submissions": [
+        "Mock evaluation submissions: 1"
+      ]
+    },
+    {
+      "stage": "runtime_completed",
+      "status": "ready",
+      "observed_at": "2026-11-23T19:44:42Z",
+      "mock_score_display": [
+        "75/100"
+      ],
+      "submissions": [
+        "Mock evaluation submissions: 1"
+      ]
+    }
+  ],
+  "notice": "75/100 is a synthetic UI fixture value, not a measured BLACKWING report score. Temporary servers were stopped."
+}

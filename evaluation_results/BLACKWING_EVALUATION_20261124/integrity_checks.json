@@ -1,0 +1,18 @@
+{
+  "protected_assets": [
+    {
+      "group": "gold",
+      "files_checked": 13,
+      "changed_files": []
+    },
+    {
+      "group": "index",
+      "files_checked": 18,
+      "changed_files": []
+    }
+  ],
+  "layout_risk_scorer_workflow_guards": 13,
+  "guard_mismatches": 0,
+  "applied_files_checked": 10,
+  "applied_file_mismatches": 0
+}

@@ -1,0 +1,52 @@
+[
+  {
+    "path": "blackwing/copilot.py",
+    "sha256_before": "8aeb4c37588331cd59fdbc074f76b04f133182efb0f4e3aa282ad39e8c2ab493",
+    "sha256_after": "56a2863af6c926f5aea5ccc807632b90b8607943e5ff36394f619a4d91921526"
+  },
+  {
+    "path": "blackwing/copilot_ui.py",
+    "sha256_before": "b7b37723cad5ca5b490515a45a817fd46fc6e8356e6b91c79a8560932825c998",
+    "sha256_after": "8f3ce0160f03b979abfbc55cd45cb5e58db25de7e697abf1a6f3ec1e7f6c985e"
+  },
+  {
+    "path": "blackwing/evaluation/materials.py",
+    "sha256_before": "70c736f1624e08877cc062ffdd11e636092de0d25c7afa735a9d92fcdd464a48",
+    "sha256_after": "8c784650c8057b3d9cc95d56f6086326484a4d199d310638557cb295a93f8185"
+  },
+  {
+    "path": "blackwing/evaluation/report_judge.py",
+    "sha256_before": "f55efae4f226930e84acd5f50ab6adda4921257e97d66f88c660bd0dd0d90989",
+    "sha256_after": "f57630b1e9778b2764b45931d20ee79aa862b5984ab3396e57306595203a1ca1"
+  },
+  {
+    "path": "blackwing/evaluation_routes.py",
+    "sha256_before": "e165aca55483ddebcbd25c1521b80acb09d20a54c2d04957275d1dbb14645f84",
+    "sha256_after": "d86e5b99fad395958e8f30742f2bea92db513f5363cb52d1459c8392043577dc"
+  },
+  {
+    "path": "blackwing/evaluation_ui.py",
+    "sha256_before": null,
+    "sha256_after": "591a6fc592c16b40dbd6b107db6243a63029d3f30fd23c2405c1a515745827b2"
+  },
+  {
+    "path": "docs/vscode-evaluation.txt",
+    "sha256_before": "c80324cbd45c959ef1877c6697d32db1916ae5b4526466cdd043d6e7230d1095",
+    "sha256_after": "20bdb1bf4431001e2226840c8e5239ce66e0af04b4ff6f7d765aa96f9ce181ee"
+  },
+  {
+    "path": "tests/test_gold_comparison.py",
+    "sha256_before": "6841c668d3d1d6573161340ad5d234287ec1c9f1bdaacf91a9587765ea4877a5",
+    "sha256_after": "e22e45b36351ebbace284c64d71fffc99dcdaf154dc454444f9d58bb9519858d"
+  },
+  {
+    "path": "tests/test_report_evaluation_ui.py",
+    "sha256_before": null,
+    "sha256_after": "da7e49d919eb661f44c0330dae5bbb9baa28c36126579956fdb9a8274de1fa3f"
+  },
+  {
+    "path": "tests/test_report_display_and_gold_errors.py",
+    "sha256_before": "2fcdbeacccfac962402b8304c9e47775743a646fcb132284266ee182881ef801",
+    "sha256_after": "6f896dacc5621118ed58c7e62970dddf7d3b0af627807bfa490fa5a843df2175"
+  }
+]

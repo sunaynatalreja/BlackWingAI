@@ -1,0 +1,31 @@
+BIRCH FERRY POLICY EVALUATOR FOLLOW-UP — 24 NOVEMBER 2026
+Arun & Sunayna approve
+
+Applied two files on feature/arun-rag-risk-compliance:
+blackwing/synthetic_gold.py and tests/test_synthetic_report_scoring.py.
+
+The saved run's summary and risk abstention are working. Its 0/5 policy judgments
+were evaluator failures: the first confused policy adherence with deciding an actual
+regulatory breach; the other four failed quotation/schema validation.
+
+The revised judge receives one explicit report-safety check plus the approved
+policy and exact visible-report excerpts. It returns only status, excerpt_id and
+a brief rationale. The backend resolves exact report/reference quotations and
+revalidates them. No points are self-awarded by the model or inferred from an ID.
+Unresolved judgments continue to withhold the score. Weights are unchanged.
+
+11 focused tests passed using mocked providers. No full-suite rerun. The latest
+saved Birch Ferry packet was checked offline: 1210–1215 input tokens plus 768
+output and 256 safety reserve fit 8192. No live semantic evaluation or numerical
+case score was produced during this repair. Mock scores are fixture values only.
+
+NEXT: Restart FastAPI in your existing configured IIT terminal:
+python -m uvicorn blackwing.api:app --host 127.0.0.1 --port 8001
+
+Refresh the UI, open THIS EXISTING completed Birch Ferry report and click Compare
+with gold report. A new investigation is unnecessary. The first v3 comparison
+requests five policy judgments; retries reuse compatible validated v3 judgments.
+The existing report and old evaluation are not retroactively rewritten by this fix.
+
+UI layout, aviation risk and completeness weights are unchanged. No IIT/Ollama
+calls, index rebuild, protected-gold edit, commit, merge or push were performed.

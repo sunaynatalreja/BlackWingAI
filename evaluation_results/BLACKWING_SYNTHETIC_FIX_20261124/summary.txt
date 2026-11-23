@@ -1,0 +1,42 @@
+BLACKWING SYNTHETIC REPORT / LAAJ FIX — 24 NOVEMBER 2026
+Arun & Sunayna approve
+
+Applied to BlackWingAI-Arun-Git, feature/arun-rag-risk-compliance.
+43 focused tests passed (42 targeted tests plus one additional API integration test).
+No full regression rerun. No IIT/Ollama inference or embedding calls.
+
+CHANGES
+- Synthetic executive/overview summaries retain an explicitly attributed quote of
+  the supplied scenario. A task is not rewritten as completed work; an interrupted
+  readback is not rewritten as proven failure to read or understand.
+- Investigation/Critic/Verification prompts preserve these distinctions, permit
+  justified abstention and distinguish historical analogies from identity conflicts.
+- Deterministic Critic accepts cited attributed accounts with disclosed unknowns,
+  recorded applicability limits and explicit evidence-based mitigation deferral.
+  Existing material model Critic issues are retained; no whitewashing is applied.
+- Synthetic-policy LaaJ uses flat visible-report fields with short exact quotations.
+  Empty-list/citation-only support and fabricated paths are rejected. Missing context
+  does not make the uncertainty safeguard inapplicable. Only action implementation
+  may be excluded when its condition does not apply.
+- Score aggregation counts validated applicable judgments accurately; unresolved
+  evaluations remain pending. Compatible validated v2 judgments are reused on retry.
+
+SAVED EXAMPLES
+Birch Ferry and Coral Basin were checked in memory using their actual saved inputs
+and agent outputs. Their prospective summaries preserve the supplied wording, risk
+remains unassessed, and exact policy input packets fit 8192 tokens. No saved report
+was changed and no live numerical LaaJ score was generated. Mock test scores do not
+measure these reports' quality or certify the hosted judge's semantic decisions.
+
+NEXT UI ACTION
+Restart FastAPI in your configured IIT terminal:
+python -m uvicorn blackwing.api:app --host 127.0.0.1 --port 8001
+
+Refresh the existing UI. To see revised summaries, generate a new investigation.
+To evaluate a saved report, click Compare with gold report. The first v2 comparison
+checks five policies; subsequent retries reuse compatible validated judgments.
+The button consumes IIT quota. Display/refresh alone does not run a judge.
+
+UI layout, completeness weights, original evidence checklist and categorical
+aviation-risk matrix are unchanged. All 13 checked protected-gold files and 18
+checked index files retain their hashes. No index rebuild, commit, merge or push.
