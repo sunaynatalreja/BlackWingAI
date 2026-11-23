@@ -1,0 +1,49 @@
+BLACKWING evidence and evaluation correction - 24 November 2026
+Approval: Arun & Sunayna approve
+Branch: feature/arun-rag-risk-compliance
+
+Target: 30 seen prompts + 20 unseen synthetic scenarios.
+The seen prompts are 10 Few-shot, 10 CoT and 10 Task decomposition variants
+over nine preserved reference incidents. They are not 30 distinct incidents.
+All 50 passed offline retrieval-query preparation. Live report validation is
+pending; no claim of 50 generated or accurately scored reports is made.
+
+Applied changes:
+- Explicitly insufficient severity/likelihood bases withhold the risk index.
+  The categorical matrix and framework remain unchanged.
+- Seen-case judge quotes must address the claimed operational action.
+  Missing reference support is pending, not zero or invented agreement.
+- Synthetic policy quotes must address the specific safeguard. All visible
+  report excerpts remain available to the judge for conflicting assertions.
+- The action safeguard can be excluded only when visible report text has no
+  proposed/implemented actions. Exclusion earns no points and requires no
+  model call. Empty proposal lists alone cannot establish inapplicability.
+- Retrieval uses case content, rather than prompt strategy/instruction text.
+  Historical analogy selection requires two nontrivial shared content terms.
+- Old evaluator versions are not silently reused. Investigation data is kept.
+
+Validation: 93 focused regression tests + 1 added pending-score test passed.
+Tests block external network/model downloads. No full-suite rerun was done.
+Two existing dependency deprecation warnings remain.
+Saved-report replay: San Diego D3/C4/E2 were withheld by the support guard.
+Two San Diego and two Alder Reach irrelevant cached quotations were rejected.
+Alder Reach with no actions qualifies for the action-applicability scope check.
+The SQLite database was read-only and saved reports were not rewritten.
+13 protected-gold and 18 existing-index file hashes matched their baselines.
+No model calls, embeddings, index rebuild, commit, merge or push occurred.
+UI layout and structural completeness weights/calculation are unchanged.
+
+Next UI check:
+1. Restart the existing configured FastAPI process on port 8001 so it loads
+   the revised Python modules. Refresh the Streamlit page.
+2. Generate San Diego and Alder Reach separately, using their existing two-
+   line entries. Earlier saved report bodies retain their previous outputs.
+3. Request a fresh comparison: legacy evaluator versions are invalidated.
+4. Inspect supporting quotations, uncertainty and risk evidence before
+   progressing through the remaining 30/20 prompt manifest.
+
+Scores remain independent: structural report completeness; gold comparison;
+categorical aviation risk. Synthetic gold comparison measures safety-policy
+adherence, not factual agreement with an authentic report for a fictional event.
+No new numerical LaaJ scores were produced during these offline checks.
+Lexical relevance guards are conservative checks, not semantic certification.

@@ -39,12 +39,16 @@ def declared_intake_metadata(narrative):
             if started:
                 break
             continue
-        match = re.fullmatch(r'(SOURCE INCIDENT ID|INCIDENT DATE|JURISDICTION|AIRPORT):[ \t]*(.*)',line)
-        if not match:
+        # Compact two-line prompts put the four routing fields on one line.
+        # Accept only explicit known labels; never mine dates from case prose.
+        matches = [re.fullmatch(r'(SOURCE INCIDENT ID|INCIDENT DATE|JURISDICTION|AIRPORT):[ \t]*(.*)',part.strip())
+                   for part in line.split(';')]
+        if not all(matches):
             break
         started = True
-        key = labels[match[1]]
-        found.setdefault(key,set()).add(match[2].strip())
+        for match in matches:
+            key = labels[match[1]]
+            found.setdefault(key,set()).add(match[2].strip())
     result = {}
     for key, values in found.items():
         if len(values) != 1:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from numbers import Integral
 import json
 from typing import Any, Mapping
 
@@ -273,15 +274,31 @@ def _tokenizer(model: str):
     return AutoTokenizer.from_pretrained(model, use_fast=True, local_files_only=True)
 
 
+def _token_id_count(encoded: Any) -> int:
+    """Count IDs, not BatchEncoding keys or the leading dimension of a batch."""
+    if isinstance(encoded, Mapping):
+        if "input_ids" not in encoded:
+            raise ValueError("Tokenizer output has no input_ids")
+        return _token_id_count(encoded["input_ids"])
+    if hasattr(encoded, "tolist"):
+        encoded = encoded.tolist()
+    if isinstance(encoded, (list, tuple)) and len(encoded) == 1 and isinstance(encoded[0], (list, tuple)):
+        return _token_id_count(encoded[0])
+    if (not isinstance(encoded, (list, tuple)) or not encoded
+            or any(not isinstance(item, Integral) or isinstance(item, bool) for item in encoded)):
+        raise ValueError("Tokenizer must return token IDs for one conversation")
+    return len(encoded)
+
+
 def count_input_tokens(messages: list[dict[str, str]], *, strict: bool,
                        tokenizer_model: str = "Qwen/Qwen3-8B") -> int:
     """For IIT-hosted operation, fail closed if exact local tokenizer unavailable."""
     if strict:
         try:
             ids = _tokenizer(tokenizer_model).apply_chat_template(messages, tokenize=True, add_generation_prompt=True)
+            return _token_id_count(ids)
         except Exception as exc:
             raise ValueError("Hosted token preflight unavailable: install/cache Qwen3 tokenizer locally") from exc
-        return len(ids)
     # Approximate count for non-hosted/mock flows; hosted requests use the exact tokenizer above.
     return sum((len(x["content"]) + 2) // 3 + 20 for x in messages)
 

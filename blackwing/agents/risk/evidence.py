@@ -7,12 +7,20 @@ citation integrity after the existing Risk Agent returns its typed JSON.
 from __future__ import annotations
 
 from typing import Any, Mapping, Sequence
+import re
 
 from blackwing.agents.risk.schema import RiskOutput
 
 _DIRECT_TYPES = {"official_factual", "official_preliminary", "user_submitted", "user_report"}
 _ADVISORY_TYPES = {"advisory", "guidance"}
 _HISTORICAL_ROLES = {"historical_analogy", "similar_case", "historical"}
+_INSUFFICIENT = re.compile(
+    r'\b(?:no|without|lack(?:s|ing)?(?: of)?|insufficient|inadequate)\s+'
+    r'(?:(?:direct|verified|incident-specific|supporting|adequate)\s+)*'
+    r'(?:evidence|data|support|basis|information|frequency|exposure|occurrence)\b'
+    r'|\b(?:cannot|unable to)\s+(?:assess|determine|establish|rate|verify)\b'
+    r'|\b(?:severity|likelihood|frequency|exposure)\s+(?:is |are |remains? )?'
+    r'(?:unknown|unverified|uncertain|not established|not determined)\b', re.I)
 
 
 def _reference(item: Mapping[str, Any]) -> str:
@@ -75,9 +83,13 @@ def ground_risk_output(
             and allowed[ref].get("evidence_status") != "SYNTHETIC_UNVERIFIED"
         ]
 
+        insufficient = any(_INSUFFICIENT.search(basis or '')
+                           for basis in (hazard.severity_basis, hazard.likelihood_basis))
+        if insufficient:
+            missing.append(f"Hazard {hazard.hazard_id}: supplied rating basis explicitly lacks support; severity/likelihood withheld pending verified evidence.")
         assessment = assess_reference_risk(
-            severity=hazard.severity,
-            likelihood=hazard.likelihood,
+            severity=None if insufficient else hazard.severity,
+            likelihood=None if insufficient else hazard.likelihood,
             evidence_ids=direct_ids,
             severity_basis=hazard.severity_basis,
             likelihood_basis=hazard.likelihood_basis,

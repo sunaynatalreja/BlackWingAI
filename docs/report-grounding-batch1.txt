@@ -1,0 +1,25 @@
+BLACKWING REPORT GROUNDING — BATCH 1, 23 NOVEMBER 2026
+
+Arun & Sunayna approve.
+Sunayana commit 5d3708d was reviewed; selected behavior was ported, without a merge.
+
+Report assembly now receives the provenance-bearing passages already supplied to each agent.
+Unverified accounts stay attributed; historical analogies cannot become current-case facts.
+Source/document IDs without an actual supplied passage cannot authenticate a report fact.
+Duplicate model text cannot upgrade a source-agent classification.
+Submitted accounts, unknowns, real conflicts, verification focus and unresolved Critic findings are retained.
+Report-section JSON shape aliases are normalized before validation. Empty model summaries fail validation.
+
+Completeness v2.1 preserves the v2 weights and original evidence checklist. It credits substantive
+attributed accounts as documentation while explicitly distinguishing them from verified facts.
+Empty/citation-only rows do not earn case coverage. This is not factual accuracy or aviation risk.
+Previously saved report/score records are not migrated or overwritten.
+
+UI layout, risk matrix/evidence policy, planner bounds, tools, SQLite contracts, startup settings
+and existing index are unchanged. No hosted model call or index build was performed.
+31 focused offline preview checks passed using mocked model IO, including AppTest.
+A stale three-tab test expectation was corrected to the existing five-tab layout; no UI source changed.
+Full regression and live IIT testing remain later validation steps.
+
+Next: prepare current-index qrels/Recall@5/10 and implement question-based saved-report LaaJ.
+The existing claim comparator remains in place; the new question evaluator is not part of this batch.

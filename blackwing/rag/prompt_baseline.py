@@ -149,7 +149,8 @@ def _tokens_preflight(messages: list[dict[str, str]], max_output: int) -> int:
             messages, tokenize=True, add_generation_prompt=True)
     except Exception as exc:
         raise RuntimeError("Qwen tokenizer unavailable: install/cache transformers + Qwen/Qwen3-8B before live run") from exc
-    count = len(tokens)
+    from blackwing.rag.small_context import _token_id_count
+    count = _token_id_count(tokens)
     if count + max_output > 8192:
         raise ValueError(f"token_budget: {count} input + {max_output} output > 8192")
     return count

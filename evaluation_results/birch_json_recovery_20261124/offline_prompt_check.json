@@ -1,0 +1,129 @@
+{
+  "synthetic_recovery_checks": [
+    {
+      "prompt_id": "BW-UNSEEN-001",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-002",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-003",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-004",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-005",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-006",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-007",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-008",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-009",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-010",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-011",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-012",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-013",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-014",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-015",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-016",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-017",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-018",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-019",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    },
+    {
+      "prompt_id": "BW-UNSEEN-020",
+      "supplied_observations": 1,
+      "documented_facts": 0,
+      "fallback_disclosed": true
+    }
+  ],
+  "seen_prompts_correctly_ineligible": 30,
+  "model_calls": 0,
+  "reports_generated": 0,
+  "scores_generated": 0,
+  "scope": "Literal-input recovery and schema checks only. No live case or judge evaluation."
+}

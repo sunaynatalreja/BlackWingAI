@@ -158,7 +158,8 @@ def test_streamlit_create_upload_run_review_and_exports(backend):
     at.button(key="analyze-incident").click().run()
     assert not at.exception and len(backend.runs) == 1 and len(backend.cases) == 1
     assert backend.list_cases(None, 100, 0)[0][0]["evidence"]
-    assert [tab.label for tab in at.tabs] == ["Investigation report", "Agent details", "Run trace"]
+    assert [tab.label for tab in at.tabs] == [
+        "Start an investigation", "Investigation report", "Agent details", "Run trace", "Q&A"]
     risk_frames = [df.value for df in at.dataframe if "Risk index" in df.value.columns]
     assert risk_frames[0].iloc[0]["Risk index"] == "C3"
     assert any("not a binding" in c.value for c in at.caption)

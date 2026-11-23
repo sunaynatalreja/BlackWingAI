@@ -1,0 +1,14 @@
+........................................................................ [ 77%]
+.....................                                                    [100%]
+============================== warnings summary ===============================
+..\..\..\..\..\..\Desktop\Capstone Project - IIT\BLACKWING_AI_PILOT_MASTER PROJECT\BLACKWING_AI_REORG\BlackWingAI-Arun-Git\.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\arunk\OneDrive\Desktop\Capstone Project - IIT\BLACKWING_AI_PILOT_MASTER PROJECT\BLACKWING_AI_REORG\BlackWingAI-Arun-Git\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+..\..\..\..\..\..\Desktop\Capstone Project - IIT\BLACKWING_AI_PILOT_MASTER PROJECT\BLACKWING_AI_REORG\BlackWingAI-Arun-Git\.venv\Lib\site-packages\langgraph\checkpoint\base\__init__.py:18
+  C:\Users\arunk\OneDrive\Desktop\Capstone Project - IIT\BLACKWING_AI_PILOT_MASTER PROJECT\BLACKWING_AI_REORG\BlackWingAI-Arun-Git\.venv\Lib\site-packages\langgraph\checkpoint\base\__init__.py:18: LangChainPendingDeprecationWarning: The default value of `allowed_objects` will change in a future version. Pass an explicit value (e.g., allowed_objects='messages' or allowed_objects='core') to suppress this warning.
+    from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\arunk\OneDrive\Documents\ChatGPT\Multi model RAG\tmp\blackwing_evidence_quality_fix_20261124\focused_tests.xml -
+93 passed, 2 warnings in 7.12s

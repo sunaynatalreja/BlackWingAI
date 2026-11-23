@@ -65,13 +65,24 @@ def test_score_is_separate_quote_validated_and_source_is_unchanged(reference):
     settings=SimpleNamespace(api_model='mock')
     async def judge(settings,claim,pages):
         return {'status':'supported' if claim.startswith('An aircraft') else 'partly_supported',
-            'gold_page':1,'gold_quote':'aircraft crossed runway 4L','rationale':'Compare the stated occurrence.'}
+            'gold_page':1,'gold_quote':'aircraft crossed runway 4L' if claim.startswith('An aircraft') else 'runway occupied alert occurred',
+            'rationale':'Compare the stated occurrence.'}
     result=asyncio.run(gold.compare_report({},report,'run-1',settings,judge=judge))
     assert result['score']==75
     assert result['label']=='Gold comparison score'
     assert result['human_review_required'] is True
     assert result['run_id']=='run-1' and len(result['improvements'])==1
     assert reference.read_bytes()==before
+
+
+def test_unverified_reference_support_is_pending_not_a_zero_score(reference):
+    async def judge(settings,claim,pages):
+        return {'status':'not_verified','gold_page':None,'gold_quote':'',
+                'rationale':'The selected reference excerpt does not establish this action.'}
+    result=asyncio.run(gold.compare_report({},report_with_facts('The aircraft crossed the runway.'),
+        'run',SimpleNamespace(api_model='mock'),judge=judge))
+    assert result['score'] is None and result['status']=='evaluation_incomplete'
+    assert result['pending_comparisons']==1 and result['comparisons'][0]['points'] is None
 
 
 def test_empty_claims_and_invalid_model_quote_do_not_get_numeric_scores(reference):
@@ -125,6 +136,7 @@ def test_post_generation_api_cache_bound_to_run_and_report(monkeypatch,tmp_path)
 
 def test_report_panel_shows_only_exact_label_and_no_automatic_model_call(monkeypatch):
     from blackwing import copilot
+    monkeypatch.setattr(copilot,'get_report_evaluation',lambda *args:{'legacy_fallback':True})
     monkeypatch.setattr(copilot,'get_gold_comparison',lambda *args:{'status':'proposed','score':75,
         'gold_case':'JFK','gold_id':'BW-HO-001','notice':'Human review required.','comparisons':[], 'factual_claims':2})
     def forbidden(*args): raise AssertionError('No model call on display')
@@ -137,6 +149,7 @@ def test_report_panel_shows_only_exact_label_and_no_automatic_model_call(monkeyp
 
 def test_unmatched_panel_has_no_compare_button(monkeypatch):
     from blackwing import copilot
+    monkeypatch.setattr(copilot,'get_report_evaluation',lambda *args:{'legacy_fallback':True})
     monkeypatch.setattr(copilot,'get_gold_comparison',lambda *args:{'status':'not_applicable','score':None,'reason':'Fictional case has no matching gold report.'})
     at=AppTest.from_string("from blackwing.copilot_ui import show_gold_comparison\nshow_gold_comparison({'incident':{'case_id':'case'},'report_run_id':'run'})").run()
     assert not at.exception and not at.button

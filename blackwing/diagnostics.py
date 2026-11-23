@@ -4,6 +4,7 @@ Sinks run synchronously before the model await. A successful sink return means
 the local repository transaction has committed, not merely queued an update.
 """
 import asyncio
+import json
 from contextlib import contextmanager
 from contextvars import ContextVar
 from datetime import datetime, timezone
@@ -61,6 +62,16 @@ def safe_error(exc, code=None):
     if code not in MESSAGES:
         code = "internal_agent_error"
     error = {"code": code, "type": type(origin).__name__, "message": MESSAGES[code]}
+    if isinstance(origin, json.JSONDecodeError):
+        # Persist parser location without response text, custom exception messages,
+        # credentials or document content. Unknown messages use a fixed label.
+        reason = {"Expecting ',' delimiter": "expected_comma",
+                  "Expecting ':' delimiter": "expected_colon",
+                  "Expecting value": "expected_value",
+                  "Expecting property name enclosed in double quotes": "expected_property_name",
+                  "Unterminated string starting at": "unterminated_string",
+                  "Extra data": "extra_data"}.get(origin.msg, "invalid_json")
+        error['json_error'] = {'reason': reason, 'line': origin.lineno, 'column': origin.colno}
     if isinstance(origin, ValidationError):
         error['validation_fields'] = [{'type':item['type'], 'location':list(item['loc'])}
                                       for item in origin.errors(include_input=False, include_url=False)[:12]]

@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="1.452" timestamp="2026-11-24T03:20:38.602296+05:30" hostname="ARUN-HP"><testcase classname="tests.test_gold_comparison" name="test_unverified_reference_support_is_pending_not_a_zero_score" time="0.458" /></testsuite></testsuites>

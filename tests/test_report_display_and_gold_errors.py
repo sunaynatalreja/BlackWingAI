@@ -70,6 +70,7 @@ def test_pdf_dependency_failure_is_sanitized_and_durable(monkeypatch,tmp_path):
 def test_ui_shows_actionable_gold_error_without_losing_case_match(monkeypatch):
     import httpx
     from blackwing import copilot
+    monkeypatch.setattr(copilot,'get_report_evaluation',lambda *args:{'legacy_fallback':True})
     monkeypatch.setattr(copilot,'get_gold_comparison',lambda *args:{'status':'not_requested','gold_id':'BW-HO-001','gold_case':'JFK'})
     def fail(*args):
         response=httpx.Response(503,request=httpx.Request('POST','http://test/'),json={'detail':{'code':'gold_pdf_crypto_missing','message':'Install project requirements and restart FastAPI.'}})

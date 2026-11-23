@@ -1,0 +1,90 @@
+{
+  "model_calls": 0,
+  "database_mode": "read-only",
+  "saved_reports_modified": false,
+  "risk_replay": [
+    {
+      "run_id": "8a2d1851-c630-48b2-a2ee-207be271e163",
+      "before_indices": [
+        "D3",
+        "C4",
+        "E2"
+      ],
+      "guarded_indices": [
+        null,
+        null,
+        null
+      ],
+      "guarded_status": "unassessed_insufficient_inputs",
+      "visible_actions": true
+    },
+    {
+      "run_id": "af73020f-bbb9-4677-a711-a80edab17562",
+      "before_indices": [],
+      "guarded_indices": [],
+      "guarded_status": "unassessed_insufficient_inputs",
+      "visible_actions": false
+    }
+  ],
+  "cached_judgment_relevance_replay": [
+    {
+      "run_id": "8a2d1851-c630-48b2-a2ee-207be271e163",
+      "criterion": "C1",
+      "previous_status": "contradicted",
+      "replay": "rejected: The quotation does not address the claimed operational action."
+    },
+    {
+      "run_id": "8a2d1851-c630-48b2-a2ee-207be271e163",
+      "criterion": "C2",
+      "previous_status": "partly_supported",
+      "replay": "rejected: The quotation does not address the claimed operational action."
+    },
+    {
+      "run_id": "af73020f-bbb9-4677-a711-a80edab17562",
+      "criterion": "BW-G061",
+      "previous_status": "supported",
+      "replay": "passes_relevance_guard"
+    },
+    {
+      "run_id": "af73020f-bbb9-4677-a711-a80edab17562",
+      "criterion": "BW-G062",
+      "previous_status": "supported",
+      "replay": "rejected: The quotation does not address this policy criterion."
+    },
+    {
+      "run_id": "af73020f-bbb9-4677-a711-a80edab17562",
+      "criterion": "BW-G069",
+      "previous_status": "supported",
+      "replay": "rejected: The quotation does not address this policy criterion."
+    },
+    {
+      "run_id": "af73020f-bbb9-4677-a711-a80edab17562",
+      "criterion": "BW-G072",
+      "previous_status": "partly_supported",
+      "replay": "passes_relevance_guard"
+    },
+    {
+      "run_id": "af73020f-bbb9-4677-a711-a80edab17562",
+      "criterion": "BW-G078",
+      "previous_status": "not_verified",
+      "replay": "pending_not_verified"
+    }
+  ],
+  "prompt_query_checks": {
+    "seen_prompts": 30,
+    "unseen_scenarios": 20,
+    "distinct_seen_references": 9,
+    "scope": "Query preparation only; report generation and numerical judge scores were not rerun."
+  },
+  "protected_checks": [
+    {
+      "baseline": "gold_hashes_before.json",
+      "unchanged_files": 13
+    },
+    {
+      "baseline": "index_hashes_before.json",
+      "unchanged_files": 18
+    }
+  ],
+  "note": "Relevance guards do not certify semantic entailment. No new numerical LaaJ scores were generated."
+}

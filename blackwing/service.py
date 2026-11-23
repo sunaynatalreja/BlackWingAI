@@ -59,7 +59,8 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
             evidence = (agent_packets.get(role, []) if agent_packets is not None
                         else state.get("evidence", []))
             if role == "report":
-                evidence = state.get("evidence", [])
+                from blackwing.agents.report.provenance import collect_report_evidence
+                evidence = collect_report_evidence(state.get("evidence", []), agent_packets)
             compliance_sources = {
                 "regulation", "procedure", "operational_order",
             }
@@ -71,6 +72,7 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
                     evidence=evidence,
                     prior_outputs=state.get("outputs", {}),
                     deterministic=state.get("plan", {}).get("task_modes", {}).get("report") == "deterministic_assembly",
+                    incident_id=state.get("source_incident_id") or state.get("case_id"),
                 )
                 fallback_used = any(event.get("status") == "deterministic_fallback" for event in report_trace)
             elif role == "similar_case":
@@ -103,14 +105,21 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
                         prior_outputs={**state.get("outputs", {}), **({"correction_request": state["correction_context"]} if state.get("correction_context") else {})},
                     )
                 except (json.JSONDecodeError, ValidationError, TypeError, ValueError) as exc:
-                    if role not in {"critic", "verification"}:
-                        raise
-                    # Both roles have deterministic cross-agent grounding checks.
-                    # If their optional model pass cannot fit the context or fails
-                    # output validation, preserve a complete report and disclose
-                    # that the model pass was skipped.
+                    # Synthetic intake can be retained literally after a rejected
+                    # response. Critic/Verification also have deterministic checks.
+                    # Preserve these limited paths and disclose missing model work.
                     context_budget_exceeded = "token_budget" in str(exc).casefold()
-                    if role == "critic":
+                    from blackwing.case_inputs import is_synthetic_case
+                    if (role == "investigation" and isinstance(exc, AgentOutputValidationError)
+                            and is_synthetic_case(state["narrative"])):
+                        from blackwing.agents.investigation.fallback import supplied_account_fallback
+                        output = supplied_account_fallback(state["narrative"], evidence,
+                            case_id=state["case_id"], incident_id=state.get("source_incident_id"))
+                        logger.warning("Investigation model output rejected; literal synthetic accounts retained; error_type=%s",
+                                       type(exc).__name__)
+                    elif role not in {"critic", "verification"}:
+                        raise
+                    elif role == "critic":
                         from blackwing.agents.critic.schema import CriticOutput
                         logger.warning(
                             "Critic model review unavailable; deterministic audit only; reason=%s "

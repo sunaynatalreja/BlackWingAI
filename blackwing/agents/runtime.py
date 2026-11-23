@@ -19,6 +19,7 @@ from blackwing.agents.compliance.agent import normalize_model_payload as normali
 from blackwing.agents.critic.agent import normalize_model_payload as normalize_critic_payload
 from blackwing.agents.risk.agent import normalize_model_payload as normalize_risk_payload
 from blackwing.agents.risk.schema import RiskOutput
+from blackwing.agents.report.schema import ReportSectionDraft, normalize_report_section
 from blackwing.config import Settings
 from blackwing.diagnostics import model_request
 from blackwing.rag.small_context import build_small_messages, verify_retry_budget
@@ -198,6 +199,8 @@ async def invoke_agent(
                 parsed = normalize_compliance_payload(parsed)
             elif spec.key == "risk" and spec.output_schema is RiskOutput:
                 parsed = normalize_risk_payload(parsed)
+            elif spec.key.startswith("report_") and spec.output_schema is ReportSectionDraft:
+                parsed = normalize_report_section(parsed)
             validated = spec.output_schema.model_validate(parsed).model_dump(mode="json")
             logger.info(
                 "Agent response validated; agent=%s provider=%s model=%s attempt=%s elapsed_seconds=%.2f response_chars=%s",

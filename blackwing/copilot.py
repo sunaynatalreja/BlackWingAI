@@ -180,6 +180,15 @@ def get_gold_comparison(case_id, run_id):
     return request('GET', f'/api/v1/cases/{case_id}/runs/{run_id}/gold-comparison')
 
 
+def get_report_evaluation(case_id, run_id):
+    return request('GET', f'/api/v1/cases/{case_id}/runs/{run_id}/report-evaluation')
+
+
+def start_report_evaluation(case_id, run_id):
+    # This POST only queues work. Inference and persistence stay in FastAPI.
+    return request('POST', f'/api/v1/cases/{case_id}/runs/{run_id}/report-evaluation')
+
+
 def compare_with_gold(case_id, run_id):
     # Explicit user action only; credentials and evaluation live in FastAPI.
     with client() as connection:

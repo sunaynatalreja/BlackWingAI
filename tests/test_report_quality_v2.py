@@ -16,7 +16,7 @@ def sample_report(*, with_citations=True):
         "generated_report": {
             "executive_summary": "Narrative summary",
             "sections": [
-                {"key_points": [{"classification": "documented_fact", "source_ids": ["BW-1"]}]},
+                {"key_points": [{"text": "Runway entry is documented", "classification": "documented_fact", "source_ids": ["BW-1"]}]},
                 {"key_points": []},
                 {"key_points": []},
                 {"key_points": []},
@@ -110,7 +110,7 @@ def test_grade_has_no_forced_minimum_and_discloses_integrity_caps():
     result = assess_quality({}, report)
     assert result["score"] <= 59
     assert result["raw_score"] == sum(c["earned"] for c in result["checks"])
-    assert result["flags"] and result["rubric_version"] == "2"
+    assert result["flags"] and result["rubric_version"] == "2.1"
     assert assess_quality({}, {})["score"] == 0
 
 
@@ -186,7 +186,9 @@ def test_ui_displays_both_independent_scores_and_preserves_workspace(backend):
     at.session_state["workspace_view"] = "case"
     at.session_state["workspace_case"] = case["incident"]["case_id"]
     at.run()
-    assert not at.exception and len(at.tabs) == 3
+    assert not at.exception
+    assert [tab.label for tab in at.tabs] == [
+        "Start an investigation", "Investigation report", "Agent details", "Run trace", "Q&A"]
     metrics = {metric.label: metric.value for metric in at.metric}
     assert metrics["Prompt Completeness"] == str(assess_quality(case["incident"])["score"]) + "%"
     assert metrics["Report Completeness"] == str(assess_quality(case["incident"], case["report"])["score"]) + "%"

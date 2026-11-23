@@ -1,0 +1,37 @@
+{
+  "approval_status": "APPROVED",
+  "approved_by": [
+    "Arun",
+    "Sunayna"
+  ],
+  "approval_source": "Arun & Sunayna approve",
+  "client_date": "2026-11-23",
+  "scope": "Proceed step by step with the reviewed implementation plan and prepared review materials.",
+  "evidence_limit": "Approval does not create missing inputs, establish source independence or resolve conflicting reference facts. No unreviewed new qrels or scoring weights are invented.",
+  "retained_constraints": [
+    "No push, commit, merge or branch switch",
+    "Preserve existing UI and risk methodology",
+    "No hosted models or index rebuild in this first batch",
+    "Full regression is deferred to the validation step"
+  ],
+  "approved_existing_materials": [
+    {
+      "path": "C:\\Users\\arunk\\OneDrive\\Documents\\ChatGPT\\Multi model RAG\\outputs\\BLACKWING_NEXT_STEPS_20261123\\BLACKWING_TASK_LIST_LAAJ_RECALL_20261123.json",
+      "sha256": "38de27e79fd6d3dc3a5ad66057f2ba3fbe9db6ad89392fbb2c1145bdc3a95349",
+      "review_status": "APPROVED"
+    },
+    {
+      "path": "C:\\Users\\arunk\\OneDrive\\Documents\\ChatGPT\\Multi model RAG\\outputs\\BLACKWING_UNSEEN_10_CASES_DRAFT_20261123\\EVALUATOR_ONLY\\all_60_anchors_DRAFT.json",
+      "sha256": "9b4d65055080bf1d54d3e77eec4cabb7d18738c0444768dfcbec5eed98e93711",
+      "review_status": "APPROVED"
+    }
+  ],
+  "remaining_evidence_gates": [
+    "Independent inputs missing for Perth 2012 and Moorabbin.",
+    "Moorabbin/Melbourne PDF downloads incomplete.",
+    "Canadian input provenance/conflicts and Perth 2018 version remain unresolved.",
+    "Current-index retrieval qrels have not yet been prepared/approved; existing approval cannot manufacture labels."
+  ],
+  "incident_safety_approval": "This is implementation/material-review approval, not operational approval of an incident report.",
+  "approval_statement": "Arun & Sunayna approve"
+}

@@ -170,6 +170,8 @@ def show_report(case, render_report):
     report = case["report"]
     if not report:
         availability = case.get("report_availability") or report_availability(case["runs"], None)
+        if availability["state"] == "running":
+            return
         if availability["state"] in {"failed", "interrupted", "unavailable"}:
             st.warning(availability["message"])
         else:
@@ -237,10 +239,8 @@ def workspace(case, render_report):
     if st.button("Run eight-agent investigation" if not latest else "Start a new investigation run", type="primary", disabled=bool(running), key="run-investigation"):
         copilot.start_investigation(incident["case_id"], include_retrieval=include_retrieval)
         st.rerun()
-    if st.button("Refresh investigation status", key="refresh-case"):
-        st.rerun()
     if running:
-        st.caption("The backend continues independently. Refresh to retrieve progress; the UI never resubmits a run automatically.")
+        st.caption("The backend continues independently. Progress updates automatically.")
         st.json(latest.get("progress") or [])
     report = case["report"] or {}
     roles = report.get("agent_outputs") or {}
@@ -307,7 +307,9 @@ def main(*, brand, render_report, cloud=False):
         elif view == "history":
             explore_cases()
         else:
-            workspace(copilot.get_case(st.session_state["workspace_case"]), render_report)
+            def live_workspace():
+                workspace(copilot.get_case(st.session_state["workspace_case"]), render_report)
+            st.fragment(live_workspace, run_every="3s")()
     except httpx.HTTPStatusError as exc:
         # Do not echo provider/transport details or credentials into the UI.
         if exc.response.status_code == 409:
@@ -321,8 +323,29 @@ def main(*, brand, render_report, cloud=False):
 
 
 def show_gold_comparison(case):
+    try:
+        result = copilot.get_report_evaluation(case['incident']['case_id'], case['report_run_id'])
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 404:
+            st.caption('Restart FastAPI to enable question-based evaluation. The existing comparison remains available below.')
+            return _show_legacy_gold_comparison(case)
+        st.subheader('Gold comparison score')
+        st.error('Cannot read the saved comparison status. Refresh after checking FastAPI; the investigation report is preserved.')
+        return None
+    except httpx.HTTPError:
+        st.subheader('Gold comparison score')
+        st.error('Cannot reach FastAPI for comparison status. The investigation report is preserved.')
+        return None
+    if result.get('legacy_fallback'):
+        st.caption('Approved question coverage is unavailable for this case. The existing comparison below uses its disclosed claim or safety-policy scope.')
+        return _show_legacy_gold_comparison(case)
+    from blackwing.evaluation_ui import show_question_evaluation
+    return show_question_evaluation(case, result)
+
+
+def _show_legacy_gold_comparison(case):
     st.subheader('Gold comparison score')
-    st.caption('Separate from structural completeness and aviation risk. Human review required.')
+    st.caption('LaaJ (LLM-as-a-Judge) / gold evaluation. Separate from structural completeness and aviation risk. Human review required.')
     try:
         result = copilot.get_gold_comparison(case['incident']['case_id'], case['report_run_id'])
     except httpx.HTTPStatusError as exc:

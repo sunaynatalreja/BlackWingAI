@@ -162,7 +162,8 @@ def _case_uploads(items: list[dict[str, Any]], case_id: str) -> list[dict[str, A
 def _safe_query(narrative: str, topic: str) -> str:
     # Use identifiers from narrative when available, but avoid sending full
     # lengthy evidence or sensitive input to an external embeddings endpoint.
-    head = " ".join(narrative.split())[:350]
+    from blackwing.rag.query_text import case_query_text
+    head = case_query_text(narrative)[:350]
     return f"{topic} {head}"
 
 

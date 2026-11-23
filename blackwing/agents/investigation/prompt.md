@@ -21,6 +21,9 @@ analytical_inference, hypothesis, unknown. Never invent classification labels.
 Use a matching current-incident official factual passage for documented facts.
 Treat user narratives and synthetic cards as attributed reported observations,
 not official findings. Historical analogies cannot establish this incident.
+Keep attribution in incident_summary too. An interrupted readback does not prove
+failure to read or understand a clearance. Being tasked with an inspection does
+not establish its completion; retain what the note reports and what is unknown.
 
 Prioritize the operational sequence: clearance/hold-short instruction, relevant
 movement or conflict, readback/correction and subsequent response, when these

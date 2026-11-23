@@ -10,6 +10,29 @@ def is_synthetic_case(narrative):
     return bool(_SYNTHETIC.search(narrative or ''))
 
 
+def attributed_synthetic_summary(narrative):
+    """Quote supplied scenario wording; never paraphrase a task into completion."""
+    if not is_synthetic_case(narrative):
+        return None
+    text = str(narrative).strip()
+    scenario = re.search(r'^\s*SCENARIO:\s*', text, re.I | re.M)
+    if scenario:
+        text = text[scenario.end():]
+        text = re.split(r'^\s*(?:SYNTHETIC EVIDENCE CARDS|REPORT CHECK|KNOWN INPUT LIMITS|'
+                        r'(?:CASE-SPECIFIC )?VERIFICATION FOCUS):', text, maxsplit=1, flags=re.I | re.M)[0]
+    else:
+        cards = list(_CARD.finditer(text))
+        if cards:
+            text = ' '.join(match.group(2).strip() for match in cards)
+        else:
+            text = re.sub(r'^\s*(?:CASE ID|SOURCE INCIDENT ID|INCIDENT DATE|JURISDICTION|'
+                          r'AIRPORT|PROMPT STRATEGY):[^\n]*\n?', '', text, flags=re.I | re.M)
+    text = ' '.join(text.split())
+    if len(text) > 1800:
+        text = text[:1800].rsplit(' ', 1)[0] + '…'
+    return 'Unverified fictional scenario. Supplied account: "' + text + '"'
+
+
 def synthetic_accounts(narrative, case_id):
     """Expose supplied card IDs as run-local unverified passages, never index them."""
     if not is_synthetic_case(narrative):

@@ -1,0 +1,232 @@
+{
+  "approval": "Arun & Sunayna approve",
+  "branch": "feature/arun-rag-risk-compliance",
+  "files": [
+    {
+      "path": "blackwing/copilot_ui.py",
+      "sha256_before": "8f3ce0160f03b979abfbc55cd45cb5e58db25de7e697abf1a6f3ec1e7f6c985e",
+      "sha256_after": "c78fd6402813b81c0ed737ed2520a927156a034a6a7a297057e58f58737ef3d5"
+    },
+    {
+      "path": "blackwing/evaluation_ui.py",
+      "sha256_before": "591a6fc592c16b40dbd6b107db6243a63029d3f30fd23c2405c1a515745827b2",
+      "sha256_after": "81ad32fc52acef00f1cb8e97f7db6ecc1e100f529128eb45d7c7cc43dac5f86f"
+    },
+    {
+      "path": "blackwing/incident_identity.py",
+      "sha256_before": "cfa49d8fddf9716936743fba82fc9c26d3a631faccc28c3cdd539ddffe755f20",
+      "sha256_after": "2a18015a074be7990864d12f8bcfd517e1dae5e7f8dddacfc975b0b8c3383cad"
+    },
+    {
+      "path": "blackwing/source_ui.py",
+      "sha256_before": "2ea9e2bdd663a4bad29d2e516c7e64f0a1631f96e16f35a669d460ae2fadee39",
+      "sha256_after": "698ad48ca40f09169ec4861104bfb8cd10b90a527307eee37a75263acd902089"
+    },
+    {
+      "path": "tests/test_responsive_run.py",
+      "sha256_before": "8d5be10d28e9f6903de210a2b62587178b4373a9a165bed21fa230ee00572f64",
+      "sha256_after": "ee86ec92f53406acbdc2e4cd78c1afcb33b0bbba3e614f9bf07095014a5ace09"
+    },
+    {
+      "path": "tests/test_two_line_intake.py",
+      "sha256_before": null,
+      "sha256_after": "fce04e7bad402268cf74b6010bd36b5e171a1346fd518efd9142f92682504b2d"
+    }
+  ],
+  "focused_tests_passed": 47,
+  "full_suite_rerun": false,
+  "test_command": "python -m pytest -q tests/test_two_line_intake.py tests/test_responsive_run.py tests/test_report_evaluation_ui.py tests/test_gold_comparison.py tests/test_streamlit_integration.py --tb=short",
+  "final_state_guard_check": "The affected running-case test passed again after guarding the first bookmarked-running-case render.",
+  "runtime_check": {
+    "mock_only": true,
+    "hosted_calls": 0,
+    "saved_case_writes": 0,
+    "actual_report_scores": null,
+    "running": {
+      "status": "ready",
+      "actions": [
+        {
+          "key": "workspace-tabs",
+          "kind": "value",
+          "type": "tabs"
+        },
+        {
+          "key": "incident_narrative_custom",
+          "kind": "value",
+          "type": "text_area",
+          "label": "Incident narrative"
+        },
+        {
+          "key": "load-trace",
+          "kind": "trigger",
+          "type": "button",
+          "label": "Load trace and audit"
+        }
+      ],
+      "metrics": {
+        "Report Completeness": "Not available",
+        "Gold comparison score": "Pending",
+        "Aviation risk": "Pending",
+        "Prompt Completeness": "45%"
+      },
+      "laaj_caption_present": true,
+      "progress": [
+        {
+          "body": "investigation \u00b7 Waiting for model response"
+        }
+      ],
+      "tabs": [
+        "Start an investigation",
+        "Investigation report",
+        "Agent details",
+        "Run trace",
+        "Q&A"
+      ]
+    },
+    "completed": {
+      "status": "ready",
+      "actions": [
+        {
+          "key": "workspace-tabs",
+          "kind": "value",
+          "type": "tabs"
+        },
+        {
+          "key": "incident_narrative_custom",
+          "kind": "value",
+          "type": "text_area",
+          "label": "Incident narrative"
+        },
+        {
+          "key": "analyze-incident",
+          "kind": "trigger",
+          "type": "form_submit_button",
+          "label": "Analyze incident"
+        },
+        {
+          "key": "refresh-gold-CHECK_RUN",
+          "kind": "trigger",
+          "type": "button",
+          "label": "Refresh comparison status"
+        },
+        {
+          "key": "download-gold-CHECK_RUN",
+          "kind": "trigger",
+          "type": "download_button",
+          "label": "Download gold comparison"
+        },
+        {
+          "key": "load-trace",
+          "kind": "trigger",
+          "type": "button",
+          "label": "Load trace and audit"
+        }
+      ],
+      "metrics": {
+        "Report Completeness": "59%",
+        "Gold comparison score": "75/100",
+        "Case match": "Seen",
+        "Aviation risk": "Unassessed",
+        "Review": "Required",
+        "Evidence check": "Needs verification",
+        "Prompt Completeness": "45%"
+      },
+      "laaj_caption_present": true,
+      "progress": [],
+      "tabs": [
+        "Start an investigation",
+        "Investigation report",
+        "Agent details",
+        "Run trace",
+        "Q&A"
+      ]
+    },
+    "notice": "75/100 is a UI fixture value, not a measured BLACKWING score."
+  },
+  "prompt_audit": {
+    "prompt_count": 50,
+    "seen": 30,
+    "unseen_synthetic": 20,
+    "seen_strategy_counts": {
+      "Few-shot": 10,
+      "Chain-of-thought (CoT)": 10,
+      "Task decomposition": 10
+    },
+    "evaluation_scope_counts": {
+      "question-based reference comparison": 15,
+      "asserted factual-claim comparison": 15,
+      "synthetic safety-policy adherence only": 20
+    },
+    "distinct_seen_incidents": 9,
+    "same_incident_factual_source_metadata_matches": {
+      "DCA23FA149": [
+        "BW-EV-006"
+      ],
+      "DCA23LA125": [
+        "BW-EV-001",
+        "BW-EV-002",
+        "BW-EV-003"
+      ],
+      "DCA23LA133": [
+        "BW-EV-007"
+      ],
+      "DCA23LA179": [
+        "BW-EV-008"
+      ],
+      "DCA23LA185": [
+        "BW-EV-009"
+      ],
+      "DCA23LA192": [
+        "BW-EV-010"
+      ],
+      "OPS23FA010": [
+        "BW-EV-014"
+      ],
+      "VT-BXL": [],
+      "VT-GOK": []
+    },
+    "seen_ids_without_direct_factual_source_metadata": [
+      "VT-BXL",
+      "VT-GOK"
+    ],
+    "all_inputs_exactly_two_lines": true,
+    "all_seen_metadata_roundtrip": true,
+    "all_seen_reference_matches": true,
+    "all_unseen_synthetic_routing": true,
+    "unknown_date_jurisdiction_preserved": true,
+    "models_called": 0,
+    "reports_generated": 0,
+    "index_rebuilt": false,
+    "notice": "Offline intake/metadata/evaluation-route audit only. Source metadata matches do not establish passage support or live model/report accuracy.",
+    "source_hashes": {
+      "seen": "58c7cc51de1b8d7960ef55513a4a017165925ac972ca929d2c61e01213e0be6e",
+      "unseen": "1c579d621aefe54dbbd5aabb579b0a82416312bc241e9e8820bd6ba743e75411"
+    }
+  },
+  "verification_agent": "Existing model and deterministic cross-checks for source support, chronology, attribution, conflicts, applicability, risk prerequisites, mitigation links and human review. Gold/LaaJ runs separately after generation.",
+  "preservation": {
+    "protected_code_files_checked": 12,
+    "mismatches": 0,
+    "assets": [
+      {
+        "group": "gold",
+        "checked": 13,
+        "changed": 0
+      },
+      {
+        "group": "index",
+        "checked": 18,
+        "changed": 0
+      }
+    ],
+    "ui_theme_and_tabs_preserved": true,
+    "completeness_weights_changed": false,
+    "aviation_risk_matrix_changed": false,
+    "saved_reports_rewritten": false
+  },
+  "hosted_calls": 0,
+  "reports_generated": 0,
+  "committed": false,
+  "merged": false,
+  "pushed": false
+}

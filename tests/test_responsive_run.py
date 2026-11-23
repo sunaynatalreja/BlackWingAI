@@ -69,8 +69,12 @@ def test_running_case_has_visible_progress_and_does_not_resubmit(backend):
     at.query_params['case_id']=case['case_id']
     at.run()
     assert not at.exception
-    assert any('progress refreshes automatically' in item.value for item in at.info)
+    assert at.button(key='analyze-incident').disabled
+    assert not any('Report unavailable: the investigation is still running' in item.value for item in at.info)
+    assert not any(b.label == 'Refresh investigation status' for b in at.button)
+    metrics={m.label:m.value for m in at.metric}
+    assert metrics['Gold comparison score']=='Pending' and metrics['Aviation risk']=='Pending'
     assert any('Retrieving evidence' in item.value for item in at.text)
-    at.run()
+    at.run()  # A polling rerun must read status without submitting another run.
     assert at.button(key='analyze-incident').disabled
     assert len(backend.cases)==1 and len(backend.runs)==1

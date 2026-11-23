@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 import json
+import hashlib
 import asyncio
 import logging
 import os
@@ -154,9 +155,16 @@ async def _execute_run_body(
         else:
             repo.patch_run(run_id, {"audit_events": list(invocation_events)})
     def checkpoint(state):
-        repo.patch_run(run_id, {"partial_outputs": state.get("outputs", {}), "plan": state.get("plan"),
+        fields = {"partial_outputs": state.get("outputs", {}), "plan": state.get("plan"),
                                "execution_steps": state.get("execution_steps", 0),
-                               "progress": [{"step": e["step"], "status": e["status"]} for e in state.get("trace", [])] + [e for e in invocation_events if e.get("event_id")]})
+                               "progress": [{"step": e["step"], "status": e["status"]} for e in state.get("trace", [])] + [e for e in invocation_events if e.get("event_id")]}
+        if "evidence" in state and not (repo.get_run(run_id) or {}).get("evaluation_input_snapshot"):
+            from blackwing.agents.report.provenance import collect_report_evidence
+            rows = collect_report_evidence(state.get("evidence", []), state.get("agent_evidence"))
+            fields["evaluation_input_snapshot"] = {"version": 1, "complete": True,
+                "scope": "Workflow evidence before per-agent token clipping; not a reconstruction of each model message.",
+                "evidence": rows, "sha256": hashlib.sha256(json.dumps(rows, sort_keys=True, default=str).encode('utf-8')).hexdigest()}
+        repo.patch_run(run_id, fields)
         record_event({"step": "state_update", "status": "complete", "detail": state.get("trace", [])[-1:]})
     record_event(lifecycle_event("workflow_execution", "execution_started", case_id=case["case_id"],
         detail="Retrieval incident reference: " + str(case.get("source_incident_id") or "unspecified")))
@@ -164,7 +172,8 @@ async def _execute_run_body(
         record_event(lifecycle_event("evidence_retrieval", "retrieval_started", case_id=case["case_id"],
                                     detail="Searching the existing evidence index"))
         def initial_retrieval():
-            query = " ".join(part for part in [case["narrative"], case.get("location"), "runway incursion"] if part)
+            from blackwing.rag.query_text import case_query_text
+            query = " ".join(part for part in [case_query_text(case["narrative"]), case.get("location"), "runway incursion"] if part)
             with tool_audit(case["case_id"], record_event):
                 return retrieve_evidence(retriever.search,
                     input_identifiers=[case.get("source_incident_id") or case["case_id"]],
@@ -662,3 +671,6 @@ async def create_gold_comparison(case_id: str, run_id: str,
 
 from blackwing.qa_routes import build_router as build_qa_router
 app.include_router(build_qa_router(get_repository, get_settings))
+
+from blackwing.evaluation_routes import build_router as build_evaluation_router
+app.include_router(build_evaluation_router(get_repository, get_settings))

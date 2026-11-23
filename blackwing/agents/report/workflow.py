@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -10,6 +11,7 @@ import httpx
 from blackwing.agents.base import AgentSpec
 from blackwing.agents.runtime import invoke_agent
 from blackwing.config import Settings
+from .provenance import ground_report_point
 from .schema import (
     REPORT_TASK_ORDER,
     ReportAgentOutput,
@@ -81,16 +83,21 @@ def _collect_allowed_references(value: Any) -> tuple[set[str], set[str]]:
     return evidence, sources
 
 
-def _ground_sections(sections: list[dict[str, Any]], prior: Mapping[str, dict[str, Any]]) -> list[dict[str, Any]]:
+def _ground_sections(sections: list[dict[str, Any]], prior: Mapping[str, Any],
+                     *, incident_id: str | None = None, narrative: str = "") -> list[dict[str, Any]]:
+    from blackwing.case_inputs import attributed_synthetic_summary
+    supplied_summary = attributed_synthetic_summary(narrative)
     allowed_evidence, allowed_sources = _collect_allowed_references(prior)
+    evidence = prior.get("retrieved_evidence") or []
     for section in sections:
-        for point in section.get("key_points", []):
-            point["evidence_ids"] = [item for item in point.get("evidence_ids", []) if item in allowed_evidence]
-            point["source_ids"] = [item for item in point.get("source_ids", []) if item in allowed_sources]
-            if point.get("classification") in {"documented_fact", "reported_observation"} and not (
-                point["evidence_ids"] or point["source_ids"]
-            ):
-                point["classification"] = "verification_gap"
+        if section.get("task_id") == "overview" and supplied_summary:
+            section["summary"] = supplied_summary
+        for index, point in enumerate(section.get("key_points", [])):
+            point["evidence_ids"] = list(dict.fromkeys(
+                item for item in point.get("evidence_ids", []) if item in allowed_evidence))
+            point["source_ids"] = list(dict.fromkeys(
+                item for item in point.get("source_ids", []) if item in allowed_sources))
+            section["key_points"][index] = ground_report_point(point, evidence, incident_id=incident_id)
     return sections
 
 
@@ -120,7 +127,7 @@ def _claim_points(rows: Any, default_classification: str) -> list[dict[str, Any]
             source_ids = row.get("source_ids", []) or ([row["source_id"]] if row.get("source_id") else [])
         else:
             continue
-        if not text:
+        if not str(text or "").strip():
             continue
         result.append({
             "text": str(text),
@@ -131,7 +138,20 @@ def _claim_points(rows: Any, default_classification: str) -> list[dict[str, Any]
     return result
 
 
-def _fallback_section(task_id: str, prior: Mapping[str, dict[str, Any]]) -> dict[str, Any]:
+def _labeled_input(narrative: str, heading: str) -> str | None:
+    """Retain an explicit input limit/focus as a gap, never as an event fact."""
+    lines = narrative.splitlines()
+    for index, line in enumerate(lines):
+        if line.strip().rstrip(":").upper() == heading:
+            for candidate in lines[index + 1:]:
+                if candidate.strip():
+                    return candidate.strip()
+    return None
+
+
+def _fallback_section(task_id: str, prior: Mapping[str, dict[str, Any]],
+                      evidence: list[dict[str, Any]] | None = None,
+                      narrative: str = "") -> dict[str, Any]:
     investigation = prior.get("investigation") or {}
     similar = prior.get("similar_case") or {}
     compliance = prior.get("compliance") or {}
@@ -146,11 +166,33 @@ def _fallback_section(task_id: str, prior: Mapping[str, dict[str, Any]]) -> dict
         points += _claim_points(investigation.get("timeline_events"), "reported_observation")
         points += _claim_points(investigation.get("documented_facts"), "verification_gap")
         points += _claim_points(investigation.get("reported_observations"), "reported_observation")
+        # Preserve actual submitted accounts when a bounded model omits them.
+        # No template crew/driver testimony is inserted.
+        for row in evidence or []:
+            identifier = str(row.get("chunk_id") or row.get("evidence_id") or "")
+            if (row.get("source_type") not in {"user_submitted", "user_report"}
+                    or row.get("evidence_role") not in {"reported", "submitted"}
+                    or not identifier or identifier.startswith("CASE-NARRATIVE:")):
+                continue
+            text = str(row.get("excerpt") or row.get("text") or "").strip()
+            if text:
+                points.append({"text": "Attributed supplied account: " + text,
+                               "classification": "reported_observation",
+                               "evidence_ids": [identifier],
+                               "source_ids": [str(row["source_id"])] if row.get("source_id") else []})
+        points += _claim_points(investigation.get("unknowns"), "verification_gap")
+        limits = _labeled_input(narrative, "KNOWN INPUT LIMITS")
+        if limits:
+            points += _claim_points(["Supplied input limit: " + limits], "verification_gap")
     elif task_id == "findings_and_causes":
         summary = "The agent review does not establish a probable cause. Candidate explanations remain provisional until primary evidence is verified."
         points += _claim_points(investigation.get("hypotheses"), "hypothesis")
         points += _claim_points(investigation.get("contributing_factors"), "hypothesis")
         points += _claim_points(verification.get("claims_needing_source"), "verification_gap")
+        points += _claim_points(verification.get("conflicts"), "verification_gap")
+        points += _claim_points(verification.get("unsupported_conclusions"), "verification_gap")
+        points += _claim_points(critic.get("issues"), "verification_gap")
+        points += _claim_points(critic.get("missing_analysis"), "verification_gap")
     elif task_id == "comparisons_and_compliance":
         summary = str(similar.get("assessment") or "Historical comparisons are analogies only.")
         summary += " Compliance status: " + str(compliance.get("overall_applicability") or "not assessed") + "."
@@ -180,6 +222,11 @@ def _fallback_section(task_id: str, prior: Mapping[str, dict[str, Any]]) -> dict
                 })
         points += _claim_points(verification.get("claims_needing_source"), "verification_gap")
         points += _claim_points(critic.get("issues"), "verification_gap")
+        points += _claim_points(verification.get("conflicts"), "verification_gap")
+        focus = (_labeled_input(narrative, "CASE-SPECIFIC VERIFICATION FOCUS")
+                 or _labeled_input(narrative, "VERIFICATION FOCUS"))
+        if focus:
+            points += _claim_points(["Requested verification focus: " + focus], "verification_gap")
 
     return {
         "task_id": task_id,
@@ -190,28 +237,40 @@ def _fallback_section(task_id: str, prior: Mapping[str, dict[str, Any]]) -> dict
 
 
 def _merge_source_detail(section: dict[str, Any], task_id: str,
-                         prior: Mapping[str, dict[str, Any]]) -> dict[str, Any]:
+                         prior: Mapping[str, dict[str, Any]],
+                         evidence: list[dict[str, Any]] | None = None,
+                         narrative: str = "") -> dict[str, Any]:
     """Restore source-agent details a short-model draft may have omitted.
 
     These points are copied from already validated agent outputs; this step
-    does not invent or upgrade claims. The report schema allows ten combined
-    source and model points.
+    does not invent or upgrade claims. A model duplicate cannot override a
+    validated source-agent classification.
     """
-    source_points = _fallback_section(task_id, prior).get("key_points", [])
+    section = deepcopy(section)
+    fallback = _fallback_section(task_id, prior, evidence, narrative)
+    source_points = fallback.get("key_points", [])
     combined: list[dict[str, Any]] = []
-    seen: set[tuple[str, tuple[str, ...]]] = set()
+    seen: dict[str, dict[str, Any]] = {}
     # Source details lead so they remain visible if a model draft is repetitive.
     for point in [*source_points, *(section.get("key_points") or [])]:
+        point = deepcopy(point)
         text = str(point.get("text") or "").strip()
-        refs = tuple(sorted(str(ref) for ref in [
-            *(point.get("evidence_ids") or []), *(point.get("source_ids") or [])
-        ]))
-        key = (text.casefold(), refs)
-        if not text or key in seen:
+        key = " ".join(text.casefold().split()).rstrip(" .;:")
+        if not text:
             continue
-        seen.add(key)
+        if key in seen:
+            existing = seen[key]
+            if point.get("classification") == existing.get("classification"):
+                for field in ("evidence_ids", "source_ids"):
+                    existing[field] = list(dict.fromkeys([
+                        *(existing.get(field) or []), *(point.get(field) or [])]))
+            # Source points lead. Never strengthen them to a model's fact label.
+            continue
+        seen[key] = point
         combined.append(point)
     section["key_points"] = combined
+    if not str(section.get("summary") or "").strip():
+        section["summary"] = fallback["summary"]
     return section
 
 
@@ -233,16 +292,20 @@ async def create_report(
     evidence: list[dict[str, Any]],
     prior_outputs: Mapping[str, dict[str, Any]],
     deterministic: bool = False,
+    incident_id: str | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """Plan and draft report sections as small, independently validated tasks."""
     if deterministic:
         # Bounded investigation: format existing outputs without five extra model tasks.
         sections = []
         for task_id in REPORT_TASK_ORDER:
-            section = ReportSection.model_validate(_fallback_section(task_id, _task_source_outputs(task_id, prior_outputs))).model_dump(mode="json")
+            source_outputs = _task_source_outputs(task_id, prior_outputs)
+            section = _merge_source_detail(_fallback_section(task_id, source_outputs, evidence, narrative),
+                                           task_id, source_outputs, evidence, narrative)
+            section = ReportSection.model_validate(section).model_dump(mode="json")
             section["title"] = _TASKS[task_id]["title"]
             sections.append(section)
-        sections = _ground_sections(sections, {"agent_outputs": prior_outputs, "retrieved_evidence": evidence})
+        sections = _ground_sections(sections, {"agent_outputs": prior_outputs, "retrieved_evidence": evidence}, incident_id=incident_id, narrative=narrative)
         output = ReportAgentOutput(executive_summary=sections[0]["summary"][:2200], sections=sections,
                                    human_approval_required=True).model_dump(mode="json")
         return output, [{"step": "report_assembly", "status": "deterministic_fallback"}]
@@ -280,19 +343,21 @@ async def create_report(
             draft["task_id"] = task_id
             draft["generation_method"] = "model"
             section = ReportSection.model_validate(draft).model_dump(mode="json")
-            section = _merge_source_detail(section, task_id, source_outputs)
+            section = _merge_source_detail(section, task_id, source_outputs, evidence, narrative)
             trace.append({"step": f"report_{task_id}", "agent": spec.name, "status": "complete"})
         except Exception as exc:
             logger.warning(
                 "Report section unavailable; using deterministic source summary; task=%s error_type=%s",
                 task_id, type(exc).__name__,
             )
-            section = ReportSection.model_validate(_fallback_section(task_id, source_outputs)).model_dump(mode="json")
+            section = _merge_source_detail(_fallback_section(task_id, source_outputs, evidence, narrative),
+                                           task_id, source_outputs, evidence, narrative)
+            section = ReportSection.model_validate(section).model_dump(mode="json")
             trace.append({"step": f"report_{task_id}", "agent": spec.name, "status": "deterministic_fallback"})
         section["title"] = _TASKS[task_id]["title"]
         sections.append(section)
 
-    sections = _ground_sections(sections, {"agent_outputs": prior_outputs, "retrieved_evidence": evidence})
+    sections = _ground_sections(sections, {"agent_outputs": prior_outputs, "retrieved_evidence": evidence}, incident_id=incident_id, narrative=narrative)
     overview = next((item for item in sections if item["task_id"] == "overview"), None)
     executive_summary = (overview or {}).get("summary") or "Preliminary analysis assembled from the agent work products."
     output = ReportAgentOutput(

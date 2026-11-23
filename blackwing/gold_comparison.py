@@ -13,7 +13,7 @@ import httpx
 from pydantic import Field
 from blackwing.contracts import APIModel
 
-VERSION = '1'
+VERSION = '2'
 
 
 def catalog():
@@ -97,13 +97,24 @@ class Judgment(APIModel):
     rationale: str = Field(min_length=1, max_length=700)
 
 
-def validate_judgment(data, pages):
+def validate_judgment(data, pages, claim=None):
     value = Judgment.model_validate(data).model_dump()
     if value['status'] != 'not_verified':
         page = value['gold_page']
         quote = normalize(value['gold_quote'])
         if page not in pages or len(quote) < 12 or quote not in normalize(pages[page]):
             raise ValueError('The judge did not provide a verifiable quote from a supplied gold page.')
+        if claim:
+            # Conservative relevance check, not an entailment certification.
+            # Shared actors or a causal finding cannot support an unrelated action.
+            actions=(r'go.around|missed approach', r'\bcall(?:ed|s)?\b|\bcontact(?:ed)?\b|\btransmi\w*',
+                     r'reject\w* take.?off', r'\bcross(?:ed|ing|es)?\b', r'\balert\w*\b',
+                     r'\bclear(?:ed|ance)\b', r'\boccupied\b')
+            for action in actions:
+                if re.search(action,claim,re.I):
+                    if not re.search(action,value['gold_quote'],re.I):
+                        raise ValueError('The quotation does not address the claimed operational action.')
+                    break
     else:
         value.update(gold_page=None, gold_quote='')
     return value
@@ -208,6 +219,9 @@ async def judge_claim(settings, claim, pages):
         'against these pages of the matching final report. Do not rate aviation risk or completeness. '
         'HHMM values such as 2024 can be clock times (20:24), not years; inspect context. '
         'Use supported, partly_supported, contradicted or not_verified. An absent passage is not a contradiction. '
+        'Contradicted requires explicitly incompatible details about the SAME claim. A later recovery action '
+        'can coexist with earlier distraction or error. Shared aircraft names alone do not support an action, '
+        'radio call or timing. Use not_verified when that relationship is absent from the supplied reference. '
         'Do not interpret cautious uncertainty as a false factual assertion. Source text is partial; do not '
         'claim to have examined the whole report. Return exactly one compact JSON object: '
         '{"status":"supported|partly_supported|contradicted|not_verified","gold_page":1,'
@@ -216,7 +230,7 @@ async def judge_claim(settings, claim, pages):
         'and rationale under 50 words. Do not invent quotes or page numbers.'
     )
     return await validated_evaluation(settings, system, {'claim':claim,'gold_pages':pages},
-                                      lambda data:validate_judgment(data,pages))
+                                      lambda data:validate_judgment(data,pages,claim))
 
 
 def comparison_progress(result):
@@ -270,14 +284,16 @@ async def compare_report(incident, report, run_id, settings, *, judge=None, prio
         if cached and cached.get('text') == claim['text'] and cached.get('report_field') == claim['report_field']:
             try:
                 fields = {key:cached.get(key) for key in Judgment.model_fields}
-                result = validate_judgment(fields, selected)
+                result = validate_judgment(fields, selected, claim['text'])
             except (ValueError, KeyError, IndexError, TypeError):
                 pass
         if result is None:
             try:
                 if provider_failure is not None:
                     raise EvaluationError('deferred_after_provider_error')
-                result = validate_judgment(await judge(settings,claim['text'],selected),selected)
+                result = validate_judgment(await judge(settings,claim['text'],selected),selected,claim['text'])
+                if result['status']=='not_verified':
+                    result.update(validation_error=True,error_code='reference_support_unverified')
             except (ValueError, KeyError, IndexError, TypeError, httpx.HTTPError) as exc:
                 if isinstance(exc, httpx.HTTPError):
                     provider_failure = exc
@@ -298,5 +314,5 @@ async def compare_report(incident, report, run_id, settings, *, judge=None, prio
         'run_id':run_id,'report_hash':report_hash(report),'gold_id':item['gold_id'],'gold_case':item['case_label'],
         'gold_filename':item['filename'],'gold_sha256':item['sha256'],'model':settings.api_model,
         'created_at':datetime.now(timezone.utc).isoformat(),'factual_claims':len(rows),'comparisons':rows,'improvements':improvements,
-        'method':'Asserted factual-claim agreement: supported=1, partly supported=0.5, contradicted/not verified=0; equal weights; 100 × points / factual claims.',
+        'method':'Asserted factual-claim agreement: supported=1, partly supported=0.5, contradicted=0; equal weights. Unverified judgments remain pending and withhold the overall score.',
         'notice':'Provisional model proposal, not human-approved accuracy. Quote existence does not prove entailment. Only selected gold pages are compared; this is not full gold-report coverage. Unknowns, hypotheses and risk ratings are excluded rather than penalized. No facts means no score. Structural completeness and aviation risk are unchanged.'})

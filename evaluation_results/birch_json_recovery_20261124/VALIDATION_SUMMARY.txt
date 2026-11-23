@@ -1,0 +1,55 @@
+BLACKWING BIRCH FERRY RECOVERY - 24 November 2026
+Approval: Arun & Sunayna approve
+Branch: feature/arun-rag-risk-compliance
+
+Observed saved run: b2129a5b-0578-4c04-bb01-4ef1e2a8a0ec
+Both retrieval phases completed. Investigation received two provider responses;
+the final response failed JSON parsing. Screenshot reports expecting comma,
+line 1 column 626, 968 characters, finish_reason=stop, max_output_tokens=1024.
+This was not a reported output-token truncation. The masked context does not
+retain enough original text to reconstruct the exact malformed response.
+
+Fix: after the existing bounded retry exhausts model-output validation, an
+explicitly synthetic Investigation may retain literal supplied accounts.
+Accounts must already exist with matching text and case-scoped citation IDs
+in the actual evidence packet. No rejected model text is reconstructed.
+No documented facts, chronology, hypotheses, causes or risk ratings are made
+up. Model analysis unavailability remains visible as a report verification
+gap and a persisted model_review_unavailable event. Normal downstream agents,
+Planner/Executor/Critic limits and post-generation evaluation remain active.
+
+Official factual analysis, ordinary seen cases, provider/timeouts and unrelated
+processing failures remain ineligible for this recovery. The trace records an
+allow-listed JSON reason and line/column, without response content or keys.
+
+Changed files:
+blackwing/service.py
+blackwing/diagnostics.py
+Added files:
+blackwing/agents/investigation/fallback.py
+tests/test_synthetic_investigation_recovery.py
+
+Validation:
+- 46 focused tests passed, covering real parser/retry with mocked responses,
+  actual graph/report/API/SQLite integration, diagnostics, and agentic flow.
+- All 20 unseen prompts passed literal recovery/schema/citation checks.
+- All 30 seen prompts were correctly excluded from synthetic recovery.
+- Initial broader selection: 21 passed, 2 failed. Those 2 UI assertions still
+  expect the running-status message intentionally removed in earlier work;
+  both failures were reproduced with the original service/diagnostics files.
+- The final focused run deselected the four parameterized UI message tests.
+  No UI code or legacy test expectation was changed to hide the mismatch.
+- No full-suite rerun or live model calls. Offline checks are not numerical
+  LaaJ scoring, nor proof that all 50 live reports will complete correctly.
+- Tested file bytes match the four files applied in the real Arun repository.
+- Existing UI, completeness scorer, risk matrix and index manifest matched
+  protected file guards. No saved report, index or protected gold was edited.
+- No commit, merge or push.
+
+Next action: stop/restart FastAPI in its already configured terminal:
+python -m uvicorn blackwing.api:app --host 127.0.0.1 --port 8001
+Restarting Streamlit alone does not reload this backend change. Refresh the
+browser and start a new investigation with the same Birch Ferry prompt.
+The existing failed run remains unchanged for audit. The new report may
+disclose deterministic intake recovery if the model again returns invalid
+JSON. Scores remain separate and require their normal completed evaluation.

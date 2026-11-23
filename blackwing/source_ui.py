@@ -1,6 +1,6 @@
 """Sunayana's original investigation form; shared backend, investigation and Q&A tabs."""
 from blackwing import copilot
-from blackwing.copilot_state import execution_label, report_availability
+from blackwing.copilot_state import execution_label, report_availability, risk_display
 from blackwing.copilot_ui import quality_panel, show_evidence, show_gold_comparison
 from blackwing.report_quality import assess_quality
 import httpx
@@ -24,8 +24,6 @@ def render_case(case, render_report):
             st.error(latest.get('error') or 'Investigation failed; inspect Run trace for the failed agent.')
         if case.get('report_run_id') and case['report_run_id']!=latest['run_id']:
             st.warning('Displaying the earlier completed report; the latest run has no completed report.')
-    if st.button('Refresh investigation status',key='refresh-case'):
-        st.rerun()
     report_tab,agents_tab,trace_tab=st.tabs(['Investigation report','Agent details','Run trace'])
     with report_tab:
         scored=report or partial
@@ -39,9 +37,19 @@ def render_case(case, render_report):
             st.metric('Report Completeness','Pending')
         if not report:
             availability=case.get('report_availability') or report_availability(case['runs'],None)
+            pending='Pending' if availability['state'] in {'running','not_started'} else 'Unavailable'
+            st.metric('Gold comparison score',pending)
+            st.caption('LaaJ (LLM-as-a-Judge) / gold evaluation runs after the report completes.')
+            risk=(partial or {}).get('agent_outputs',{}).get('risk')
+            if risk:
+                rows=risk_display(partial)['rows']
+                indices=list(dict.fromkeys(row['Risk index'] for row in rows if row['Risk index']!='Unassessed'))
+                st.metric('Aviation risk',' · '.join(indices) if indices else 'Unassessed')
+            else:
+                st.metric('Aviation risk',pending)
             if availability['state'] in {'failed','interrupted','unavailable'}:
                 st.warning(availability['message'])
-            else:
+            elif availability['state']!='running':
                 st.info(availability['message'])
         else:
             reference=show_gold_comparison(case)
@@ -92,7 +100,7 @@ def _render_live_case(case_id, render_report):
             generated = partial_outputs.pop('report',None)
             if partial_outputs:
                 case['partial_report'] = {'agent_outputs':partial_outputs,'generated_report':generated}
-        was_running = st.session_state.get('source_run_active', True)
+        was_running = st.session_state.get('source_run_active', False)
         running = bool(latest and latest['status'] in {'queued', 'running'})
         st.session_state['source_run_active'] = running
         render_case(case, render_report)

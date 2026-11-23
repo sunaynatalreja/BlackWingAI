@@ -1,0 +1,60 @@
+{
+  "prompt_count": 50,
+  "seen": 30,
+  "unseen_synthetic": 20,
+  "seen_strategy_counts": {
+    "Few-shot": 10,
+    "Chain-of-thought (CoT)": 10,
+    "Task decomposition": 10
+  },
+  "evaluation_scope_counts": {
+    "question-based reference comparison": 15,
+    "asserted factual-claim comparison": 15,
+    "synthetic safety-policy adherence only": 20
+  },
+  "distinct_seen_incidents": 9,
+  "same_incident_factual_source_metadata_matches": {
+    "DCA23FA149": [
+      "BW-EV-006"
+    ],
+    "DCA23LA125": [
+      "BW-EV-001",
+      "BW-EV-002",
+      "BW-EV-003"
+    ],
+    "DCA23LA133": [
+      "BW-EV-007"
+    ],
+    "DCA23LA179": [
+      "BW-EV-008"
+    ],
+    "DCA23LA185": [
+      "BW-EV-009"
+    ],
+    "DCA23LA192": [
+      "BW-EV-010"
+    ],
+    "OPS23FA010": [
+      "BW-EV-014"
+    ],
+    "VT-BXL": [],
+    "VT-GOK": []
+  },
+  "seen_ids_without_direct_factual_source_metadata": [
+    "VT-BXL",
+    "VT-GOK"
+  ],
+  "all_inputs_exactly_two_lines": true,
+  "all_seen_metadata_roundtrip": true,
+  "all_seen_reference_matches": true,
+  "all_unseen_synthetic_routing": true,
+  "unknown_date_jurisdiction_preserved": true,
+  "models_called": 0,
+  "reports_generated": 0,
+  "index_rebuilt": false,
+  "notice": "Offline intake/metadata/evaluation-route audit only. Source metadata matches do not establish passage support or live model/report accuracy.",
+  "source_hashes": {
+    "seen": "58c7cc51de1b8d7960ef55513a4a017165925ac972ca929d2c61e01213e0be6e",
+    "unseen": "1c579d621aefe54dbbd5aabb579b0a82416312bc241e9e8820bd6ba743e75411"
+  }
+}
