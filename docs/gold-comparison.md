@@ -4,6 +4,11 @@ The report view adds **Gold comparison score**, independent of Prompt Completene
 Report Completeness and aviation risk. Existing scores, weights, risk calculations,
 case-match labels and report content are unchanged.
 
+The unseen/synthetic safety-policy comparison reads the approved question workbook
+from `BLACKWING_GOLD_QUERY_FILE`. The repository-protected workbook is selected by
+default when present; set this variable in `config/blackwing.properties` when it is
+stored elsewhere. Install `requirements.txt` so `openpyxl` is available.
+
 After an investigation completes, choose **Compare with gold report** in its Report
 tab. The server selects the matching case from nine preserved final reports. It
 never averages unrelated incidents. Synthetic or ambiguous cases show Not applicable.

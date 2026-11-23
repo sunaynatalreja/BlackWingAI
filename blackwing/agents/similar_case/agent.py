@@ -12,7 +12,19 @@ from blackwing.agents.evidence_utils import source_id
 from blackwing.agents.similar_case.schema import SimilarCaseMatch, SimilarCaseOutput
 
 _TERMS = re.compile(r"[a-z0-9]{3,}", re.I)
-_STOP = {"runway", "aircraft", "airport", "reported", "incident", "the", "and", "with", "from", "that", "when"}
+# Exclude corpus boilerplate and common English terms. Without this list, BM25
+# candidates with no operational similarity were labeled matches merely
+# because their excerpts shared words such as "these", "both", or "NTSB".
+_STOP = {
+    "runway", "aircraft", "airport", "reported", "incident", "the", "and", "with", "from", "that", "when",
+    "this", "these", "those", "both", "their", "there", "where", "which", "while", "during", "after", "before",
+    "about", "above", "below", "between", "within", "without", "into", "onto", "under", "over", "such", "same",
+    "some", "more", "most", "other", "another", "also", "only", "than", "then", "them", "they", "were", "was",
+    "are", "been", "being", "have", "has", "had", "does", "did", "not", "but", "for", "its", "his", "her",
+    "who", "what", "how", "why", "can", "could", "would", "should", "will", "may", "might", "must", "each",
+    "report", "reports", "source", "sources", "record", "records", "case", "cases", "historical", "factual",
+    "ntsb", "faa", "asrs", "aviation", "safety", "data", "investigation", "finding", "findings",
+}
 
 
 def _features(s: str) -> set[str]:
@@ -46,10 +58,11 @@ def build_output(narrative: str, evidence: Sequence[Mapping[str, Any]], *,
     for ref, item in reports.items():
         text = " ".join(str(item.get(k) or "") for k in ("title", "excerpt", "content", "comparison_notes"))
         overlapping = sorted(targets & _features(text))
-        # Retrieving a case is not evidence of similarity; require at least one
-        # nontrivial overlapping operational term, or state insufficiency.
+        # Retrieval rank alone is not a similarity judgment. Require at least
+        # two non-boilerplate operational terms and a modest overlap ratio.
         score = len(overlapping) / (len(targets) + 1)
-        scored.append((score, ref, item, overlapping))
+        if len(overlapping) >= 2 and score >= 0.08:
+            scored.append((score, ref, item, overlapping))
     scored.sort(key=lambda t: (-t[0], t[1]))
 
     matches = []

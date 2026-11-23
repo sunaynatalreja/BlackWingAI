@@ -9,6 +9,11 @@ class HazardOutput(APIModel):
     hazard_id: str
     description: str
     evidence_ids: list[str] = Field(default_factory=list)
+    # Separate current-case support from historical passages used only to
+    # inform a provisional reference-matrix estimate.
+    rating_evidence_ids: list[str] = Field(default_factory=list)
+    rating_basis_type: Literal["direct_case_evidence", "historical_analogies", "unassessed"] = "unassessed"
+    scoring_reason: str = ""
     existing_controls: list[str] = Field(default_factory=list)
     control_gaps: list[str] = Field(default_factory=list)
     severity: int | None = Field(default=None, ge=1, le=5)

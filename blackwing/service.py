@@ -15,7 +15,7 @@ from pydantic import ValidationError
 from blackwing.agents.base import AgentExecutionError, AgentOutputValidationError, AgentSpec
 from blackwing.agents.compliance.agent import unassessed_output as compliance_unassessed_output
 from blackwing.agents.compliance.evidence import ground_compliance_output
-from blackwing.agents.risk.evidence import ground_risk_output
+from blackwing.agents.risk.evidence import ground_risk_output, historical_case_key, _reference
 from blackwing.agents.investigation.grounding import ground_investigation_output
 from blackwing.agents.mitigation.grounding import ground_mitigation_output
 from blackwing.agents.critic.grounding import audit_critic_output
@@ -169,13 +169,84 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
                         incident_date=state.get("incident_date"),
                     )
                 elif role == "risk":
-                    output = ground_risk_output(output, evidence)
+                    grounded = ground_risk_output(output, evidence)
+                    risk_mode = state.get("plan", {}).get("task_modes", {}).get("risk")
+                    history_cases = {key for row in evidence if (key := historical_case_key(row))}
+                    rating_passages = [
+                        {"incident_id": historical_case_key(row), "evidence_id": _reference(row)}
+                        for row in evidence if historical_case_key(row) and _reference(row)
+                    ]
+                    needs_analogy_retry = (
+                        risk_mode == "provisional_historical_analogy_rating"
+                        and len(history_cases) >= 2
+                        and any(hazard.get("risk_index") is None for hazard in grounded.get("hazards", []))
+                    )
+                    if needs_analogy_retry:
+                        retry_prior = {
+                            **state.get("outputs", {}),
+                            "correction_request": {
+                                "target": "risk",
+                                "reason": "analogy_rating_retry",
+                                "issues": [{
+                                    "issue_type": "missing_provisional_rating",
+                                    "affected_output": "risk",
+                                    "description": "This case has at least two distinct eligible incident records, but the validated output lacks a complete categorical rating. For each hazard, choose a severity and likelihood and cite one exact passage from each of two different incident IDs. Use only the listed IDs; keep the rating provisional and explain the analogy limits.",
+                                    "available_historical_incidents": sorted(history_cases)[:5],
+                                    "available_rating_passages": rating_passages[:5],
+                                }],
+                            },
+                        }
+                        emit("analogy_rating_retry", step="risk", detail={
+                            "status": "started", "available_distinct_analogues": len(history_cases),
+                            "reason": "risk output had no validated categorical index",
+                        })
+                        try:
+                            retry_output = await invoke_agent(
+                                spec, client=client, settings=settings,
+                                narrative=state["narrative"], evidence=evidence,
+                                prior_outputs=retry_prior,
+                            )
+                            retry_grounded = ground_risk_output(retry_output, evidence)
+                            first_scored = sum(h.get("risk_index") is not None for h in grounded.get("hazards", []))
+                            retry_scored = sum(h.get("risk_index") is not None for h in retry_grounded.get("hazards", []))
+                            retry_by_id = {h.get("hazard_id"): h for h in retry_grounded.get("hazards", [])}
+                            merged_hazards = []
+                            for original in grounded.get("hazards", []):
+                                replacement = retry_by_id.get(original.get("hazard_id"))
+                                merged_hazards.append(
+                                    replacement if replacement and replacement.get("risk_index") is not None
+                                    and original.get("risk_index") is None else original
+                                )
+                            merged = {**grounded, "hazards": merged_hazards}
+                            merged_scored = sum(h.get("risk_index") is not None for h in merged_hazards)
+                            if merged_scored > first_scored:
+                                grounded = {
+                                    **merged,
+                                    "assessment_status": retry_grounded.get(
+                                        "assessment_status", "provisional_reference_matrix_requires_human_review"
+                                    ),
+                                }
+                            emit("analogy_rating_retry", step="risk", detail={
+                                "status": "completed" if merged_scored > first_scored else "still_unscored",
+                                "scored_hazards": merged_scored,
+                                "distinct_analogues": len(history_cases),
+                            })
+                        except Exception as exc:
+                            logger.warning("Risk analogy-rating retry did not produce a validated result; error_type=%s",
+                                           type(exc).__name__)
+                            emit("analogy_rating_retry", step="risk", detail={
+                                "status": "failed", "error_type": type(exc).__name__,
+                                "distinct_analogues": len(history_cases),
+                            })
+                    output = grounded
                 elif role == "mitigation":
                     output = ground_mitigation_output(output, state.get("outputs", {}))
                 elif role == "critic":
                     output = audit_critic_output(output, state.get("outputs", {}))
                 elif role == "verification":
-                    output = ground_verification_output(output, state.get("outputs", {}))
+                    output = ground_verification_output(
+                        output, state.get("outputs", {}), narrative=state.get("narrative", "")
+                    )
         except httpx.TimeoutException as exc:
             raise AgentExecutionError(role, "model_timeout", "The configured model provider did not respond before the configured timeout.") from exc
         except httpx.HTTPStatusError as exc:

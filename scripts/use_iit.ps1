@@ -6,7 +6,7 @@ param([switch]$PromptKeys)
 # This script performs local checks only; it does not call IIT or rebuild indexes.
 
 $iitRepoRoot = Split-Path -Parent $PSScriptRoot
-$iitDefaultIndex = Join-Path $iitRepoRoot 'rag_indexes\expanded_iit_bge_20261122_v1'
+$iitDefaultIndex = Join-Path $iitRepoRoot 'rag_indexes\blackwing-kb-iit-bge-v1'
 $iitLegacyIndex = Join-Path $iitRepoRoot 'rag_indexes\blackwing-kb-iit-bge-v1'
 $iitDefaultChatCert = Join-Path $env:USERPROFILE 'Downloads\vm07-ca.crt'
 $iitLegacyChatCert = Join-Path $env:USERPROFILE 'Downloads\VM02_Embeddings_Access_2\vm07-ca.crt'
@@ -87,6 +87,10 @@ if (-not (Test-Path -LiteralPath $iitConfig -PathType Leaf)) { throw 'BLACKWING 
 $iitCredentials.Clear()
 Remove-Variable iitValue -ErrorAction SilentlyContinue
 $env:BLACKWING_CONFIG = $iitConfig
+$iitGoldWorkbook = Join-Path $iitRepoRoot 'BLACKWING_DATA\02_GOLD_EVALUATION_PROTECTED\GOLD_80_QUESTIONS\BW-GQ-001-GOLD80-WORKBOOK.xlsx'
+if ([string]::IsNullOrWhiteSpace($env:BLACKWING_GOLD_QUERY_FILE) -and (Test-Path -LiteralPath $iitGoldWorkbook -PathType Leaf)) {
+    $env:BLACKWING_GOLD_QUERY_FILE = (Resolve-Path -LiteralPath $iitGoldWorkbook).Path
+}
 $env:BLACKWING_LLM_API_BASE_URL = $iitChatUrl
 $env:BLACKWING_LLM_CA_CERT = (Resolve-Path -LiteralPath $iitChatCert).Path
 $env:BLACKWING_EMBEDDING_URL = $iitEmbeddingUrl.TrimEnd('/')
@@ -111,7 +115,7 @@ $env:BLACKWING_RAG_RERANKER = 'crossencoder' # Local reranking, not local embedd
 $env:BLACKWING_AGENT_RAG = '1'
 $env:BLACKWING_AGENT_RAG_METHOD = 'rerank'
 $env:BLACKWING_RAG_CACHE = Join-Path $iitRepoRoot 'rag_cache\embeddings_iit.sqlite'
-$env:BLACKWING_API_JSON_RESPONSE_FORMAT = 'false'
+$env:BLACKWING_API_JSON_RESPONSE_FORMAT = 'true'
 $env:BLACKWING_IIT_MIN_INTERVAL_SECONDS = '1.1'
 
 Write-Host 'LM/chat and BGE embedding credentials are configured separately.'

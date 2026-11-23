@@ -104,8 +104,10 @@ def _render_report(generated: dict, report: dict, case_id: str, run_id: str, *, 
     if (agent_outputs.get("risk") or {}).get("numeric_score") is not None:
         st.warning("This saved report uses the retired numeric risk calculation. Its original result is retained for audit; start a new investigation run to obtain the current categorical reference assessment.")
     indices = list(dict.fromkeys(row["Risk index"] for row in display["rows"] if row["Risk index"] != "Unassessed"))
-    left.metric("Case match", "Seen" if reference_case is True else "No reference match" if reference_case is False else "Unknown")
-    middle.metric("Aviation risk", " · ".join(indices) if indices else "Unassessed")
+    pending_hazards = len(display["rows"])
+    risk_label = " · ".join(indices) if indices else (f"{pending_hazards} hazard · unscored" if pending_hazards == 1 else f"{pending_hazards} hazards · unscored" if pending_hazards else "Unassessed")
+    left.metric("Case match", "Seen" if reference_case is True else "Unseen" if reference_case is False else "Unknown")
+    middle.metric("Aviation risk", risk_label)
     right.metric("Review", "Required" if generated.get("human_approval_required", True) else "Pending")
     review.metric(
         "Evidence check",
@@ -116,10 +118,14 @@ def _render_report(generated: dict, report: dict, case_id: str, run_id: str, *, 
     st.caption(display["framework"])
     st.caption(display["notice"])
     if display["rows"]:
-        st.dataframe([{key:row[key] for key in ("Hazard","Severity","Likelihood","Risk index","Classification","Status")}
+        st.dataframe([{key:row[key] for key in ("Hazard","Description","Severity","Likelihood","Risk index","Classification","Rating basis","Rating evidence IDs","Status")}
                       for row in display["rows"]], hide_index=True, alt="Backend hazard severity, likelihood and categorical risk indexes")
-    if not indices:
-        st.info("This saved backend assessment has no evidence-backed severity and likelihood pair, so no A1/C3-style risk index was assigned. The UI does not invent ratings.")
+    if not indices and display["rows"]:
+        reasons = list(dict.fromkeys(row["Scoring reason"] for row in display["rows"] if row.get("Scoring reason")))
+        st.info("Risk not scored: " + (" ".join(reasons) if reasons else
+            "The Risk Agent returned no complete severity/likelihood pair with validated rating citations. The backend withheld the matrix index."))
+    elif not indices:
+        st.info("No candidate hazard was established from the available evidence; severity and likelihood remain unassessed.")
     for missing in display["missing_inputs"]:
         st.caption("Risk assessment gap: " + str(missing))
 

@@ -197,3 +197,22 @@ def test_actual_hosted_adapter_uses_token_preflight_and_shared_pacing(tmp_path,m
     assert result['citations']==['FACT:1']
     assert captured['min_interval_seconds']==1.7 and captured['payload']['max_tokens']<=1024
     assert 'gold' not in captured['payload']['messages'][1]['content'].casefold()
+
+
+def test_protected_workbook_defaults_to_repository_copy(monkeypatch):
+    monkeypatch.delenv('BLACKWING_GOLD_QUERY_FILE',raising=False)
+    monkeypatch.delenv('BLACKWING_CONFIG',raising=False)
+    expected=Path(__file__).resolve().parents[1]/'BLACKWING_DATA'/'02_GOLD_EVALUATION_PROTECTED'/'GOLD_80_QUESTIONS'/'BW-GQ-001-GOLD80-WORKBOOK.xlsx'
+    assert qa.workbook_path()==expected
+    assert expected.is_file()
+
+
+def test_synthetic_gold_policy_references_are_present_and_approved(monkeypatch):
+    from blackwing import synthetic_gold
+    monkeypatch.delenv('BLACKWING_GOLD_QUERY_FILE',raising=False)
+    monkeypatch.delenv('BLACKWING_CONFIG',raising=False)
+    rows,signature=qa.workbook_rows()
+    selected={row['question_id']:row for row in rows if row['question_id'] in synthetic_gold.CRITERIA}
+    assert set(selected)==set(synthetic_gold.CRITERIA)
+    assert all(str(row['human_validation_status']).upper()=='APPROVED' for row in selected.values())
+    assert len(signature)==64

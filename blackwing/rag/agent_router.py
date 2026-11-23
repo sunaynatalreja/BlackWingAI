@@ -31,6 +31,36 @@ def _unique(items: list[dict[str, Any]], limit: int | None) -> list[dict[str, An
     return results
 
 
+_INCIDENT_SOURCE_TYPES = {"official_factual", "official_preliminary", "official_final", "voluntary_asrs"}
+_INCIDENT_DOCUMENT_TYPES = {"incident_report", "asrs_report", "incident_summary", "safety_report"}
+
+
+def _distinct_historical_incidents(items: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
+    """Keep one relevant passage from each real incident, excluding guidance."""
+    chosen: list[dict[str, Any]] = []
+    seen_incidents: set[str] = set()
+    for row in items:
+        kind = str(row.get("source_type") or "").casefold()
+        doc_type = str(row.get("document_type") or "").casefold()
+        incident_id = str(row.get("incident_id") or row.get("case_id") or "").strip()
+        if (kind not in _INCIDENT_SOURCE_TYPES or doc_type not in _INCIDENT_DOCUMENT_TYPES
+                or not incident_id
+                or str(row.get("evidence_status") or "").casefold() in {"gold", "evaluation_only", "protected_gold"}
+                or str(row.get("evidence_role") or "").casefold() in {"general_guidance", "guidance", "evaluation", "gold"}):
+            continue
+        key = incident_id.casefold()
+        if key in seen_incidents:
+            continue
+        seen_incidents.add(key)
+        selected = dict(row)
+        selected["evidence_role"] = "historical_analogy"
+        selected["caution"] = "OTHER INCIDENT: analogy only; never factual evidence for current case"
+        chosen.append(selected)
+        if len(chosen) >= limit:
+            break
+    return chosen
+
+
 # Look for actual clock-time transcript markers (e.g. 0639:13), not case-specific pages.
 _TIMELINE_CLOCK = re.compile(r"\b(?:[01]\d|2[0-3])\d{2}:\s*[0-5]\d\b")
 # Generic aviation actions that make a chronological passage useful for incident
@@ -195,13 +225,11 @@ def build_agent_packets(*, retriever: Any, narrative: str, case_id: str,
 
     direct_candidates = search("direct", 40, case_id=case_id, jurisdiction=jurisdiction,
                     incident_date=incident_date)
-    historical = search("historical", 2, case_id=case_id,
+    historical = search("historical", 30, case_id=case_id,
                         incident_date=incident_date)
     # Defense in depth: a retriever must not return this incident as its own analogy.
     historical = [row for row in historical if str(row.get("incident_id") or "").upper() != case_id.upper()]
-    for row in historical:
-        row["evidence_role"] = "historical_analogy"
-        row["caution"] = "OTHER INCIDENT: analogy only; never factual evidence for current case"
+    historical = _distinct_historical_incidents(historical, limit_per_agent)
     rules = search("regulatory", 2, jurisdiction=jurisdiction,
                    incident_date=incident_date) if jurisdiction and incident_date else []
     guidance = search("guidance", 2, incident_date=incident_date)
@@ -227,7 +255,7 @@ def build_agent_packets(*, retriever: Any, narrative: str, case_id: str,
         ),
 
         "risk": _unique(
-            [*current[:max(2, limit_per_agent - 1)], *guidance[:1]],
+            [*current[:max(1, limit_per_agent - 4)], *historical[:3]],
             limit_per_agent
         ),
 

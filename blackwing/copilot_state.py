@@ -22,6 +22,11 @@ def risk_display(report):
                      "Risk index": hazard.get("risk_index") if assessed else "Unassessed",
                      "Classification": hazard.get("risk_level") if assessed else "Unassessed",
                      "Evidence IDs": ", ".join(hazard.get("evidence_ids") or []),
+                     "Rating basis": ("Historical analogies · provisional" if hazard.get("rating_basis_type") == "historical_analogies"
+                                     else "Direct case evidence · provisional" if hazard.get("rating_basis_type") == "direct_case_evidence"
+                                     else "No valid rating returned"),
+                     "Rating evidence IDs": ", ".join(hazard.get("rating_evidence_ids") or []),
+                     "Scoring reason": hazard.get("scoring_reason") or "",
                      "Status": hazard.get("scoring_status") or "unassessed_insufficient_inputs"})
     return {"framework": REFERENCE_FRAMEWORK, "rows": rows,
             "assessment_status": risk.get("assessment_status") or "unassessed_insufficient_inputs",

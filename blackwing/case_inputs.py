@@ -44,8 +44,7 @@ def unassessed_synthetic_risk(state, evidence):
     allowed={str(row.get('chunk_id') or row.get('evidence_id') or '') for row in evidence}
     investigation=state.get('outputs',{}).get('investigation',{})
     hazards=[]
-    # Retain already stated, cited hypotheses; create no new hazard from a mere
-    # proximity report and never invent rated severity or likelihood.
+    # Preserve cited model hypotheses when present.
     for claim in [*investigation.get('hypotheses',[]),*investigation.get('contributing_factors',[])]:
         refs=[ref for ref in claim.get('evidence_ids',[]) if ref in allowed]
         if claim.get('text') and refs:
@@ -54,6 +53,28 @@ def unassessed_synthetic_risk(state, evidence):
                 'severity':None,'likelihood':None,'severity_basis':'','likelihood_basis':''})
         if len(hazards)>=3:
             break
+    # A proximity account is a reportable potential hazard even when it does
+    # not establish runway entry, severity, or likelihood. Keep it visibly
+    # distinct from a verified occurrence and link only supplied passages.
+    if not hazards:
+        synthetic_rows=[row for row in evidence
+            if row.get('evidence_status')=='SYNTHETIC_UNVERIFIED'
+            and row.get('source_type')=='user_submitted']
+        account_text=' '.join(str(row.get('excerpt') or '') for row in synthetic_rows).casefold()
+        proximity_terms=('proximit','close to the runway','near the runway','runway')
+        vehicle_terms=('vehicle','van','truck','car','driver','access limit')
+        if (any(term in account_text for term in proximity_terms)
+                and any(term in account_text for term in vehicle_terms)):
+            refs=[str(row.get('chunk_id') or row.get('evidence_id') or '') for row in synthetic_rows
+                  if str(row.get('chunk_id') or row.get('evidence_id') or '') in allowed]
+            refs=list(dict.fromkeys(ref for ref in refs if ref))
+            if refs:
+                hazards.append({'hazard_id':'H001',
+                    'description':('Potential vehicle–runway proximity hazard for verification: the supplied crew account reports apparent proximity, '
+                        'while the driver account reports stopping before an access limit. The accounts do not establish boundary entry, runway occupancy, or an incursion.'),
+                    'evidence_ids':refs,'severity':None,'likelihood':None,
+                    'severity_basis':'','likelihood_basis':'',
+                    'control_gaps':['Surveyed access boundary and synchronized vehicle/aircraft positions are unavailable.']})
     missing=['Verified incident-specific severity evidence is unavailable.',
              'A defensible occurrence/exposure basis for likelihood is unavailable.']
     if not state.get('incident_date'):

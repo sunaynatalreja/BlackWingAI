@@ -51,7 +51,9 @@ def _eligible(agent: str, e: Mapping[str, Any]) -> bool:
     if agent == "investigation":
         return _is_direct(e)
     if agent == "risk":
-        return _is_direct(e) or _is_guidance(e)
+        # Historical reports are contextual rating evidence for Risk only;
+        # they remain excluded from Investigation's current-case fact packet.
+        return _is_direct(e) or _is_guidance(e) or _is_historical(e)
     if agent == "mitigation":
         return _is_direct(e) or _is_guidance(e)
     if agent in {"critic", "verification"} or agent.startswith("report"):
@@ -130,7 +132,11 @@ def _review_context(agent: str, prior_outputs: Mapping[str, Any]) -> dict[str, A
         "risk": {
             "hazards": _short_rows(risk.get("hazards"), limit=2, fields={
                 "hazard_id": 25, "description": 90, "evidence_ids": 40,
-                "control_gaps": 60,
+                "control_gaps": 60, "severity": 10, "likelihood": 10,
+                "risk_index": 20, "risk_level": 20,
+                "rating_evidence_ids": 50, "rating_basis_type": 30,
+                "severity_basis": 100, "likelihood_basis": 100,
+                "scoring_reason": 120,
             }),
             "risk_notes": _short(risk.get("risk_notes"), 90),
             "missing_inputs": [_short(item, 75) for item in (risk.get("missing_inputs") or [])[:1]],
@@ -190,6 +196,10 @@ def _review_context(agent: str, prior_outputs: Mapping[str, Any]) -> dict[str, A
                 "hazards": _short_rows(risk.get("hazards"), limit=3, fields={
                     "hazard_id": 25, "description": 180, "evidence_ids": 60,
                     "control_gaps": 120, "existing_controls": 100,
+                    "severity": 10, "likelihood": 10, "risk_index": 20,
+                    "risk_level": 20, "rating_evidence_ids": 70,
+                    "rating_basis_type": 30, "severity_basis": 180,
+                    "likelihood_basis": 180, "scoring_reason": 160,
                 }),
                 "risk_notes": _short(risk.get("risk_notes"), 180),
                 "missing_inputs": [_short(item, 120) for item in (risk.get("missing_inputs") or [])[:3]],

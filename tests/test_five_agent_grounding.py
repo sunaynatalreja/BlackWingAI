@@ -84,6 +84,26 @@ def test_similar_no_match_does_not_invent():
     assert out["case_status"] == "unseen_case_no_historical_match"
 
 
+def test_similar_case_ignores_boilerplate_word_overlap():
+    unrelated = dict(HISTORY, source_id="NTSB-UNRELATED", title="Human performance report",
+                    excerpt="Both reports were reviewed by the NTSB, but these findings were not final.")
+    out = build_output("A driver stopped before an access limit while a crew reported proximity.",
+                       [unrelated], current_incident_id="NEW-SYNTHETIC-CASE")
+    assert out["matches"] == []
+    assert out["case_status"] == "unseen_case_no_historical_match"
+
+
+def test_verification_does_not_treat_synthetic_evidence_labels_as_identity_conflict():
+    from blackwing.agents.verification.grounding import ground_verification_output
+    out = ground_verification_output(
+        {"claims_needing_source": [], "unsupported_conclusions": [],
+         "conflicts": ["Conflicting incident identities between synthetic accounts."],
+         "completeness_status": "incomplete", "human_approval_required": True},
+        {}, narrative="CASE ID: BW-UNSEEN-001\nORIGINAL FICTIONAL training scenario."
+    )
+    assert out["conflicts"] == []
+
+
 def test_mitigation_links_only_actual_hazard_and_marks_unverified():
     priors = {"risk": {"hazards": [{"hazard_id": "HAZ-001", "evidence_ids": []}]},
               "investigation": {"contributing_factors": []}}

@@ -70,7 +70,7 @@ flowchart LR
 
 Every agent lives in its own package at `blackwing/agents/<agent_id>/`. Each package owns its prompt file (`prompt.md`), structured output schema (`schema.py`), and agent registration (`agent.py`). The coordinator imports registered `AgentSpec` objects from `agents/registry.py`; shared request construction, safety instructions, model transport and schema validation live in `agents/runtime.py`. Upstream context is declared on each agent spec so edits to one role remain localized and reviewable.
 
-Prompting strategy follows agent responsibility. The Investigation Agent uses few-shot examples in its prompt to demonstrate how to classify documented facts, reported observations, and unknowns; examples are illustrative only and must never be copied as case evidence. Other model-backed analysis agents use zero-shot instructions in their package prompt files. Similar Case Analysis is deterministic and does not call the model. The Report Agent uses task breakdown prompting: it plans four fixed report sections and drafts each section in a separate focused call with task-relevant upstream outputs.
+Prompting strategy follows agent responsibility. The Investigation Agent uses few-shot examples in its prompt to demonstrate how to classify documented facts, reported observations, and unknowns; examples are illustrative only and must never be copied as case evidence. Other model-backed analysis agents use zero-shot instructions in their package prompt files. Similar Case Analysis is deterministic and does not call the model. The Report Agent uses task breakdown prompting: it follows a fixed four-section plan and drafts each section in a separate focused call with task-relevant upstream outputs.
 
 ## Data model
 

@@ -183,7 +183,10 @@ async def _execute_run_body(
         record_event(lifecycle_event("evidence_retrieval", status, case_id=case["case_id"]))
     evidence = [*case.get("evidence", []), *retrieved]
     agent_evidence = None
-    if use_agent_retrieval and os.getenv("BLACKWING_AGENT_RAG", "0") == "1":
+    agent_rag_setting = os.getenv("BLACKWING_AGENT_RAG")
+    agent_rag_enabled = (agent_rag_setting == "1" if agent_rag_setting is not None
+                         else bool(settings.rag_index_dir or os.getenv("BLACKWING_RAG_INDEX_DIR")))
+    if use_agent_retrieval and agent_rag_enabled:
         # Keep integration outside agent packages and UI. No LLM calls here.
         from blackwing.rag.agent_router import build_agent_packets
         record_event(lifecycle_event("evidence_retrieval", "retrieval_started", case_id=case["case_id"],
@@ -203,7 +206,9 @@ async def _execute_run_body(
         try:
             agent_evidence = await asyncio.to_thread(agent_retrieval)
             record_event(lifecycle_event("evidence_retrieval", "retrieval_completed", case_id=case["case_id"]))
-        except Exception:
+        except Exception as exc:
+            logger.warning("Agent-specific evidence retrieval unavailable; continuing without historical packets (%s)",
+                           type(exc).__name__)
             from blackwing.rag.agent_router import AGENT_ROLES, _case_uploads
             uploads = _case_uploads(case.get("evidence", []), case.get("source_incident_id") or case["case_id"])
             agent_evidence = {role: ([] if role == "similar_case" else uploads) for role in AGENT_ROLES}

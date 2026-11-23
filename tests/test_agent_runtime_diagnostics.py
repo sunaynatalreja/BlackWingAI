@@ -10,6 +10,7 @@ import pytest
 from blackwing.agents.base import AgentOutputValidationError
 from blackwing.agents.registry import AGENT_BY_ID
 from blackwing.agents.runtime import invoke_agent
+from blackwing.agents.report.schema import ReportSectionDraft, normalize_report_section
 from blackwing.config import Settings
 
 
@@ -49,3 +50,20 @@ def test_invalid_agent_response_logs_validation_details_and_response_preview(cap
     assert "agent=critic provider=ollama model=qwen3:8b attempt=1/2" in caplog.text
     assert "validation_details" in caplog.text
     assert "raw diagnostic critic response" in caplog.text
+
+
+def test_report_normalizer_accepts_common_qwen_section_variants():
+    normalized = normalize_report_section({
+        "executive_summary": "Two accounts differ on vehicle position.",
+        "findings": [
+            {"claim": "Driver stopped before the access line.", "type": "reported",
+             "citations": ["SIM-E1"], "extra": "discarded"},
+            "Position remains unverified.",
+        ],
+        "unused_metadata": "discarded",
+    })
+    result = ReportSectionDraft.model_validate(normalized).model_dump()
+    assert result["summary"] == "Two accounts differ on vehicle position."
+    assert result["key_points"][0]["classification"] == "reported_observation"
+    assert result["key_points"][0]["evidence_ids"] == ["SIM-E1"]
+    assert result["key_points"][1]["classification"] == "verification_gap"

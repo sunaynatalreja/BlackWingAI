@@ -154,8 +154,12 @@ def show_risk(report):
     st.text("Backend assessment status · " + display["assessment_status"])
     if display["rows"]:
         st.dataframe(display["rows"], hide_index=True, alt="Backend-calculated severity, likelihood and categorical risk")
+        if not any(row.get("Risk index") != "Unassessed" for row in display["rows"]):
+            reasons = list(dict.fromkeys(row.get("Scoring reason", "") for row in display["rows"] if row.get("Scoring reason")))
+            st.info("Risk not scored: " + (" ".join(reasons) if reasons else
+                "The Risk Agent returned no complete severity/likelihood pair with validated rating citations. The backend withheld the matrix index."))
     else:
-        st.info("Unassessed: no backend hazard risk values are available.")
+        st.info("No candidate hazard was established from the available evidence; severity and likelihood remain unassessed.")
     if display["missing_inputs"]:
         st.write(display["missing_inputs"])
     for h in (report or {}).get("agent_outputs", {}).get("risk", {}).get("hazards", []):
@@ -336,6 +340,9 @@ def show_gold_comparison(case):
         st.caption(result['scope_notice'])
     if result.get('last_error'):
         st.error(result['last_error']['message'])
+    comparisons = result.get('comparisons') or []
+    if any(row.get('error_code') == 'provider_http_401' for row in comparisons):
+        st.error('The inference provider rejected the configured API key (HTTP 401). Update BLACKWING_LLM_API_KEY in the launching environment, restart the API, then retry the unvalidated comparisons. No score was assigned.')
     if result['status'] in {'not_applicable','unavailable'}:
         st.metric('Gold comparison score', 'Not applicable' if result['status'] == 'not_applicable' else 'Unavailable')
         st.info(result['reason'])

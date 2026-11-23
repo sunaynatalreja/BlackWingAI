@@ -5,8 +5,13 @@ Return compact JSON with `claims_needing_source` (list of strings),
 `completeness_status: "incomplete"`, `human_approval_required: true`.
 Cross-check Investigation claims, Risk hazards, Compliance checks, Mitigation
 hazard links and Critic issues. Flag uncited facts and timelines, assumptions
-presented as observations, questionable advisory applicability, conflicting
-incident identities, and unsupported priorities. A valid citation ID verifies
+presented as observations, questionable advisory applicability, and conflicting
+incident identities only when incident metadata itself gives incompatible
+identifiers. Never infer an identity conflict from evidence IDs, synthetic
+SIM-E labels, or the run's internal UUID. Treat reported positions as a conflict
+only when both claims address the same place and time and cannot both be true;
+otherwise state that their relationship is unresolved. Flag unsupported
+priorities. A valid citation ID verifies
 only that a passage was supplied; it does NOT prove its meaning or accuracy.
 The model cannot authenticate documents or determine legal liability.
 No final approval is possible without a qualified human reviewer. Keep lists

@@ -4,11 +4,11 @@ Return one compact JSON object using only these top-level schema keys:
 incident_summary, timeline_events, documented_facts, reported_observations,
 hypotheses, contributing_factors, unknowns. Empty lists are valid.
 
-Output budget: write minified JSON, no markdown and no indentation. Use a short
-summary, at most THREE timeline events, TWO documented facts, ONE reported
-observation and ONE hypothesis/contributing factor. Keep claims concise;
-avoid repeating the same event in multiple lists. Preserve the most important
-unknowns, including partial chronology, instead of claiming full coverage.
+Output budget: write minified JSON, no markdown and no indentation. Keep claim
+text concise, but preserve every materially distinct supplied event and
+reported account; do not drop an account merely to meet an arbitrary item
+count. Avoid repeating the same event in multiple lists. Preserve unknowns,
+contradictions and incomplete chronology instead of claiming full coverage.
 
 Each claim is an OBJECT with text, evidence_state and evidence_ids (an array
 of exact supplied passage IDs). source_ids and rationale are OPTIONAL: omit

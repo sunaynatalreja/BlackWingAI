@@ -59,6 +59,24 @@ def test_safe_unknowns_not_confused_with_cited_facts():
     assert next(c for c in result["checks"] if c["check"] == "Unknowns/completeness disclosed")["earned"] == 7
 
 
+def test_attributed_reported_observations_count_as_coverage_not_verified_facts():
+    report = sample_report()
+    report["agent_outputs"]["investigation"]["documented_facts"] = []
+    report["agent_outputs"]["investigation"]["reported_observations"] = [
+        {"text": "Driver reports stopping before an access limit.", "evidence_ids": ["SIM-E1"]},
+        {"text": "Crew reports apparent proximity to the runway.", "evidence_ids": ["SIM-E2"]},
+    ]
+    report["generated_report"]["sections"][0]["key_points"] = [
+        {"classification": "reported_observation", "text": "Driver reports stopping before an access limit.", "evidence_ids": ["SIM-E1"]},
+        {"classification": "reported_observation", "text": "Crew reports apparent proximity to the runway.", "evidence_ids": ["SIM-E2"]},
+    ]
+
+    result = assess_quality({}, report)
+    assert result["score"] == 100
+    assert result["flags"] == ["Available case material is attributed reporting, not independently verified facts."]
+    assert next(c for c in result["checks"] if c["check"] == "Current-case evidence represented")["earned"] == 12
+
+
 def test_critic_issues_are_not_hidden_or_treated_as_no_review():
     r = sample_report()
     r["agent_outputs"]["critic"]["issues"] = ["Citation incomplete"]

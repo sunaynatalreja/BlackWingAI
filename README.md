@@ -6,7 +6,7 @@ Runway-incursion API and local UI prototype with evidence-grounded agents, a bou
 
 See [local agentic delivery and validation](docs/local-agentic-delivery.md) for architecture, test evidence, modified files, limitations, IIT setup and Sunayana UI requirements. The API supports case creation, text evidence, investigation/status, seven agent outputs, provisional deterministic risk classification, hazard-linked mitigation, Critic findings, review and JSON/Markdown export.
 
-The LangGraph Planner selects execution modes. The Executor runs the existing roles, the Critic can trigger one evidence-supported targeted revision, and the workflow stops within ten counted execution steps. The report role assembles four typed sections deterministically within this budget; standalone report drafting remains available through its existing function.
+The LangGraph Planner selects execution modes. The Executor runs the existing roles, the Critic can trigger one evidence-supported targeted revision, and the workflow stops within ten counted execution steps. The report role drafts four typed sections in separate, bounded task calls, then restores all validated supplied-account details so short model responses cannot omit them. Role-specific retrieval is enabled by default for runs that include retrieval; set `BLACKWING_AGENT_RAG=0` to disable it. Standalone report drafting remains available through its existing function.
 
 Cases, evidence, runs, partial/final outputs, tool traces, reviews and report references use SQLite. Interrupted runs are retained as failed with `error_code=interrupted`; recovery creates a new run rather than claiming checkpoint resumption. Run one API worker per database and hosted API key.
 
@@ -23,7 +23,7 @@ Retrieval keeps current-case evidence separate from historical analogies, includ
 
 The API supports only `runway_incursion` in v1. It lets a client create/edit a draft case, attach text evidence, ingest/list/search knowledge documents, start an analysis run, poll status, read the typed report and trace, and record/list a review. Investigation, Compliance, Risk, Mitigation, Critic, Verification and Report call the selected model provider. Similar Case Analysis uses deterministic, deduplicated source metadata so it can reliably mark a case unseen in the current corpus and report sourced historical findings without making them findings about the new case. Each role has its own response schema.
 
-Each role is maintained as an independent package under `blackwing/agents/<role>/`. A package owns its registration, schema, and prompt files; shared model-provider handling lives in `blackwing/agents/runtime.py`, and workflow order/upstream context lives in `blackwing/agents/registry.py`. The Report Agent receives the previous agents' structured work products, creates a constrained task plan, then drafts the report as four smaller section tasks before assembling a typed report. The UI presents that report first and keeps the source agent JSON in a separate details tab. Contributors can change one role's prompts and schema without editing the other agent packages. Changes to an output schema must remain compatible with the public report schema in `blackwing/schemas.py`.
+Each role is maintained as an independent package under `blackwing/agents/<role>/`. A package owns its registration, schema, and prompt files; shared model-provider handling lives in `blackwing/agents/runtime.py`, and workflow order/upstream context lives in `blackwing/agents/registry.py`. The Report Agent receives the previous agents' structured work products, follows a fixed four-section task plan, then drafts each section with its focused prompt before assembling a typed report. The UI presents that report first and keeps the source agent JSON in a separate details tab. Contributors can change one role's prompts and schema without editing the other agent packages. Changes to an output schema must remain compatible with the public report schema in `blackwing/schemas.py`.
 
 Prompting strategies are role-specific: the Investigation Agent uses few-shot examples to teach the model how to distinguish sourced facts, reported observations, and unknowns. Other model-backed analysis agents use zero-shot role instructions in their individual prompt files. Similar Case Analysis is deterministic code and makes no model call. The Report Agent uses task breakdown prompting: it plans four fixed report sections, then drafts each section in a focused call using relevant upstream agent outputs.
 
@@ -89,10 +89,13 @@ BlackWing uses the IIT Kharagpur hosted OpenAI-compatible endpoint with `Qwen/Qw
 
 The attached `vm02-ca.crt` is the certificate for the shared embeddings endpoint. The inference endpoint uses its group certificate (`vm04-ca.crt` through `vm07-ca.crt`), so configure those two CA paths separately. The group number was not included in the request; enter your assigned inference URL and matching model CA below.
 
+Keep `BLACKWING_API_JSON_RESPONSE_FORMAT=true` for Qwen3. The hosted endpoint accepts JSON response mode; this prevents free-form preambles from making otherwise useful section drafts fail JSON parsing. BlackWing still validates each response against its schema and uses its bounded retry if validation fails.
+
 Run this configuration from the repository root in the API terminal and repeat it in the Streamlit terminal:
 
 ```bash
 export BLACKWING_CONFIG="$PWD/config/blackwing.properties"
+export BLACKWING_GOLD_QUERY_FILE="$PWD/BLACKWING_DATA/02_GOLD_EVALUATION_PROTECTED/GOLD_80_QUESTIONS/BW-GQ-001-GOLD80-WORKBOOK.xlsx"
 export BLACKWING_API_HOST="127.0.0.1"
 export BLACKWING_API_PORT="8000"
 export BLACKWING_LLM_PROVIDER="openai_compatible"
@@ -113,7 +116,7 @@ export BLACKWING_AGENT_TOKEN_QUOTA_CRITIC="512"
 export BLACKWING_AGENT_TOKEN_QUOTA_VERIFICATION="512"
 export BLACKWING_AGENT_TOKEN_QUOTA_REPORT_PLANNER="256"
 export BLACKWING_AGENT_TOKEN_QUOTA_REPORT_SECTION="768"
-export BLACKWING_API_JSON_RESPONSE_FORMAT="false"
+export BLACKWING_API_JSON_RESPONSE_FORMAT="true"
 export BLACKWING_EMBEDDING_URL="https://103.42.50.41:1035/v1"
 export BLACKWING_EMBEDDING_MODEL="bge-small-en-v1.5"
 read -s "BLACKWING_EMBEDDING_API_KEY?Enter the shared embeddings API key: "

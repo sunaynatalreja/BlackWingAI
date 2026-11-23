@@ -42,8 +42,12 @@ def context(incident,report,run):
         'scope_notice':'Safety-policy adherence only. This is not matching-incident factual accuracy or a historical-case match.'}
     try:
         _,signature=references()
-    except (OSError,ValueError,KeyError,ImportError):
-        return {**result,'status':'unavailable','reason':'Approved safety-policy references are unavailable; configure BLACKWING_GOLD_QUERY_FILE.'}
+    except ImportError:
+        return {**result,'status':'unavailable','reason':'Gold workbook support is missing. Install project dependencies with `pip install -r requirements.txt`.'}
+    except FileNotFoundError:
+        return {**result,'status':'unavailable','reason':'Gold evaluation workbook was not found. Set BLACKWING_GOLD_QUERY_FILE in config/blackwing.properties.'}
+    except (OSError,ValueError,KeyError):
+        return {**result,'status':'unavailable','reason':'The workbook is unreadable or lacks the approved safety-policy references required for this comparison.'}
     cached=run.get('gold_comparison') or {}
     if cached.get('rubric_version')==VERSION and cached.get('report_hash')==report_hash(report) and cached.get('gold_sha256')==signature:
         from blackwing.gold_comparison import comparison_progress

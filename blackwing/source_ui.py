@@ -10,6 +10,7 @@ import streamlit as st
 def render_case(case, render_report):
     incident=case['incident']
     latest=max(case['runs'],key=lambda r:r['created_at']) if case['runs'] else None
+    running=bool(latest and latest['status'] in {'queued','running'})
     report=case.get('report')
     partial=case.get('partial_report')
     st.markdown('## Investigation run')
@@ -24,7 +25,7 @@ def render_case(case, render_report):
             st.error(latest.get('error') or 'Investigation failed; inspect Run trace for the failed agent.')
         if case.get('report_run_id') and case['report_run_id']!=latest['run_id']:
             st.warning('Displaying the earlier completed report; the latest run has no completed report.')
-    if st.button('Refresh investigation status',key='refresh-case'):
+    if not running and st.button('Refresh investigation status',key='refresh-case'):
         st.rerun()
     report_tab,agents_tab,trace_tab=st.tabs(['Investigation report','Agent details','Run trace'])
     with report_tab:
@@ -32,7 +33,9 @@ def render_case(case, render_report):
         if scored:
             quality=assess_quality(incident,scored)
             st.metric('Report Completeness',f"{quality['score']}%")
-            st.caption('Structural documentation completeness; separate from aviation risk and gold comparison. Detailed checks are in Run trace.')
+            st.caption('Structural documentation completeness. Cited attributed observations count as coverage but remain unverified; this is separate from aviation risk and gold comparison.')
+            for flag in quality.get('flags',[]):
+                st.caption('Scope note: '+flag)
             if not report:
                 st.caption('Provisional percentage from saved validated agent outputs. This is not a completed report or a factual-accuracy score.')
         else:

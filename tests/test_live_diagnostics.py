@@ -73,8 +73,10 @@ def test_started_and_waiting_commit_before_model_returns(monkeypatch, tmp_path):
     assert len(started) == len(completed) == 8
     assert {e["execution_id"] for e in started} == {e["execution_id"] for e in completed}
     assert all(e["duration_ms"] >= 0 for e in completed)
-    # Deterministic roles must not claim an outbound model request.
-    assert not any(e["status"] == "waiting_for_model_response" and e["agent_key"] in {"similar_case", "compliance", "report"} for e in events)
+    # Similar-case comparison and source-gated compliance are deterministic;
+    # the report node now makes four bounded, task-specific model requests.
+    assert not any(e["status"] == "waiting_for_model_response" and e["agent_key"] in {"similar_case", "compliance"} for e in events)
+    assert any(e["status"] == "waiting_for_model_response" and e["agent_key"] == "report" for e in events)
     repo.patch_run("run", {"status": "completed", "result": result})
     repo.close()
     restarted = SQLiteRepository(db)

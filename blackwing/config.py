@@ -80,6 +80,7 @@ class Settings:
     rag_embedding_retries: int = 2
     rag_cache_path: str = ""
     agent_token_quotas: dict[str, int] | None = None
+    gold_query_file: str = ""
 
     @property
     def model_name(self) -> str:
@@ -174,6 +175,7 @@ class Settings:
             rag_embedding_retries=min(5, max(0, int(values.get("rag.embedding_retries") or 2))),
             rag_cache_path=values.get("rag.cache_path", "").strip(),
             agent_token_quotas=agent_token_quotas,
+            gold_query_file=values.get("gold.query_file", "").strip(),
             model_response_log_limit=max(0, int(values.get("logging.model_response_log_limit") or 4000)),
         )
 

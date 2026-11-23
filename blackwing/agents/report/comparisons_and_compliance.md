@@ -6,5 +6,4 @@ historical probable cause to the current case. Report compliance as not
 assessed if no applicable rule was supplied. Do not assert a violation.
 Preserve supplied source IDs and URLs only; do not invent citations.
 
-Return the requested section schema with `task_id` set to
-`comparisons_and_compliance`.
+Return only the section body fields defined by the supplied schema. The application assigns the task ID and title.

@@ -18,10 +18,19 @@ def plan_investigation(state):
              "compliance": "model_with_grounding" if has_rules else "unassessed",
              "risk": "model_then_reference_tool_per_hazard", "mitigation": "model_with_hazard_links",
              "critic": "model_and_deterministic_audit", "verification": "model_and_deterministic_checks",
-             "report": "deterministic_assembly"}
-    abstain_risk = synthetic_risk_unassessed(state, sources("risk"))
+             "report": "task_decomposed"}
+    risk_sources = sources("risk")
+    historical_sources = [row for row in risk_sources
+        if str(row.get("evidence_role") or "").casefold() in {"historical_analogy", "similar_case", "historical"}
+        or str(row.get("source_type") or row.get("document_type") or "").casefold() in {"official_final", "voluntary_asrs"}]
+    distinct_analogs = {str(row.get("incident_id") or row.get("source_id") or row.get("evidence_id") or "")
+                        for row in historical_sources}
+    analogy_rating_available = len(distinct_analogs - {""}) >= 2
+    abstain_risk = synthetic_risk_unassessed(state, risk_sources) and not analogy_rating_available
     if abstain_risk:
         modes["risk"] = "unassessed_synthetic"
+    elif analogy_rating_available and synthetic_risk_unassessed(state, risk_sources):
+        modes["risk"] = "provisional_historical_analogy_rating"
     return {"task_modes": modes, "tool_requirements": {
                 "retrieve_evidence": "preflight retrieval when requested; use supplied evidence otherwise",
                 "find_similar_incidents": "compare supplied historical records, including explicit no-match results",
@@ -30,7 +39,10 @@ def plan_investigation(state):
             "decisions": {"investigation": "ground supplied evidence; preserve unknowns",
                           "similar_case": "compare historical records separately",
                           "compliance": "compare authoritative rules" if has_rules else "unassessed: authoritative rules missing",
-                          "risk": "unassessed: unverified synthetic accounts provide no rated-input basis" if abstain_risk else "score only supported severity and likelihood",
+                          "risk": ("use at least two relevant historical analogues for a clearly labeled provisional reference rating; never treat them as current-case facts"
+                                   if analogy_rating_available and synthetic_risk_unassessed(state, risk_sources)
+                                   else "unassessed: no sufficient direct evidence or two distinct relevant historical analogues" if abstain_risk
+                                   else "score only supported severity and likelihood"),
                           "correction": "one evidence-gated target; unresolved issues require human review"},
             "source_counts": {role: len(sources(role)) for role in ("investigation", "similar_case", "compliance", "risk")},
             "max_execution_steps": MAX_EXECUTION_STEPS, "max_corrections": 1}

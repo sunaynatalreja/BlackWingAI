@@ -94,11 +94,13 @@ def assess_quality(incident: dict, report: dict | None = None) -> dict:
         generated = _dict(report.get("generated_report"))
         sections = _list(generated.get("sections"))
         facts = [_dict(f) for f in _list(inv.get("documented_facts"))]
-        fact_points = [
+        reported = [_dict(f) for f in _list(inv.get("reported_observations"))]
+        case_evidence = [*facts, *reported]
+        evidence_points = [
             _dict(p)
             for section in sections
             for p in _list(_dict(section).get("key_points"))
-            if _dict(p).get("classification") == "documented_fact"
+            if _dict(p).get("classification") in {"documented_fact", "reported_observation"}
         ]
         unknowns = _list(inv.get("unknowns"))
         approval_needed = verification.get("human_approval_required") is True
@@ -108,14 +110,14 @@ def assess_quality(incident: dict, report: dict | None = None) -> dict:
         check("Executive summary and report sections", 12,
               bool(generated.get("executive_summary")) and len(sections) >= 4,
               "Produce a summary and four required report sections.")
-        check("Current-case factual evidence", 12, bool(facts),
-              "Identify current-case facts with primary evidence; otherwise disclose that facts are unavailable.")
+        check("Current-case evidence represented", 12, bool(case_evidence),
+              "Preserve available current-case facts or attributed reports; disclose when neither is supplied.")
         check("Factual evidence references present", 13,
-              bool(facts) and all(_has_refs(f) for f in facts),
-              "Attach resolvable source IDs to every documented fact; citation presence is not entailment.")
+              bool(case_evidence) and all(_has_refs(f) for f in case_evidence),
+              "Attach source IDs to each documented fact or attributed observation; citation presence is not entailment.")
         check("Report factual points referenced", 10,
-              bool(fact_points) and all(_has_refs(p) for p in fact_points),
-              "Reference each factual point in the generated report; no points cannot earn this credit.")
+              bool(evidence_points) and all(_has_refs(p) for p in evidence_points),
+              "Reference each documented fact or attributed observation in the report; no points cannot earn this credit.")
         check("Human verification required", 8, approval_needed,
               "Keep explicit human approval required before final safety or regulatory conclusions.")
         check("Unknowns/completeness disclosed", 7,
@@ -161,13 +163,15 @@ def assess_quality(incident: dict, report: dict | None = None) -> dict:
     score = sum(c["earned"] for c in checks)
     flags: list[str] = []
     if report is not None:
-        if not facts:
-            # Preserve transparent limits on an evidence-free report.
+        if not case_evidence:
+            # Preserve transparent limits on a report with no current-case evidence.
             score = min(score, 69)
-            flags.append("No current-case documented facts supplied: report cannot receive >=70.")
-        elif not all(_has_refs(f) for f in facts):
+            flags.append("No current-case facts or attributed observations supplied: report cannot receive >=70.")
+        elif not all(_has_refs(f) for f in case_evidence):
             score = min(score, 59)
-            flags.append("Documented facts have missing citations; critical integrity review required.")
+            flags.append("Current-case facts or attributed observations have missing citations; critical integrity review required.")
+        elif not facts:
+            flags.append("Available case material is attributed reporting, not independently verified facts.")
     return {
         "label": label,
         "score": score,

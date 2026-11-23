@@ -6,11 +6,19 @@ from typing import Any, Mapping
 from blackwing.agents.verification.schema import VerificationOutput
 
 
-def ground_verification_output(output: Mapping[str, Any], prior: Mapping[str, Any]) -> dict[str, Any]:
+def ground_verification_output(output: Mapping[str, Any], prior: Mapping[str, Any],
+                              narrative: str = "") -> dict[str, Any]:
     result = VerificationOutput.model_validate(output).model_dump(mode="json")
     needs = list(result["claims_needing_source"])
     unsupported = list(result["unsupported_conclusions"])
     conflicts = list(result["conflicts"])
+    # SIM-E labels and the synthetic case ID are source labels, not competing
+    # real-world incident identities. Do not carry that common small-model
+    # misread into the report as a factual conflict.
+    from blackwing.case_inputs import is_synthetic_case
+    if is_synthetic_case(narrative):
+        conflicts = [text for text in conflicts
+                     if not ("identit" in text.casefold() and "conflict" in text.casefold())]
     inv = prior.get("investigation") or {}
     for field in ("documented_facts", "reported_observations", "contributing_factors"):
         for claim in inv.get(field, []):

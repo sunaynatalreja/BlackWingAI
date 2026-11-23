@@ -77,8 +77,23 @@ class QAAnswer(QAOutput):
 
 
 def workbook_path():
-    return Path(os.getenv('BLACKWING_GOLD_QUERY_FILE') or
-        Path.home()/'Downloads/BLACKWING_DATA_EXTRACTED/BLACKWING_DATA/02_GOLD_EVALUATION_PROTECTED/GOLD_80_QUESTIONS/BW-GQ-001-GOLD80-WORKBOOK.xlsx')
+    configured = os.getenv('BLACKWING_GOLD_QUERY_FILE')
+    if not configured and os.getenv('BLACKWING_CONFIG'):
+        # Read the same environment-backed properties file as the API. Gold
+        # workbook selection is configuration, never a source-code credential.
+        from blackwing.config import Settings
+        configured = Settings.load().gold_query_file
+    if configured:
+        return Path(configured).expanduser()
+    repo_default = (Path(__file__).resolve().parents[1] / 'BLACKWING_DATA' /
+        '02_GOLD_EVALUATION_PROTECTED' / 'GOLD_80_QUESTIONS' / 'BW-GQ-001-GOLD80-WORKBOOK.xlsx')
+    downloads_default = (Path.home() / 'Downloads' / 'BLACKWING_DATA_EXTRACTED' /
+        'BLACKWING_DATA' / '02_GOLD_EVALUATION_PROTECTED' / 'GOLD_80_QUESTIONS' /
+        'BW-GQ-001-GOLD80-WORKBOOK.xlsx')
+    for candidate in (repo_default, downloads_default):
+        if candidate.is_file():
+            return candidate
+    return repo_default
 
 
 def workbook_rows():
