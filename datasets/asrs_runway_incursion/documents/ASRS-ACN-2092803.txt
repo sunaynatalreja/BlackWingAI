@@ -1,0 +1,5 @@
+Synopsis:
+Air carrier pilot reported a runway incursion due to a misunderstanding of the location of the runway hold short line. ATC notified the pilot that they had passed the runway hold short line.
+
+Narrative:
+We were cleared to taxi to runway 7 from gate X via E and A. I taxied past the hold short line for runway 7 thinking it was it was for the ILS critical area because I saw the hold short line closer to the runway. Upon reaching what I thought was the hold short line I realized it had been painted over and was no longer used. I was notified by Tower that I had passed the hold short line. No aircraft were landing. After Tower informed me of that he then cleared us for takeoff. I looked closer at the taxi chart and noticed exactly where the hold short line was. No other issues.

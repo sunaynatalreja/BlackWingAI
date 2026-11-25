@@ -1,0 +1,5 @@
+Synopsis:
+Air carrier First Officer reported the Captain executed a missed approach at a non-towered airport due to traffic; then flew a visual pattern for landing. ATC informed the crew this was not the correct procedure.
+
+Narrative:
+After being cleared for the RNAV XX into ZZZ; we learned of VFR traffic landing ahead of us. That traffic didn't clear the runway in time; so we elected to go around. During the go around; the captain asked for heading select to fly a visual left traffic pattern and had me set pattern altitude. Soon after; he turned the autopilot back on and began flying the airplane in a left closed traffic pattern in visual conditions. The go around and traffic pattern were uneventful. After landing; I called ZZZ Center to cancel our IFR and the controller cancelled the IFR; but he kindly asked if we would call him next time if we go missed or have to go around so the airspace is usable sooner for other aircraft. After parking at the gate and debriefing; we discussed that it would have been better for us to fly the published missed approach; call center back and get vectors for another instrument approach.

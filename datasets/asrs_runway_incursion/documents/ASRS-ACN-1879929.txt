@@ -1,0 +1,5 @@
+Synopsis:
+Tower Controller reported a vehicle entered the runway without clearance as an aircraft began its takeoff roll resulting in a conflict.
+
+Narrative:
+I cleared Aircraft X for takeoff from Runway XXL. As the aircraft began its departure roll the ASDE-X (Airport Surface Detection Equipment) alert system sounded informing me that there was a vehicle on the runway. I quickly scanned the runway display on the ASDE-X and noticed a target tagged; 'OPS' on the runway moving toward the departing aircraft. I attempted to call the vehicle but received no response. I tried to call the vehicle a second time with an instruction to exit the runway immediately.The vehicle was still moving in the direction of the aircraft but then quickly existed the runway to the left. The Supervisor on Duty received a call from the vehicle operator via the phone line at the watch desk shortly after the incident. The operations personnel who was operating the vehicle apologized for getting on the runway without permission. Vehicle Operators must be trained to always communicate with the Tower before entering any runway surface area.

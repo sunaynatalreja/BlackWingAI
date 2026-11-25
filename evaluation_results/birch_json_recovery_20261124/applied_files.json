@@ -1,0 +1,22 @@
+[
+  {
+    "path": "blackwing/agents/investigation/fallback.py",
+    "sha256_before": null,
+    "sha256_after": "6025de023c2bbca151501839aa0d9d2fa41489a94de7aee031c74ed84b3c5616"
+  },
+  {
+    "path": "blackwing/diagnostics.py",
+    "sha256_before": "4d6588d0f4a1ec38f3cf571614a0d19131ee3bf02faf1c5118ba9f4273ced035",
+    "sha256_after": "9d26470193f68d8f7918ae9e18c9338899c0b2cbb6f18c6d013726028d39d430"
+  },
+  {
+    "path": "blackwing/service.py",
+    "sha256_before": "b9e6ee6e39b5bbc32fbee509aeb345e7031df587e48291bef76b6db6bba6d8d4",
+    "sha256_after": "d474c9175a9939bc58193e9bd8fa71214fcc46862b1eab19f4c0f9f74d274d68"
+  },
+  {
+    "path": "tests/test_synthetic_investigation_recovery.py",
+    "sha256_before": null,
+    "sha256_after": "b98590b275174818ae74e48b61bc637fa9ae5741f05451b2002f54c5cd62ce5c"
+  }
+]

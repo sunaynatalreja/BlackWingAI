@@ -1,0 +1,5 @@
+Synopsis:
+Pilot flying a tail wheel aircraft reported a ground loop during taxi.
+
+Narrative:
+After landing on Runway XL at ZZZ I went to exit the runway onto Taxiway 1. During that event I began to turn left onto the taxiway and due to the current wind gusting from 080 degrees to 29. The headwind turned into a tailwind causing the tail of the aircraft to be swung around in a counter clockwise manner. The tail wind was not the only thing contributing to this event. The aircraft's speed and braking system contributed to this as well. The swinging of the aircraft occurred in between the runway and the hold-short line; effectively the 'runway safety area. I decided to let the aircraft do a complete 360 degree swing due to the possibility of running off of the taxiway. The aircraft then exited the runway safety area like normal. No persons; aircraft; or property were compromised due to this event.

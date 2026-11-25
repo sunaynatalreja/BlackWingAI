@@ -1,0 +1,78 @@
+{
+  "test_type": "read-only real local index and deterministic tools; no model calls",
+  "lookup_incident_id": "DCA23LA125",
+  "tool_events": [
+    {
+      "step": "retrieve_evidence",
+      "tool": "retrieve_evidence",
+      "invocation_id": "b8ea79e9-d94c-4faa-b217-76f691de46f2",
+      "case_id": "LOCAL-READONLY-SMOKE",
+      "input_identifiers": [
+        "DCA23LA125"
+      ],
+      "timestamp": "2026-11-21T11:13:38.831544+00:00",
+      "status": "complete",
+      "result_summary": {
+        "output_identifiers": [
+          "BW-EV-003:loc35:fixed:00000:4020b01215",
+          "BW-EV-003:loc37:fixed:00001:09b4eb68d1",
+          "BW-EV-003:loc30:fixed:00002:f2e0984136"
+        ],
+        "count": 3
+      },
+      "error": null,
+      "duration_ms": 80.709
+    },
+    {
+      "step": "find_similar_incidents",
+      "tool": "find_similar_incidents",
+      "invocation_id": "d317b7b6-7e5a-4925-90f5-13b26e58f858",
+      "case_id": "LOCAL-READONLY-SMOKE",
+      "input_identifiers": [
+        "ASRS-ACN-2298265:loctext:fixed:00001:49eb7dbe32",
+        "ASRS-ACN-2219966:loctext:fixed:00000:ee3c9ce8a7",
+        "ASRS-ACN-1903643:loctext:fixed:00000:83258a45a2"
+      ],
+      "timestamp": "2026-11-21T11:13:39.230869+00:00",
+      "status": "complete",
+      "result_summary": {
+        "fields": [
+          "case_status",
+          "matches",
+          "assessment",
+          "factors_to_verify",
+          "limitations"
+        ],
+        "item_counts": {
+          "matches": 3,
+          "factors_to_verify": 1,
+          "limitations": 2
+        }
+      },
+      "error": null,
+      "duration_ms": 0.237
+    },
+    {
+      "step": "assess_reference_risk",
+      "tool": "assess_reference_risk",
+      "invocation_id": "13618ecd-49a6-43f8-aebb-a36c495b4fbe",
+      "case_id": "LOCAL-READONLY-SMOKE",
+      "input_identifiers": [
+        "BW-EV-003:loc35:fixed:00000:4020b01215",
+        "BW-EV-003:loc37:fixed:00001:09b4eb68d1",
+        "BW-EV-003:loc30:fixed:00002:f2e0984136"
+      ],
+      "timestamp": "2026-11-21T11:13:39.234104+00:00",
+      "status": "complete",
+      "result_summary": {
+        "status": "unassessed_insufficient_inputs",
+        "risk_index": null,
+        "risk_level": null
+      },
+      "error": null,
+      "duration_ms": 0.004
+    }
+  ],
+  "historical_matches": 3,
+  "risk_status": "unassessed_insufficient_inputs"
+}

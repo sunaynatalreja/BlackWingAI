@@ -1,0 +1,5 @@
+Synopsis:
+Tower Controller reported a runway incursion at YIP airport.  Reporter stated Taxiway A is not depicted on the airport charts which contributed to the event.
+
+Narrative:
+Aircraft X was told to taxi to RWY 5 via TWY G; A; B and the pilot read it back correctly. This route would not cause them to cross any RWY so a hold short instruction was not necessary.  Aircraft X then crossed RWY 5 at TWY G without authorization in front of Aircraft Y who was departing RWY 5.  My trainee and I did not notice the unauthorized crossing until the aircraft was on the RWY.A portion of TWY A was just opened and it is not on the charts even though it is allowed to be used.  Specifying to the pilot that portions of TWY A are uncharted might have alleviated some of the confusion for the pilot. The intersection of TWY A and TWY G is also in close proximity to RWY 5.  Even though we did have traffic; a more diligent scan when aircraft are on TWY G about to turn onto TWY A would have helped me to spot the aircraft as they were about to have a runway incursion and I could have had a better chance at stopping the incursion.

@@ -1,0 +1,5 @@
+Synopsis:
+Cessna 172 pilot reported beginning the take off roll with an aircraft on short final. Pilot rejected take off.
+
+Narrative:
+I was waiting to take off behind the Hold Short line for runway XX.  I heard on the radio that someone was on final for runway XX but had no visual.  I did see another airplane about turn to the left base for runway XX.  I looked multiple times and did not see a plane on final.  I then heard a plane announce their turn to the left base.  I looked again and still did not see anyone on final.Assuming (incorrectly) that the plane turning to base had mis-announced final; I announce I was departing on XX and taxied onto the runway and started my roll.  The plane on final saw me proceeding and announced an abort.  They passed over me about 500 ft in the air and continued down the runway while climing.  I cut my engine and exited XX at the first exit.This was my fault.  I don't think I looked high enough when searching for the plane on final.  I should have trusted what I had heard and waited for the traffic to land and/or asked again to confirm a plane on final.

@@ -1,0 +1,5 @@
+Synopsis:
+Pilot departing a non-towered airport reported they entered the runway and began takeoff before previous arriving traffic cleared the runway.
+
+Narrative:
+We were released for an IFR departure out of ZZZ.  We took the runway; but the landing traffic did not clear as quickly as expected.  Landing traffic executed a go around as we were taking off.  We quickly established visual separation with the now upwind traffic.  In retrospect; we should have rejected the IFR release.  The two minute void time was insufficient to depart with as busy as the airport was that day.  In the future; I plan to depart ZZZ VFR and get the IFR clearance in the air when VMC at ZZZ.

@@ -55,7 +55,9 @@ def test_risk_keeps_only_supplied_current_case_passage_ids():
     assert result["hazards"][0]["evidence_ids"] == ["fact-p2-001"]
     assert "Removed unsupported" in result["risk_notes"]
     assert result["numeric_score"] is None
-    assert "provisional" in result["assessment_status"]
+    assert result["assessment_status"] == "unassessed_insufficient_inputs"
+    assert result["hazards"][0]["risk_index"] is None
+    assert result["hazards"][0]["risk_level"] is None
 
 
 def test_risk_guidance_does_not_establish_incident_fact():

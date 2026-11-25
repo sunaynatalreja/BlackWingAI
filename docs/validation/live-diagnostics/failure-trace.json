@@ -1,0 +1,323 @@
+{
+  "run_id": "ba31364f-3a16-4e98-8a0f-48783dbe7d79",
+  "events": [
+    {
+      "event_id": null,
+      "execution_id": null,
+      "agent_key": null,
+      "provider": null,
+      "request_id": null,
+      "attempt": null,
+      "tool": "retrieve_evidence",
+      "invocation_id": "39d4cb30-9209-4c81-8db8-4da512907168",
+      "case_id": "7331aeaa-62cf-4ed1-baa6-77ba68452320",
+      "input_identifiers": [
+        "7331aeaa-62cf-4ed1-baa6-77ba68452320"
+      ],
+      "result_summary": {
+        "output_identifiers": [],
+        "count": 0
+      },
+      "duration_ms": 0.006,
+      "error": null,
+      "sequence": 1,
+      "step": "retrieve_evidence",
+      "agent": null,
+      "status": "complete",
+      "model": null,
+      "detail": null,
+      "timestamp": "2026-11-21T11:57:07.432229Z"
+    },
+    {
+      "event_id": "b2012ae9-f2d9-4b98-881e-311ad5a249af",
+      "execution_id": null,
+      "agent_key": null,
+      "provider": null,
+      "request_id": null,
+      "attempt": null,
+      "tool": null,
+      "invocation_id": null,
+      "case_id": "7331aeaa-62cf-4ed1-baa6-77ba68452320",
+      "input_identifiers": null,
+      "result_summary": null,
+      "duration_ms": null,
+      "error": null,
+      "sequence": 2,
+      "step": "workflow_execution",
+      "agent": null,
+      "status": "execution_started",
+      "model": null,
+      "detail": null,
+      "timestamp": "2026-11-21T11:57:07.434604Z"
+    },
+    {
+      "event_id": "3ed2d877-fe66-49a1-868a-8e92eea7c613",
+      "execution_id": null,
+      "agent_key": null,
+      "provider": null,
+      "request_id": null,
+      "attempt": null,
+      "tool": null,
+      "invocation_id": null,
+      "case_id": "7331aeaa-62cf-4ed1-baa6-77ba68452320",
+      "input_identifiers": null,
+      "result_summary": null,
+      "duration_ms": null,
+      "error": null,
+      "sequence": 3,
+      "step": "workflow_execution",
+      "agent": null,
+      "status": "invoking_workflow",
+      "model": null,
+      "detail": null,
+      "timestamp": "2026-11-21T11:57:07.435191Z"
+    },
+    {
+      "event_id": "d49cc278-a576-41fc-b8ec-5736afdb64ef",
+      "execution_id": null,
+      "agent_key": null,
+      "provider": null,
+      "request_id": null,
+      "attempt": null,
+      "tool": null,
+      "invocation_id": null,
+      "case_id": "7331aeaa-62cf-4ed1-baa6-77ba68452320",
+      "input_identifiers": null,
+      "result_summary": null,
+      "duration_ms": null,
+      "error": null,
+      "sequence": 4,
+      "step": "workflow_execution",
+      "agent": null,
+      "status": "workflow_started",
+      "model": null,
+      "detail": "{\"phase\": \"initializing_model_client\"}",
+      "timestamp": "2026-11-21T11:57:07.435780Z"
+    },
+    {
+      "event_id": "1b0661a2-1eed-403e-98c1-6c3f6d176018",
+      "execution_id": null,
+      "agent_key": null,
+      "provider": null,
+      "request_id": null,
+      "attempt": null,
+      "tool": null,
+      "invocation_id": null,
+      "case_id": "7331aeaa-62cf-4ed1-baa6-77ba68452320",
+      "input_identifiers": null,
+      "result_summary": null,
+      "duration_ms": null,
+      "error": null,
+      "sequence": 5,
+      "step": "workflow_execution",
+      "agent": null,
+      "status": "workflow_ready",
+      "model": null,
+      "detail": null,
+      "timestamp": "2026-11-21T11:57:07.449418Z"
+    },
+    {
+      "event_id": "5a4286cc-8bd4-46be-8e14-30706611bccc",
+      "execution_id": "7d823a35-7514-4cf5-a5f0-cfef54aa45a0",
+      "agent_key": "investigation",
+      "provider": "ollama",
+      "request_id": null,
+      "attempt": null,
+      "tool": null,
+      "invocation_id": null,
+      "case_id": "7331aeaa-62cf-4ed1-baa6-77ba68452320",
+      "input_identifiers": null,
+      "result_summary": null,
+      "duration_ms": 0.0,
+      "error": null,
+      "sequence": 6,
+      "step": "agent_execution",
+      "agent": "Investigation Agent",
+      "status": "agent_started",
+      "model": "qwen3:8b",
+      "detail": "{\"execution_mode\": \"model_with_grounding\"}",
+      "timestamp": "2026-11-21T11:57:07.457099Z"
+    },
+    {
+      "event_id": "9c0e062f-024e-4233-8737-43028d64f47b",
+      "execution_id": "7d823a35-7514-4cf5-a5f0-cfef54aa45a0",
+      "agent_key": "investigation",
+      "provider": "ollama",
+      "request_id": "0f3566bb-cee0-42ea-9d33-01de333c333f",
+      "attempt": 1,
+      "tool": null,
+      "invocation_id": null,
+      "case_id": "7331aeaa-62cf-4ed1-baa6-77ba68452320",
+      "input_identifiers": null,
+      "result_summary": null,
+      "duration_ms": 0.0,
+      "error": null,
+      "sequence": 7,
+      "step": "agent_execution",
+      "agent": "Investigation Agent",
+      "status": "waiting_for_model_response",
+      "model": "qwen3:8b",
+      "detail": "{\"execution_mode\": \"model_with_grounding\"}",
+      "timestamp": "2026-11-21T11:57:07.458893Z"
+    },
+    {
+      "event_id": "6af3b6f1-9d44-44f5-8fd7-2e137fc28b4a",
+      "execution_id": "7d823a35-7514-4cf5-a5f0-cfef54aa45a0",
+      "agent_key": "investigation",
+      "provider": "ollama",
+      "request_id": "0f3566bb-cee0-42ea-9d33-01de333c333f",
+      "attempt": 1,
+      "tool": null,
+      "invocation_id": null,
+      "case_id": "7331aeaa-62cf-4ed1-baa6-77ba68452320",
+      "input_identifiers": null,
+      "result_summary": null,
+      "duration_ms": 5.783,
+      "error": {
+        "code": "model_timeout",
+        "type": "ReadTimeout",
+        "message": "The model request timed out.",
+        "frames": [
+          {
+            "file": "_client.py",
+            "function": "_send_handling_auth",
+            "line": 1657
+          },
+          {
+            "file": "_client.py",
+            "function": "_send_handling_redirects",
+            "line": 1694
+          },
+          {
+            "file": "_client.py",
+            "function": "_send_single_request",
+            "line": 1730
+          },
+          {
+            "file": "mock.py",
+            "function": "handle_async_request",
+            "line": 41
+          },
+          {
+            "file": "diagnostic_backend_harness.py",
+            "function": "fail",
+            "line": 19
+          }
+        ]
+      },
+      "sequence": 8,
+      "step": "agent_execution",
+      "agent": "Investigation Agent",
+      "status": "model_request_failed",
+      "model": "qwen3:8b",
+      "detail": "{\"execution_mode\": \"model_with_grounding\"}",
+      "timestamp": "2026-11-21T11:57:07.465886Z"
+    },
+    {
+      "event_id": "bf39101d-98ef-4252-a6f4-a7c5c8b1f605",
+      "execution_id": "7d823a35-7514-4cf5-a5f0-cfef54aa45a0",
+      "agent_key": "investigation",
+      "provider": "ollama",
+      "request_id": null,
+      "attempt": null,
+      "tool": null,
+      "invocation_id": null,
+      "case_id": "7331aeaa-62cf-4ed1-baa6-77ba68452320",
+      "input_identifiers": null,
+      "result_summary": null,
+      "duration_ms": 9.989,
+      "error": {
+        "code": "model_timeout",
+        "type": "ReadTimeout",
+        "message": "The model request timed out.",
+        "frames": [
+          {
+            "file": "_client.py",
+            "function": "_send_handling_auth",
+            "line": 1657
+          },
+          {
+            "file": "_client.py",
+            "function": "_send_handling_redirects",
+            "line": 1694
+          },
+          {
+            "file": "_client.py",
+            "function": "_send_single_request",
+            "line": 1730
+          },
+          {
+            "file": "mock.py",
+            "function": "handle_async_request",
+            "line": 41
+          },
+          {
+            "file": "diagnostic_backend_harness.py",
+            "function": "fail",
+            "line": 19
+          }
+        ]
+      },
+      "sequence": 9,
+      "step": "agent_execution",
+      "agent": "Investigation Agent",
+      "status": "agent_failed",
+      "model": "qwen3:8b",
+      "detail": "{\"execution_mode\": \"model_with_grounding\"}",
+      "timestamp": "2026-11-21T11:57:07.467451Z"
+    },
+    {
+      "event_id": "04b1eee2-7e2f-4886-85f9-f02a9afddda1",
+      "execution_id": null,
+      "agent_key": null,
+      "provider": null,
+      "request_id": null,
+      "attempt": null,
+      "tool": null,
+      "invocation_id": null,
+      "case_id": "7331aeaa-62cf-4ed1-baa6-77ba68452320",
+      "input_identifiers": null,
+      "result_summary": null,
+      "duration_ms": null,
+      "error": {
+        "code": "model_timeout",
+        "type": "ReadTimeout",
+        "message": "The model request timed out.",
+        "frames": [
+          {
+            "file": "_client.py",
+            "function": "_send_handling_auth",
+            "line": 1657
+          },
+          {
+            "file": "_client.py",
+            "function": "_send_handling_redirects",
+            "line": 1694
+          },
+          {
+            "file": "_client.py",
+            "function": "_send_single_request",
+            "line": 1730
+          },
+          {
+            "file": "mock.py",
+            "function": "handle_async_request",
+            "line": 41
+          },
+          {
+            "file": "diagnostic_backend_harness.py",
+            "function": "fail",
+            "line": 19
+          }
+        ]
+      },
+      "sequence": 10,
+      "step": "workflow_execution",
+      "agent": null,
+      "status": "execution_failed",
+      "model": null,
+      "detail": null,
+      "timestamp": "2026-11-21T11:57:07.469581Z"
+    }
+  ]
+}

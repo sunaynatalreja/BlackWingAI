@@ -1,0 +1,8 @@
+Synopsis:
+Air carrier flight crew reported while lined up for departure on runway another aircraft started their takeoff roll on the opposite end of the runway and climbed over them. They didn't hear any communications with other the other aircraft on CTAF.
+
+Narrative:
+We were waiting on the release for takeoff by ATC; we were talking to other traffics around the airport. We were with Denver center in comm 1 and CTAF in comm 2. Once we were cleared; we communicated on the CTAF frequency that we were entering runway 21 for departure. We didn't hear any communications after that; and once we were lined up with the runway an airplane started rolling out and took off from runway 3. We believe that the traffic didn't communicate their intentions on CTAF as we were monitoring the frequency and communicating all along. Cause: No control tower in the airport and not enough communications on CTAF.Suggestions: More CTAF communications and increased situational awareness specially in non-towered airports.
+
+Secondary Narrative:
+We made CTAF announcement and took runway 21 after being released from ATC. We switched to Com 1 to CTAF but we were monitoring and had been communicating on com 2 with Durango traffic while waiting for flow time. We believe the airplane departing on runway 3 didn't make any calls on CTAF. The airplane departed runway 3 and climbed over us while we were in position on the runway at the departure end of 21.Cause: No control tower and inadequate pilot communication on CTAF.Suggestions: More CTAF communication and more pilot vigilance when operating at uncontrolled airports.

@@ -1,0 +1,5 @@
+Synopsis:
+Air taxi Captain reported a conflict while getting ready for takeoff with an aircraft on final.  Tower issued a go-around to the landing aircraft.
+
+Narrative:
+While briefing the departure on the ramp; I briefed that we were departing runway 28R with a F1 intersection takeoff.  Holding short of 28R we were given instructions to depart 28R via intersection F1. The tower controller also stated there was another aircraft on a 4-mile final but did not give us an immediate departure.  While turning onto the runway I noticed the illuminated runway for departure on the Garmin FMS was 28L. I brought it up to the other pilot and he switched to the proper runway in the FMS.  It only took a few seconds but the controller made the aircraft behind me go-around.  I should have caught that back on the ramp.

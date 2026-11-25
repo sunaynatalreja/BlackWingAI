@@ -1,0 +1,5 @@
+Synopsis:
+Tower Controller reported clearing a helicopter to enter the pattern for the runway while there was a vehicle operating on the runway.
+
+Narrative:
+Vehicle asked to proceed onto Taxiway 1 and Runway XX from the old hangars. Vehicle was given clearance to proceed onto Taxiway 1 and Runway XX and instructed to hold short Taxiway 2. Vehicle was at operating on the end of Taxiway 1 and on the extended portion of Runway XX. Runway incursion lights and board were utilized. Approximately 20 minutes later Aircraft X called from the new hangars requesting to enter pattern for Runway XX. Aircraft X was instructed to depart the new hangars at his own risk and enter a right base Runway XX. Aircraft X was cleared for the option Runway XX with vehicle still operating on extended portion of Runway XX and Taxiway 1. Aircraft X made a full stop and taxied back to the new hangars via Taxiway 3.Remember to scan runway incursion lights/board prior to giving runway clearances. The RID (Runway Incursion Device) lights are not bright enough during daytime operations and make it easier to pass over by accident.

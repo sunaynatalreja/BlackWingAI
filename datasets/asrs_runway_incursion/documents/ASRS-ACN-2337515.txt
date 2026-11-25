@@ -1,0 +1,5 @@
+Synopsis:
+Cessna 172 pilot reported the aircraft's engine failed just after landing.
+
+Narrative:
+Incident occured shortly after landing on runway XX at ZZZ. Pattern at the time was empty. After an uneventful ladning I took controls to taxi off the runway. Upon idling the engine to slow to make a turn onto the taxiway; the engine sputtered and died. The aircraft came to a stop about 1 foot away from crossing the hold short bars. Attempted a quick restart that failed; ended up having to shut down the aircraft and push. In all; the aircraft was stuck within the runway environment for about 30 seconds until I pushed it out. Luckly no one was in the pattern at the time. The failure seemed to be a result of spark plug fouling. Once clear of the runway; I was able to properly start the engine and troubleshoot the issue. Overall; the issue was resolved and did not result in any further incidents; and other traffic was still absent from the airport throughout the timeframe during which this incident occurred. I wanted to submit a report given the position the aircraft initially came to a stop at; prior to being pushed out.

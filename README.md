@@ -1,6 +1,16 @@
 # BlackWing AI
 
-Runway-incursion API and local UI prototype. The repository has a versioned case API, typed request/response models, an OpenAPI document, knowledge source endpoints with chunked hybrid retrieval, eight sequential LangGraph agents, run polling, trace access, report delivery and human review recording.
+Runway-incursion API and local UI prototype with evidence-grounded agents, a bounded Planner/Executor/Critic workflow, durable SQLite history, typed reports and required human review.
+
+## Current local implementation
+
+See [local agentic delivery and validation](docs/local-agentic-delivery.md) for architecture, test evidence, modified files, limitations, IIT setup and Sunayana UI requirements. The API supports case creation, text evidence, investigation/status, seven agent outputs, provisional deterministic risk classification, hazard-linked mitigation, Critic findings, review and JSON/Markdown export.
+
+The LangGraph Planner selects execution modes. The Executor runs the existing roles, the Critic can trigger one evidence-supported targeted revision, and the workflow stops within ten counted execution steps. The report role assembles four typed sections deterministically within this budget; standalone report drafting remains available through its existing function.
+
+Cases, evidence, runs, partial/final outputs, tool traces, reviews and report references use SQLite. Interrupted runs are retained as failed with `error_code=interrupted`; recovery creates a new run rather than claiming checkpoint resumption. Run one API worker per database and hosted API key.
+
+Retrieval keeps current-case evidence separate from historical analogies, including voluntary ASRS reports. The existing FAA reference matrix supplies provisional categorical risk only when supporting inputs exist; numeric scores remain null. Human approval is required. Existing saved indexes are reused without rebuilding.
 
 ## API contract
 
@@ -164,3 +174,25 @@ The vertical-slice test uses a mocked model runner. It exercises the runway-incu
 - The system does not assign blame, determine legal liability, issue operational instructions, or make binding regulatory decisions.
 - Candidate retrieval is not proof of source authenticity or regulatory applicability.
 - A qualified human must verify sources, applicability, findings and recommendations.
+
+
+## Integrated Streamlit UI (PowerShell)
+
+Keep the configured FastAPI backend running with one worker. From the repository root in a second terminal:
+
+```powershell
+$env:BLACKWING_UI_API_URL = "http://127.0.0.1:8000"
+.\.venv\Scripts\python.exe -m streamlit run .\blackwing\cloud\streamlit_app.py --server.address 127.0.0.1 --server.port 8501
+```
+
+Open `http://127.0.0.1:8501`. This UI uses backend SQLite history, backend categorical risk and a separate report-quality checklist. It never opens a session case database or calls a model directly. See [the UI delivery report](docs/streamlit-ui-integration.md) for file changes, source-branch comparison, endpoint usage, 128 passing tests and remaining live-testing limits.
+
+
+## Live investigation diagnostics
+
+Agent-start, physical model-wait, completion/failure and restart-interruption events are now persisted incrementally and exposed through run progress, trace and audit. Streamlit explains report HTTP 409 by running/failed/interrupted state. See [the diagnostics and recovery guide](docs/live-diagnostics.md) for event meanings, sanitized errors, server-failure boundaries and 141 passing tests. The historical JFK process-stop cause remains undetermined; no live model replay was performed.
+
+
+## Independent completeness results
+
+The integrated v2 rubric separately reports Prompt Completeness (supplied intake) and Report Completeness (investigation documentation), with weighted checks and disclosed integrity ceilings. Aviation risk remains in its independent backend-calculated view, and Sunayana's original evidence checklist is retained. See [the scorer integration and saved-report evaluation](docs/quality-scorer-v2.md): 158 regression tests passed; existing JFK/Austin reports scored 84/58 for report completeness without model calls or report changes.

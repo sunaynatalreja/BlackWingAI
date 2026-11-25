@@ -248,3 +248,47 @@ FastAPI validation errors use its standard `detail` response shape. Other endpoi
 Changes that remove or rename fields require a new API major version. Additive optional fields may be added within v1. Category IDs, run status values, agent role names and evidence-state values are API enums once formally frozen. The current Pydantic models reject unknown request properties to surface client/server mismatches early.
 
 The report export currently supports JSON and Markdown. The Streamlit UI displays the Report Agent's readable report on screen; it does not generate a PDF. Resumable graph checkpoints, authentication, and tenant/case authorization remain target-architecture work and are not exposed as working v1 endpoints yet.
+
+
+## Local agentic additions (21 November 2026)
+
+Existing request fields and run status enum values remain compatible. Trace events add optional `tool`, `invocation_id`, `case_id`, `input_identifiers`, `result_summary`, `duration_ms` and sanitized `error` fields. The trace endpoint exposes executed tools for active/failed runs as well as completed traces.
+
+`GET /api/v1/runs/{run_id}/audit` adds durable audit events, the plan, partial outputs, execution step count, `resumable=false` and controlled-recovery guidance. Interrupted queued/running runs retain status `failed` with `error_code=interrupted`; post a new case run to recover. Reports remain preliminary and contain all existing agent-output keys. See [the delivery guide](local-agentic-delivery.md) for validation and UI requirements.
+
+
+## Q&A evaluation (local, human reviewed)
+
+The investigation UI retains Sunayana's single-form layout and three report tabs.
+`?view=qa` opens a separate page where users type or paste their own questions. No questions are created or automatically run. Generation and persistence remain in FastAPI.
+Swagger documentation is available at `/api/v1/docs`; its live OpenAPI contract
+is `/api/v1/openapi.json`.
+
+| Method and path | Purpose |
+| --- | --- |
+| `GET /api/v1/qa/queries` | List the 80 question IDs, prompts and grouping metadata; no approved answer fields. |
+| `POST /api/v1/qa/answers` | Generate one answer from the existing index and persist it. Supply `gold_query_id`, or a free `question`; optional `case_id` scopes case evidence. |
+| `GET /api/v1/qa/answers` | Read saved Q&A tests and human verdicts. |
+| `GET /api/v1/qa/answers/{answer_id}` | Read a frozen answer, citations and source excerpts. |
+| `GET /api/v1/qa/answers/{answer_id}/reference` | Reveal the preserved approved answer only after a generated answer exists. Refuse if the workbook hash changed. |
+| `POST /api/v1/qa/answers/{answer_id}/review` | Record `verdict`, `reviewer` and `rationale`; retain review history. |
+
+Entered questions are matched uniquely by case-insensitive whitespace-normalized text against the existing gold evaluation workbook. A nonmatching question can still use RAG, but no approved answer or automatic score is fabricated. Configure `BLACKWING_GOLD_QUERY_FILE` if the protected workbook is elsewhere.
+The default is the preserved `GOLD_80_QUESTIONS/BW-GQ-001-GOLD80-WORKBOOK.xlsx`
+under `~/Downloads/BLACKWING_DATA_EXTRACTED/BLACKWING_DATA/02_GOLD_EVALUATION_PROTECTED`.
+The workbook is opened read-only. Approved answers, expected source IDs and
+review notes never enter answer generation, retrieval queries or the RAG index.
+The same SQLite repository stores Q&A under a separate record kind; investigation
+case/run histories and existing repository methods retain their contracts.
+
+Opening the page performs no inference. Each Generate click sends one question.
+The shared hosted request lock, timeout, token preflight and bounded transient
+retries apply. An active investigation returns HTTP 409. Provider/schema failures
+return a sanitized HTTP 502 and never count as successful answers. Missing
+workbook/index configuration returns HTTP 503. There is no automatic gold
+correctness score; human verdicts are separate from structural completeness,
+gold report comparison and categorical aviation risk.
+
+The fetched Sunayana `main` revision `bf7fda983c8b4e1c149860c8a457156fa9e75be2`
+had no Q&A endpoint or Docker/Compose configuration. No Docker configuration
+was introduced by this integration.

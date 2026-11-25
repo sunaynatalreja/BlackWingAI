@@ -1,0 +1,8 @@
+Synopsis:
+Pilots reported a ground conflict with an unknown aircraft while looking for ATC issued traffic.
+
+Narrative:
+While taxiing from the southeast ramp; westbound on taxiway 1; Ground Control issued us the following clearance; 'Aircraft X; taxi to Runway XXL via [Taxiway] 2; cleared to cross Runway XY; give way to Aircraft Y on [Taxiway] 3.'  As we turned southbound onto Taxiway 2; as I was looking right to clear for crossing the runway; the Captain brought the aircraft to an abrupt stop and I noted a 767 taxiing westbound on Runway XY.  Luckily the Captain saw them before we hit them.   We queried Ground Control about the conflict and we noted that the 767 crew remarked; 'That was a close call'.  There was never any mention of giving way to a 767 taxiing westbound on Runway XY in our taxi instructions. Human Factors breakdown.
+
+Secondary Narrative:
+While taxiing to Spot X on Taxiway 1; Ground issued the following clearance just prior to reaching Spot X:  'Aircraft X Taxi to Runway XXL via [Taxiway] 2; cleared to cross Runway XY; give way to Aircraft Y on [Taxiway] 3.' As I turned the airplane onto Taxiway 2 (north side of Runway XY) to cross Runway XY; I had to yield/stop uninstructed to give way to a 767 aircraft taxiing on Runway XY westbound from my left to avoid a taxi incursion with that aircraft.

@@ -1,0 +1,5 @@
+Synopsis:
+Pilot departed airport without communication with Tower. Pilot mistook LOCAL time for ZULU time; and departed the airport when Tower was open.
+
+Narrative:
+While attempting to talk to Ground and Tower while parked on the north ramp I did not receive any responses back. Listened to ATIS again and heard that the Tower closed each day at XA00.  Checked the time and it was after XA00 Z and continued on as I would with a closed Tower. I taxied to get fuel and continued to make radio calls and then took off.  While in cruise I realized that the radio was not working correctly. After fixing the radio I continued the flight.  While coming back to land at ZZZ I listened to ATIS 8 miles out and noticed that the time now said the tower closes at XA00 local time. I then called the Tower and let them know that I had ATIS and requested to land and was cleared to land and landed with no incident. Contributing factors are a Tower closure during this pandemic times; a radio that was not working correctly; and the XA00 local time vs Zulu time and possibly not identified on ATIS as local time vs. Zulu time on the initial ATIS weather.

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
@@ -59,7 +59,7 @@ class Settings:
     ollama_max_output_tokens: int
     api_base_url: str
     api_model: str
-    api_key: str
+    api_key: str = field(repr=False)
     api_timeout_seconds: float
     api_temperature: float
     api_max_output_tokens: int
@@ -83,11 +83,11 @@ class Settings:
 
     @property
     def model_name(self) -> str:
-        return self.api_model
+        return self.ollama_model if self.llm_provider == "ollama" else self.api_model
 
     @property
     def model_timeout_seconds(self) -> float:
-        return self.api_timeout_seconds
+        return self.ollama_timeout_seconds if self.llm_provider == "ollama" else self.api_timeout_seconds
 
     @classmethod
     def load(cls) -> "Settings":

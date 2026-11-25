@@ -1,0 +1,5 @@
+Synopsis:
+Air carrier flight crew flying A320 aircraft reported runway incursion and loss of aircraft control during taxi off the runway.
+
+Narrative:
+While we were taxiing clear of the runway on a high speed exit the steering became very erratic and then we received a nose wheel steering fault ECAM. We stopped the aircraft immediately and called the tower to say that we were stuck on the runway for now and to send the aircraft behind us around. After looking at the systems page and noting that we just needed to taxi straight ahead 100 feet to clear the runway; we slowly cleared the runway and informed the tower. We then ran the Wheel NWS (Nose Wheel Steering) fault checklist and reset the anti-ski NWS switch which corrected the problem.  We taxied uneventfully to the gate at or below 10 knots per the checklist; wrote up the fault; debriefed maintenance; and called the Chief Pilot.

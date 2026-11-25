@@ -1,13 +1,19 @@
-"""Single-process development repository; replace with PostgreSQL/object storage."""
+"""Local repository interface with memory and durable SQLite implementations."""
 
 from __future__ import annotations
 
 from datetime import datetime, timezone
 import re
+import json
+import os
+import sqlite3
+from pathlib import Path
+from functools import wraps
 from threading import RLock
 from typing import Any
 
 from blackwing.schemas import CaseStatus, RunStatus
+from blackwing.diagnostics import lifecycle_event
 
 
 def now() -> datetime:
@@ -25,6 +31,20 @@ class MemoryRepository:
         # The approved dataset index is configured separately. Do not seed a
         # protected final report into in-memory retrieval documents.
         self.documents: dict[str, dict[str, Any]] = {}
+        self.qa_answers: dict[str, dict[str, Any]] = {}
+
+    def save_qa_answer(self, answer_id: str, record: dict[str, Any]) -> dict[str, Any]:
+        with self._lock:
+            self.qa_answers[answer_id] = record
+            return record
+
+    def get_qa_answer(self, answer_id: str) -> dict[str, Any] | None:
+        with self._lock:
+            return self.qa_answers.get(answer_id)
+
+    def list_qa_answers(self) -> list[dict[str, Any]]:
+        with self._lock:
+            return sorted(self.qa_answers.values(), key=lambda r: r["created_at"], reverse=True)
 
     def create_case(self, case_id: str, data: dict[str, Any]) -> dict[str, Any]:
         timestamp = now()
@@ -185,4 +205,112 @@ class MemoryRepository:
         return results
 
 
-repository = MemoryRepository()
+    def append_event(self, run_id, event):
+        with self._lock:
+            record = self.runs[run_id]
+            record.setdefault("audit_events", []).append(event)
+            if event.get("event_id"):
+                summary = {key: event[key] for key in ("step", "status", "agent", "agent_key", "execution_id", "timestamp", "duration_ms", "error") if key in event}
+                record.setdefault("progress", []).append(summary)
+                record["execution_state"] = summary
+
+def _encode(value):
+    if isinstance(value, datetime):
+        return {"__blackwing_datetime__": value.isoformat()}
+    raise TypeError(type(value).__name__)
+
+
+def _decode(value):
+    if set(value) == {"__blackwing_datetime__"}:
+        return datetime.fromisoformat(value["__blackwing_datetime__"])
+    return value
+
+
+class SQLiteRepository(MemoryRepository):
+    """Single API worker, atomic SQLite transactions and write-through mutations.
+
+    Keep the original interface and detached-on-restart JSON records. One owner
+    process must use a database; a second application worker is unsupported.
+    """
+    def __init__(self, path=None):
+        super().__init__()
+        path = Path(path or os.getenv("BLACKWING_DATABASE_PATH") or Path(__file__).resolve().parent.parent / "work" / "blackwing.sqlite3")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self._db = sqlite3.connect(str(path), check_same_thread=False)
+        self._db.execute("PRAGMA journal_mode=WAL")
+        self._db.execute("PRAGMA synchronous=FULL")
+        self._db.execute("CREATE TABLE IF NOT EXISTS records (kind TEXT, id TEXT, payload TEXT NOT NULL, PRIMARY KEY(kind,id))")
+        self._db.execute("CREATE TABLE IF NOT EXISTS audit_events (run_id TEXT, sequence INTEGER, payload TEXT NOT NULL, PRIMARY KEY(run_id,sequence))")
+        for kind in ("cases", "runs", "reviews", "documents", "qa_answers"):
+            rows = self._db.execute("SELECT id,payload FROM records WHERE kind=?", (kind,)).fetchall()
+            if rows:
+                setattr(self, kind, {key: json.loads(payload, object_hook=_decode) for key, payload in rows})
+        for run in self.runs.values():
+            if run["status"] in {"queued", "running"}:
+                run.update(status="failed", error_code="interrupted",
+                           error="Application restarted before completion. Start a new run for controlled recovery; checkpoint resumption is unavailable.",
+                           completed_at=now(), resumable=False)
+                self.cases[run["case_id"]].update(status="analysis_failed", updated_at=now())
+                previous = run.get("execution_state") or {}
+                active = {}
+                for event in run.get("audit_events", []):
+                    if event.get("execution_id"):
+                        active[event["execution_id"]] = event
+                unfinished = [e for e in active.values() if e["status"] not in {"agent_completed", "agent_failed", "execution_interrupted"}]
+                last_agent = unfinished[-1] if unfinished else {}
+                self.append_event(run["run_id"], lifecycle_event(
+                    "agent_execution" if last_agent else "workflow_execution", "execution_interrupted", case_id=run["case_id"],
+                    **{key: last_agent[key] for key in ("execution_id", "agent", "agent_key", "provider", "model") if key in last_agent},
+                    error={"code": "interrupted", "type": "ApplicationRestart", "message": "Application restarted before this run completed; no checkpoint resumption was attempted."},
+                    detail={"last_known_status": previous.get("status"), "agent_started_observed": bool(last_agent), "resumable": False}))
+        self._flush()
+
+    def _flush(self):
+        with self._db:
+            for kind in ("cases", "runs", "reviews", "documents", "qa_answers"):
+                self._db.executemany("INSERT OR REPLACE INTO records VALUES (?,?,?)", [
+                    (kind, key, json.dumps(value, default=_encode))
+                    for key, value in getattr(self, kind).items()])
+
+    def append_event(self, run_id, event):
+        with self._lock:
+            super().append_event(run_id, event)
+            sequence = len(self.runs[run_id]["audit_events"])
+            with self._db:
+                self._db.execute("INSERT INTO audit_events VALUES (?,?,?)",
+                                 (run_id, sequence, json.dumps(event, default=_encode)))
+                self._flush()
+
+    def close(self):
+        with self._lock:
+            self._db.close()
+
+
+def _durable_mutation(name):
+    @wraps(getattr(MemoryRepository, name))
+    def mutate(self, *args, **kwargs):
+        with self._lock:
+            result = getattr(super(SQLiteRepository, self), name)(*args, **kwargs)
+            self._flush()
+            return result
+    return mutate
+
+
+for _method in ("create_case", "update_case", "add_evidence", "create_run", "patch_run", "add_review", "add_document", "save_qa_answer"):
+    setattr(SQLiteRepository, _method, _durable_mutation(_method))
+
+
+class _DefaultRepository:
+    """Open durable storage on first use, avoiding import-time filesystem writes."""
+    def __init__(self):
+        self._instance = None
+        self._lock = RLock()
+
+    def __getattr__(self, name):
+        with self._lock:
+            if self._instance is None:
+                self._instance = SQLiteRepository()
+            return getattr(self._instance, name)
+
+
+repository = _DefaultRepository()

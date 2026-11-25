@@ -1,0 +1,5 @@
+Synopsis:
+Kitfox 2 pilot reported an engine failure while in cruise at 5;000 ft. The pilot was able to restart the engine and continued to land where; upon inspection a clogged fuel filter was discovered. After clearing the clog; the pilot inadvertently crossed the runway hold short line when readying for takeoff.
+
+Narrative:
+Cruising at 5;500 feet towards home airport I had an engine failure over ZZZ. I had no transponder or ADS-B. I quickly looked up approach frequencies and contacted ATC. I was able to restart engine 3 times. 3rd time it was working again. I made a precautionary uneventful landing and taxied to ramp. After checking out fuel lines; one of the filters could be clogged. Cleaned it up and after the run check; arranged with ATC a departure with extra pattern to make sure engine operates normal. When I taxied out to runway; I misunderstood the call sign due unclear radio. By the time I verified it; my nose crossed the hold short line and was stopped. ATC instructed me to make a 180 and shortly after I departed. I was satisfied with performance and continued to destination.

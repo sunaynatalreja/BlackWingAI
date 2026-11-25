@@ -1,0 +1,8 @@
+Synopsis:
+Pilot of a small aircraft reported that after taxiing onto the runway for takeoff; another aircraft announced on CTAF that he was executing a go-around due to the aircraft on the runway.
+
+Narrative:
+I was waiting at hold short line for departure Runway 28. An aircraft landed doing touch and go's; another aircraft in pattern called 'base short approach'. I looked to see if any other aircraft was on final - saw none- so announced '[Callsign] departing Runway 28 northwest bound' and taxied onto 28 and departed. The aircraft that had called 'base short approach' called that I had cut him off and he had to execute a go around. I never saw him nor heard any radio call that he was turning on final. I told him on CTAF that I was sorry and he replied back he was going to report me. I radioed back that I was [callsign] and that I was sorry. My flying partner took off behind me and said the [aircraft] executed missed and climbed back into traffic pattern for future touch and go's.
+
+Secondary Narrative:
+[Report narrative contained no additional information.]

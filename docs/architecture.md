@@ -1,5 +1,7 @@
 # BlackWing AI Application Architecture
 
+The current local implementation is documented in [Local agentic delivery](local-agentic-delivery.md), including the Planner/Executor/Critic graph, audited executable tools, durable SQLite history, interrupted-run recovery and test artifacts. That document supersedes the original Draft 1 design below where behavior differs: the current bounded workflow has one targeted correction, a ten-step cap, deterministic report assembly and provisional reference-matrix risk classifications. The following Draft 1 material is retained as architectural history.
+
 ## Draft 1 scope
 
 The first vertical slice supports runway-incursion cases only. It creates a case, stores source metadata and text, retrieves chunked candidate passages, runs eight role-specific agents (including a task-decomposed Report Agent), exposes the report and trace, and records a human review. The agents are workflow roles, not separate model deployments.

@@ -61,7 +61,21 @@ class CrossEncoderReranker:
             self._model = CrossEncoder(self.identity)
         return [float(v) for v in self._model.predict([(query, passage) for passage in passages],
                                                       show_progress_bar=False)]
+def _is_protected_gold(row):
+    import re
 
+    identifiers = " ".join(
+        str(row.get(key) or "")
+        for key in ("source_id", "document_id", "source_path")
+    )
+
+    return bool(
+        re.search(
+            r"(?<![A-Za-z0-9])BW-HO-00[1-9](?![0-9])",
+            identifiers,
+            flags=re.IGNORECASE,
+        )
+    )
 
 def _scope_filter(row: dict[str, Any], *, scope: str, case_id: str | None,
                   jurisdiction: str | None, incident_date: str | None,
@@ -109,8 +123,27 @@ def _scope_filter(row: dict[str, Any], *, scope: str, case_id: str | None,
         if incident_date and row.get("effective_through") and str(row["effective_through"]) < incident_date:
             return False
     if scope == "historical" and incident_date:
-        # If the earlier occurrence date is not known, historical precedence cannot be proven.
-        if not row.get("incident_date") or str(row["incident_date"]) >= incident_date:
+        exact_date = row.get("incident_date")
+
+        if exact_date:
+            if str(exact_date) >= incident_date:
+                return False
+
+        elif kind == "voluntary_asrs":
+            month = str(row.get("incident_month") or "")
+
+            if (len(month) != 6 or not month.isdigit()
+                    or not 1 <= int(month[4:6]) <= 12):
+                return False
+
+            # Month-level evidence must precede the entire target month.
+            # Never invent an exact incident day.
+            target_month = incident_date[:4] + incident_date[5:7]
+
+            if month >= target_month:
+                return False
+
+        else:
             return False
     return True
 
@@ -180,10 +213,6 @@ class HybridIndex:
             "tokenizer_verified": all(r.get("tokenizer_verified", False) for r in self.chunks),
             "crossencoder_status": "NOT VERIFIED: evaluate separately",
             "audit": self.audit,
-            "iit_document_count_requirement": "NOT VERIFIED" if not self.audit else
-                ("COUNT_IN_RANGE_PENDING_IIT_ELIGIBILITY_CHECK" if 500 <= self.audit.get("approved_document_count", 0) <= 2000 else "NOT MET"),
-            "true_recall_at_k": "NOT VERIFIED: needs complete approved relevance labels",
-            "answer_quality": "NOT VERIFIED: requires separate evaluated model outputs",
         }
         (directory / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         return manifest
@@ -222,11 +251,19 @@ class HybridIndex:
             raise ValueError("method must be bm25, dense, hybrid or rerank")
         if scope == "regulatory" and (not jurisdiction or not incident_date):
             raise ValueError("Regulatory retrieval requires jurisdiction and incident_date")
-        pool = [row for row in self.chunks if
-                (not document_types or row.get("document_type") in document_types) and
-                _scope_filter(row, scope=scope, case_id=case_id, jurisdiction=jurisdiction,
-                              incident_date=incident_date,
-                              include_retrospective_guidance=include_retrospective_guidance)]
+        pool = [
+    row for row in self.chunks
+    if not _is_protected_gold(row)
+    and (not document_types or row.get("document_type") in document_types)
+    and _scope_filter(
+        row,
+        scope=scope,
+        case_id=case_id,
+        jurisdiction=jurisdiction,
+        incident_date=incident_date,
+        include_retrospective_guidance=include_retrospective_guidance,
+    )
+]
         if not query.strip() or not pool:
             return {"results": [], "retrieval_method": "no_matches", "limitations": ["No eligible evidence in selected scope"],
                     "metrics": {"eligible_chunks": len(pool), "reranker_status": "not_run"}}

@@ -32,7 +32,7 @@ def _unique(items: list[dict[str, Any]], limit: int | None) -> list[dict[str, An
 
 
 # Look for actual clock-time transcript markers (e.g. 0639:13), not case-specific pages.
-_TIMELINE_CLOCK = re.compile(r"\b(?:[01]\d|2[0-3])\d{2}:[0-5]\d\b")
+_TIMELINE_CLOCK = re.compile(r"\b(?:[01]\d|2[0-3])\d{2}:\s*[0-5]\d\b")
 # Generic aviation actions that make a chronological passage useful for incident
 # reconstruction. Terms are not tied to a particular airport or incident.
 _ATC_ACTION = re.compile(
@@ -49,7 +49,9 @@ def _event_relevance(item: dict[str, Any]) -> int:
     if not times:
         return -1  # Prefer true clock-stamped transcript lines.
     actions = {m.group(0).lower() for m in _ATC_ACTION.finditer(excerpt)}
-    return min(len(times), 4) + 2 * min(len(actions), 5)
+    conflict = bool(re.search(r"hold short|cross(?:ed|ing)?\s+runway|abort|reject(?:ed)?|go[ -]?around", excerpt, re.I))
+    disputed = bool(re.search(r"incorrect|corrected|conflict|abort|reject(?:ed)?|go[ -]?around", excerpt, re.I))
+    return min(len(times), 4) + 2 * min(len(actions), 5) + (10 if conflict else 0) + (6 if disputed else 0)
 
 
 
@@ -83,6 +85,35 @@ def _diverse_current(items: list[dict[str, Any]], limit: int) -> list[dict[str, 
         if pg is not None:
             used_pages.add(pg)
         return True
+
+    if limit >= 5:
+        # A wider chronology packet preserves adjacent continuation chunks,
+        # including untimed readbacks split at the original indexing boundary.
+        # Only original retrieved passages and their IDs are sent onward.
+        timed = sorted((r for r in items if _event_relevance(r) >= 0),
+                       key=_event_relevance, reverse=True)
+        for row in timed:
+            if len(chosen) >= limit:
+                break
+            if page_key(row) in used_pages:
+                continue
+            add(row)
+            for continuation in items:
+                if len(chosen) >= limit:
+                    break
+                if page_key(row) is not None and page_key(continuation) == page_key(row):
+                    add(continuation)
+        for row in items:
+            if len(chosen) >= limit:
+                break
+            add(row)
+        def chronology_order(row):
+            page = row.get("page_number") or row.get("page")
+            return (str(row.get("source_id") or row.get("document_id") or ""),
+                    int(page) if str(page).isdigit() else 10**9,
+                    str(row.get("chunk_id") or row.get("evidence_id") or ""))
+        chosen.sort(key=chronology_order)
+        return chosen[:limit]
 
     add(items[0])
     if len(chosen) < limit:
@@ -131,7 +162,8 @@ def _case_uploads(items: list[dict[str, Any]], case_id: str) -> list[dict[str, A
 def _safe_query(narrative: str, topic: str) -> str:
     # Use identifiers from narrative when available, but avoid sending full
     # lengthy evidence or sensitive input to an external embeddings endpoint.
-    head = " ".join(narrative.split())[:350]
+    from blackwing.rag.query_text import case_query_text
+    head = case_query_text(narrative)[:350]
     return f"{topic} {head}"
 
 
@@ -162,10 +194,12 @@ def build_agent_packets(*, retriever: Any, narrative: str, case_id: str,
         )
         return [dict(row) for row in result["results"]]
 
-    direct_candidates = search("direct", 10, case_id=case_id, jurisdiction=jurisdiction,
+    direct_candidates = search("direct", 40, case_id=case_id, jurisdiction=jurisdiction,
                     incident_date=incident_date)
     historical = search("historical", 2, case_id=case_id,
                         incident_date=incident_date)
+    # Defense in depth: a retriever must not return this incident as its own analogy.
+    historical = [row for row in historical if str(row.get("incident_id") or "").upper() != case_id.upper()]
     for row in historical:
         row["evidence_role"] = "historical_analogy"
         row["caution"] = "OTHER INCIDENT: analogy only; never factual evidence for current case"
@@ -183,16 +217,36 @@ def build_agent_packets(*, retriever: Any, narrative: str, case_id: str,
     # deterministic in the existing service. It must never receive case uploads.
     return {
         "investigation": current,
-        "similar_case": _unique(historical, limit_per_agent),
-        # A compliance comparison needs both the rule and the current incident
-        # evidence; guidance is supplementary and never silently binding.
-        "compliance": _unique([*rules[:2], *current[:1], *guidance], limit_per_agent),
-        "risk": _unique([*current[:2], *guidance], limit_per_agent),
-        "mitigation": _unique([*guidance, *current[:1]], limit_per_agent),
-        "critic": _unique([*current[:2], *rules], limit_per_agent),
-        "verification": _unique([*current[:2], *rules], limit_per_agent),
-    }
 
+        "similar_case": _unique(
+            historical, limit_per_agent
+        ),
+
+        "compliance": _unique(
+            [*rules[:1], *current[:1], *guidance[:1]],
+            limit_per_agent
+        ),
+
+        "risk": _unique(
+            [*current[:max(2, limit_per_agent - 1)], *guidance[:1]],
+            limit_per_agent
+        ),
+
+        "mitigation": _unique(
+            [*guidance[:1], *current[:1]],
+            limit_per_agent
+        ),
+
+        "critic": _unique(
+            [*current[:max(2, limit_per_agent - 1)], *rules[:1]],
+            limit_per_agent
+        ),
+
+        "verification": _unique(
+            [*current[:max(2, limit_per_agent - 1)], *rules[:1]],
+            limit_per_agent
+        ),
+    }
 
 def packet_diagnostics(packets: Mapping[str, list[dict[str, Any]]]) -> dict[str, Any]:
     """Structural check only; NOT retrieval Recall or model report accuracy."""

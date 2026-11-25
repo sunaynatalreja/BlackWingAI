@@ -1,0 +1,5 @@
+Synopsis:
+EMB175 First Officer reported rejected takeoff due to an aircraft on the runway.
+
+Narrative:
+XA:50 Runway XXL ZZZ. 'Cleared for Takeoff Aircraft X' we start rolling down the runway; as we hit 115KTS we hear a burbled radio call due to the congestion of radio chatter in ZZZ...'(blurred speech) Cancel Takeoff Clearance' I was unsure of who the Air Traffic Controller was telling to reject however; thankfully; the Captain; heard & saw the imminent threat. A G650ER which was instructed to hold short of Runway XXL-started to cross at Taxiway 1. We rejected the takeoff-called 80KTS; and came to a complete stop. We alerted ATC 'Aircraft X Rejected Takeoff Runway XXL.' We stopped on Runway XYR. We exited Runway XXL at 2; held on 3; contacted Operations; and returned to the gate once the breaks cooled off; they got up to an average of 380 degrees and were in the yellow. No exceedance was observed.Cause: Private Jet crossing traffic while we; Aircraft X; were on the takeoff roll.

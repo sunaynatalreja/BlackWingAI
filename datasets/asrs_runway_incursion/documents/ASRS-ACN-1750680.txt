@@ -1,0 +1,8 @@
+Synopsis:
+Glider Pilot and Observer reported a Critical Ground Conflict after landing while still in the runway safety area with departing traffic.
+
+Narrative:
+As the last training sortie of the day; our organization aero-towed Aircraft X to an altitude of 200 ft. AGL in order to practice a low altitude rope break (PTT). Prior to departing; it was announced on CTAF that our aircraft would return immediately to the same runway and land in the opposite direction as an emergency aircraft. During the maneuver; Aircraft Y was waiting for takeoff on the end of the runway. After landing our glider rolled into the intersection of the two runways and completed a turn SW onto Taxiway in order to wait for the recovery team to arrive in the golf cart.After announcing on CTAF the crossing of Runway; our golf cart team proceeded to recover the glider in the intersection of Runway and Taxiway. As we crossed we heard Aircraft Y announce commencing a takeoff on CTAF. Being aware that our glider was still in the runway safety area of the runway; we announced 'STOP; STOP; STOP the takeoff roll' on CTAF. Regardless of the transmission; the pilot of Aircraft Y continued the take off roll and passed the recovery team by approximately 50 ft.
+
+Secondary Narrative:
+[Report narrative contained no additional information.]

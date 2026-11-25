@@ -1,0 +1,5 @@
+Synopsis:
+C525 pilot reported a ground conflict during takeoff roll with a helicopter departing on a parallel taxiway resulting in a rejected takeoff.  The helicopter pilot was reportedly not making any radio calls.
+
+Narrative:
+I entered Runway XX at ZZZ airport; an uncontrolled airfield and after broadcasting my taxi and takeoff intentions with the local CTAF- - XXX.X and making sure that Aircraft Y that was crossing Runway XX cleared Runway XX; I started the takeoff rolling and immediately I saw a Helicopter departing the taxiway paralleled to Runway XX without broadcasting any Takeoff intentions on CTAF; immediately I aborted my takeoff and exit Runway XX on the first taxiway and I taxied back to Runway XX to takeoff one more time. This report is very important because we need to be extra vigilant at all times; on uncontrolled airports.

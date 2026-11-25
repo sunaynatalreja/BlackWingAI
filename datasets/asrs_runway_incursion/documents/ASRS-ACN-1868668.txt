@@ -1,0 +1,8 @@
+Synopsis:
+B737-700 flight crew reported a ground conflict during short final resulting in a go-around.
+
+Narrative:
+I was the First Officer and Pilot Monitoring for Flight #XXXX; ZZZ1-ZZZ. The flight had been uneventful all the way through the approach. We were cleared for the visual approach to Runway XX at ZZZ; and after contacting Tower; we were given our landing clearance. Aircraft were landing and departing on Runway XX as well as departing on Runway XYR. I did not specifically hear a takeoff clearance for an aircraft for Runway XX while we were on final. At 400 ft. AGL; an aircraft entered Runway XX. The Captain said out loud that this didn't look right and I commented that the aircraft may be crossing the runway where an FBO is on the other side but it seemed closer than what the Tower usually allowed. The aircraft then made the ninety degree turn to lineup on the runway and immediately started taking off. At that instant the Captain already said he was going around; and before I could say anything [to] the Tower; the Controller directed us to go-around. We were then given a right turn and altitude to climb. The Captain performed a smooth and normal go-around and we were handed off to Departure. Approach re-vectored us for the visual back to Runway XX; where we landed without further incident and taxied to the gate.Go-around when an aircraft entered red landing runway while on short final.
+
+Secondary Narrative:
+Landing configuration; Runway XX (ZZZ). We were cleared to land. Aircraft entered the landing runway at approximately 500 ft. AGL. We initiated a go-around; and circled back to land with no further incident. Go-around due to aircraft on landing runway. Radio congestion; increase awareness of surroundings at a busy facility.

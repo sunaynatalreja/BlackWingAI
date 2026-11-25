@@ -1,0 +1,20 @@
+[
+  {
+    "index": "expanded_bge_asrs_20261121",
+    "document_count": 777,
+    "chunk_count": 27255,
+    "vector_sha256": "900b2aa7be2bfec88305f1e5f9f9477d917cd7e26006cf83c07ffa370fdf5f9f",
+    "chunk_signature_valid": true,
+    "vector_hash_valid": true,
+    "mode": "read-only; no embedding generation"
+  },
+  {
+    "index": "expanded_bge_asrs_metadata_v2",
+    "document_count": 777,
+    "chunk_count": 27255,
+    "vector_sha256": "900b2aa7be2bfec88305f1e5f9f9477d917cd7e26006cf83c07ffa370fdf5f9f",
+    "chunk_signature_valid": true,
+    "vector_hash_valid": true,
+    "mode": "read-only; no embedding generation"
+  }
+]

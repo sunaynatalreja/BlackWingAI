@@ -1,0 +1,5 @@
+Synopsis:
+Pilot reported a critical ground conflict during the takeoff roll when another aircraft entered the runway at the opposite end. Pilot continued the takeoff roll and overflew the opposite end aircraft.
+
+Narrative:
+Aircraft Y entered Runway XX when I was on the takeoff roll on Runway XY. The wind favored Runway XY. Another aircraft had departed prior to my takeoff on Runway XY. This runway has a blind spot because it is not level. I entered Runway XY for takeoff. There is not a blind spot in this position. Aircraft Y was on the taxiway holding short of Runway XX. The aircraft entered Runway XX when I was 1/2 through my takeoff roll. I continued the takeoff because I would not be able to stop without hitting the other aircraft. This was the safest course of action given the aircraft entered the active runway in the wrong direction during my takeoff roll. I announced my position and intentions multiple times but later realized I was transmitting on the Center frequency instead on the Unicom frequency.

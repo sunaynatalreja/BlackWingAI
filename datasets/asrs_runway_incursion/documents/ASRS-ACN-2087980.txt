@@ -1,0 +1,5 @@
+Synopsis:
+General aviation pilot reported a near miss with a landing aircraft while taxiing to the departure runway. The pilot immediately stopped when the landing aircraft was identified; then maneuvered off the runway to avoid a conflict with another landing aircraft.
+
+Narrative:
+During a particularly busy period at FLY; possibly due to increased traffic on Day 0; an aircraft without ADS-B made a short final approach to Runway 15 and was not visible until it was 50 ft. AGL. As the pilot of a taxiing aircraft; I immediately stopped upon spotting the aircraft on final approach. After the aircraft landed; I proceeded to taxi onto the runway and then exited via the taxiway to avoid disrupting the sequence of other aircraft preparing for landing. The airfield was notably congested; with more than four aircraft in the pattern. It was concerning that this near-collision incident seemed unnoticed by other pilots in the vicinity.

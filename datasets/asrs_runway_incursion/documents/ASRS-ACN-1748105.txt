@@ -1,0 +1,5 @@
+Synopsis:
+Tower Controller reported inadvertently clearing an aircraft for takeoff while an airport operations vehicle was on the runway.
+
+Narrative:
+[Ops Vehicle] called with electricians to enter runway XX about 15 minutes prior to the event. When Aircraft X called for taxi I was in the tower alone. I had the strip up that [Ops Vehicle] was on the runway but did not see it. I taxied Aircraft X for an intersection departure on runway XY (reciprocal runway) and cleared them for takeoff. Ground control NIDS monitor and STARS keyboard were blocking my view of [Ops Vehicle]. I saw [Ops Vehicle] just as Aircraft X was rotating and ASDE (Airport Surface Detection Equipment) said something but did not hear what it said. [Aircraft X] did climb well and was offset to the right of [Ops Vehicle] it appeared. I really don't believe any changes need to be made. I did use the visual aid. It was slow and it is an experience that I will never forget. I spoke to Ops on the phone and he said he heard me assign runway XY but it didn't register until he saw the plane.

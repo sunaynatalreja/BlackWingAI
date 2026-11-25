@@ -1,0 +1,5 @@
+Synopsis:
+Flight Instructor reported when lined up on runway for takeoff; a NORDO aircraft overflew them and landed. Pattern traffic warned instructor to not takeoff.
+
+Narrative:
+Lining up on Runway 23 at GIF to do a short field takeoff with a student; we cleared the area and made appropriate call. As we were lining up Aircraft Y overflys us and lands just before the 1000 footers. Does not make any radio calls on final; base; downwind or entering the traffic pattern. The aircraft did not show up on adsb also. The only indication that we had of the aircraft on short final was another aircraft on downwind made the call letting us know to abort the takeoff. The aircraft did not attempt to do a go around and exited the runway; without making calls again. Both aircraft came within 100 ft. vertically of each other.

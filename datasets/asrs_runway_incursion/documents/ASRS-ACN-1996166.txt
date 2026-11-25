@@ -1,0 +1,8 @@
+Synopsis:
+Air Carrier flight crew reported there is no signage for the hold short line for Runway 31 on Taxiway H at BNA airport.
+
+Narrative:
+On taxi out from D1 in BNA; we were told to follow (other carrier) on L to H to [Runway] 2R. We turned on to H to 2R and Ground said hold short of [Runway] 31 threshold. The 10-9 of Jepps does not show a hold line for 31 landing traffic; but the AMM does as soon as you make turn on to H for 2R. By the time we figured it out; we had just passed the hold line and there is no signage that says 31 threshold on H taxiway. By the time we were going to stop he said continue on to 2R. We check the current ATIS at the time and it said only 2R for takeoff and 2C for landings and 2L was closed. So; we continued on and departed 2R for ZZZ.
+
+Secondary Narrative:
+We were cleared by Ground to taxi behind (other carrier) aircraft to [Runway] 2R. We were not issued any hold short instructions. Upon crossing the portion of H that passes Runway 31; Approach Ground told us to hold short of it. At the time of the instruction we were already crossing this area. Additionally; there was no sign on the airport depicting this area and it was not on the 10-9 airport diagram. After issuing the instruction; Ground told us to continue taxi down H.

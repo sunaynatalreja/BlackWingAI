@@ -1,0 +1,52 @@
+[
+  {
+    "path": "blackwing/agents/risk/evidence.py",
+    "sha256_before": "700b9d8dbf273143d7f45bb8869f9098ab41b8ef54147844f578501257ef9899",
+    "sha256_after": "e88f9998969375a905a3f242dbbf36070e655af3af6bdb91452925ac8110e287"
+  },
+  {
+    "path": "blackwing/agents/similar_case/agent.py",
+    "sha256_before": "c3ad34ac8c093dcb1061fac9d866d20ffd055881e2946f31c8914284f8a89088",
+    "sha256_after": "763f6a906c3e5787e9b619550a4f2951def536e06e0962942812634dee468d81"
+  },
+  {
+    "path": "blackwing/api.py",
+    "sha256_before": "361eb0e9ecae6d0fa4b8de09393f169ee3b50dbb23fbe8394b59f3f4ccf2d5fe",
+    "sha256_after": "9d18506017052fc53aa57c5bcfe1fabe1b0f3ce7512c76d8d41c33b345dce137"
+  },
+  {
+    "path": "blackwing/gold_comparison.py",
+    "sha256_before": "b17c92a6ff2eaa4a89bbe82895083c13cd8cc06ae9e71fc4377b56257146370e",
+    "sha256_after": "44325efa862a28708a13428b242e29c6f201c9dff15c6875e78ef86b9453eb7c"
+  },
+  {
+    "path": "blackwing/rag/agent_router.py",
+    "sha256_before": "6d00f35922294486bb7d8eab043d59b284fbe55d91a1a1f9adfdc989dec89223",
+    "sha256_after": "7dea64555af9ddda661031346d6f283ee95b664093cd3f7c8014f3f23b184c50"
+  },
+  {
+    "path": "blackwing/rag/query_text.py",
+    "sha256_before": null,
+    "sha256_after": "de4d8eee87dab8d1c9b5b884ebfc475249339381819ae484357ddfc2a4116907"
+  },
+  {
+    "path": "blackwing/synthetic_gold.py",
+    "sha256_before": "6937199ee9e5f5dbbe1824aa20127e8f817ba99d06fbfcf943d6f7179fccca72",
+    "sha256_after": "6591d2ea575f080cb8da6d38c3859f623b130a25f8924a4115b3428167579770"
+  },
+  {
+    "path": "tests/test_evidence_quality_repairs.py",
+    "sha256_before": null,
+    "sha256_after": "31f6b53d1f33d4f86060a28a1fd400c19325f3520c9840a0b7df5d5323bc0c59"
+  },
+  {
+    "path": "tests/test_gold_comparison.py",
+    "sha256_before": "e22e45b36351ebbace284c64d71fffc99dcdaf154dc454444f9d58bb9519858d",
+    "sha256_after": "253a382c291b604c65e8458d6d1c6753215633dec3c086557e6acfcef5fde318"
+  },
+  {
+    "path": "tests/test_synthetic_report_scoring.py",
+    "sha256_before": "d2bef3f63e9e8a504efb920eef2358dfb488f290b742aafccaf34d85efab107e",
+    "sha256_after": "43a00dfcbba2e1916b6db2daba087ccbba96d6d028bac9889aa9919ddbcc5032"
+  }
+]

@@ -1,0 +1,5 @@
+Synopsis:
+GA pilot reported they crossed a runway hold short line requiring an aircraft on approach to go around. Reportedly; the ATC instructions to cross the runway were incorrect.
+
+Narrative:
+At ZZZ; I was given taxi instructions from the T-Hangers to RWY X via [Taxiway] 1; 2; 3 to RWY X hold-short RWY X-XX @ 2.  I apparently miss-heard the instruction to hold short @ 2; and read back that I was going to hold short @ 3.  The Controller did not correct my read-back; and as a result I believed I was cleared to cross X-XX @ 2; and had to hold short @ 3.  This resulted in Ground calling for me to stop as I inadvertently crossed the hold-short line @ 2. I was able to stop immediately over the line; but there was a small aircraft on final approach that had to execute a go-around.Upon calling the tower after the flight; the controller I spoke to indicated that the error was on the part of the Ground controller.  I was only made aware that this was a reportable issue today.

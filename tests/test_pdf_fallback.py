@@ -22,7 +22,7 @@ def test_pdf_page_fallback_retains_original_page_number(tmp_path, monkeypatch):
 
     monkeypatch.setattr(
         "pypdf.PdfReader",
-        lambda _: SimpleNamespace(pages=[WorkingPage(), FailingPage()]),
+        lambda _: SimpleNamespace(is_encrypted=False, pages=[WorkingPage(), FailingPage()]),
     )
     units = _text_units(source, {})
     assert len(units) == 2

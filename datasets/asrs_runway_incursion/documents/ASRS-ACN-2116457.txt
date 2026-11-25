@@ -1,0 +1,8 @@
+Synopsis:
+Air carrier flight crew reported a runway incursion which prompted Tower to instruct an aircraft to go around.
+
+Narrative:
+Runway incursion occurred at ZZZ at the hold-short line of Runway XXR. We were given a taxi clearance to XYL via Taxiway 1 after pushing from Gate XX. Soon after taxiing; we were told to hold position. We then realized we had crossed the hold-short line for XXR at Taxiway 2. A general aviation aircraft was directed to go around. We were then given taxi clearance onto XXR and then Taxiway 3 to 1.Suggestion: Better briefing of Hot Spot areas for taxi. Complete understanding of taxi instructions before moving the aircraft. Better Pilot Monitoring during taxi. Also; ATC instruction should have been 'Taxi to XYL via 3; 1' versus 'Taxi to XYL via 1.'
+
+Secondary Narrative:
+After pushback from Gate XX at ZZZ; we received clearance from Ground to Taxi to Runway XYL via Taxiway 1". Exiting the ramp; ZZZ Ground instructed us to hold position. We had inadvertently crossed Runway XXR Approach hold-short line. A general aviation aircraft on a one-mile final was subsequently sent around by ZZZ Tower. We were instructed to continue taxiing to Runway XYL without further incident.Suggestion: Complete Flight Crew Briefing of taxi plan and threats; including hot spot review.  More focus outside the aircraft versus looking at the taxi diagram. Also; more accurate taxi instructions from Ground 'Taxi to XYL via 3 to 1' versus 'Via 1.'"

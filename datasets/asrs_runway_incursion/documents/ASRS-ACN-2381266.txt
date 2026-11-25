@@ -1,0 +1,5 @@
+Synopsis:
+Flight Instructor reported an aircraft departing opposite direction resulted in an NMAC and critical ground conflict with other aircraft at a non-towered airport.
+
+Narrative:
+While conducting pattern work on runway 19 at EDE with 2 other aircraft; Aircraft Y made a radio call that he was taxiing for runway 1; despite 3 planes in the pattern for runway 19 and the winds favoring 19. Aircraft X informed Aircraft Y that runway 19 was in use and that they would conduct a 360 to allow Aircraft Y to take off. Aircraft Z was on final and Aircraft A was on base; both making appropriate radio calls that were acknowledged by Aircraft Y. Aircraft Y responded that he would hold short for landing traffic. Aircraft Z performed a touch and go and during the takeoff roll Aircraft Y began to taxi onto runway 1 without making a radio call; once Aircraft Y was established on the centerline; they made the call that they were taking off even though Aircraft Z was still on the runway and Aircraft A was on final. Aircraft Z and Aircraft A both made evasive maneuvers to avoid collision with Aircraft Y.

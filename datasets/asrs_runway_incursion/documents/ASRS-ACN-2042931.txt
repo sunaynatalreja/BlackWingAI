@@ -1,0 +1,8 @@
+Synopsis:
+B737 flight crew reported observing traffic entering runway while accelerating for takeoff resulted in ATC clearance to cancel takeoff and a rejected takeoff.
+
+Narrative:
+Tower gave us line up and wait; for multiple aircraft crossing downfield on runway XX. Two heavy aircraft crossed runway XX downfield. After the two aircraft had cleared [runway] XX; tower then cleared us for takeoff. I initiated the take off sequence and executed standard procedures to the point where I noticed an Airbus (321) about to cross the runway and then proceeding on to runway XX. Approaching 80 kts; tower transmits Aircraft X cancel take off clearance. CA (Captain) then initiated RTO (Rejected Take Off) with standard procedures. We exited about halfway down the runway with minimal brake application on taxiway 1. I clarified with tower for taxi clearance and again for takeoff clearance; while re accomplishing takeoff checklist. Cause: Non compliance to clearance by aircraft taxiing and crossing active runway. Suggestions: Compliance to ATC clearance by aircrew"
+
+Secondary Narrative:
+We were given a line up and wait traffic will cross clearance onto runway XX. We watched two heavy aircraft aircraft cross at the far end of the runway. Tower then gave us clearance to take off.  My first officer commenced the takeoff. I was pilot monitoring. The tower said Aircraft X cancel take off clearance. I looked up to see a  heavy was crossing runway XX. This occurred about. 75 knots as I did not make the 80 knot call out. I did the reject procedure; exited the runway on taxiway 1 about halfway down the runway. Cause: My guess is the heavy had a language barrier and thought he/she had clearance to cross. Suggestions: Maybe better communication for clearances.
