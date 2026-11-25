@@ -16,8 +16,10 @@ Exact JSON shape (illustrative empty assessment, not incident evidence):
 {"hazards":[],"risk_notes":"Evidence is insufficient.","assessment_status":"provisional","numeric_score":null,"missing_inputs":[]}
 Each hazard has hazard_id, description, evidence_ids, existing_controls,
 control_gaps, severity (integer 1..5 or null), likelihood ("A".."E" or null),
-severity_basis and likelihood_basis. Omit computed risk_index/risk_level:
-the backend calculates them. Never use severity_rationale, likelihood_rationale,
+severity_basis and likelihood_basis. Both basis fields must always be JSON strings,
+never null, arrays, or objects. When evidence is insufficient, set the corresponding
+severity or likelihood to null and use an empty string ("") for its basis.
+Omit computed risk_index/risk_level: the backend calculates them. Never use severity_rationale, likelihood_rationale,
 score, risk_rating, scoring_method or a numeric likelihood. A single event,
 absence of injury, or generic potential collision does not establish frequency.
 An unverified prompt alone cannot justify rated inputs. Qualified human review

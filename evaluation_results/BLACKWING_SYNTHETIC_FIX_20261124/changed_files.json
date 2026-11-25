@@ -1,0 +1,42 @@
+[
+  {
+    "path": "blackwing/agents/critic/grounding.py",
+    "sha256_before": "1ee5fb885f4d37b334464fce24ff37f419edecfca8e821e160c7b1273bd6b1a9",
+    "sha256_after": "6997e2bb8292e9759f7f18ce2012d19afc0fe85685f49d3d16188f2a1a13043b"
+  },
+  {
+    "path": "blackwing/agents/critic/prompt.md",
+    "sha256_before": "bc287e7d1a15539742fe72976d504b2ed2eafa53ff3c235db1f76b3906843a53",
+    "sha256_after": "cdce906ef898811093d579a0e6b47a766a6aab696aa4a15aec1b6066d9113ec9"
+  },
+  {
+    "path": "blackwing/agents/investigation/prompt.md",
+    "sha256_before": "b64beec00ce5843f85f53feaec1549f959b89f6c95246b62775a6bc6b43224d3",
+    "sha256_after": "9baa85b066488544a9b9c5c38b01f7a89713b42cf7c85daf22a02a40eed7ff94"
+  },
+  {
+    "path": "blackwing/agents/report/workflow.py",
+    "sha256_before": "0903f09f5e303ebc827ae3102ac04d3ee8addbab3384ec4279be1881cea2dabe",
+    "sha256_after": "c954d9f8d66564517597026e060112ec22b2a55e5b7f2366a13750f3cc29827f"
+  },
+  {
+    "path": "blackwing/agents/verification/prompt.md",
+    "sha256_before": "6fd8af8df41dd4c5600793a96ef7ea7d6bee83b5479d719c041aa9fe89c83f99",
+    "sha256_after": "1aa87deec90770d5140040fad58d633d1c6883309943ab17eea0a44a61e5455a"
+  },
+  {
+    "path": "blackwing/case_inputs.py",
+    "sha256_before": "0a46dec848decff4b26c6a01cb522ad17054d517ee9f9a1c0b47fda99e04a076",
+    "sha256_after": "65ba96500fc515d10a1115c1b3fcd32f8799753319a4f6e27e95e92de09d2f7a"
+  },
+  {
+    "path": "blackwing/synthetic_gold.py",
+    "sha256_before": "280a751421d07686f002e74cbfe6a7e45db9b37432934794ce7dd17624d0f5b2",
+    "sha256_after": "204de41754190ea9354f05e1246dcb2b5f2cae54496a5d6e1f413093c4794ccf"
+  },
+  {
+    "path": "tests/test_synthetic_report_scoring.py",
+    "sha256_before": null,
+    "sha256_after": "8959fb0a307600f099e5189daf19436aee5975690983d928b856860575790f5e"
+  }
+]

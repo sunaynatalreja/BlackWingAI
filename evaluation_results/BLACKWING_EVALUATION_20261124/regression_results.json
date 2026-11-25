@@ -1,0 +1,10 @@
+{
+  "command": "python -m pytest -q --tb=short",
+  "location": "C:\\Users\\arunk\\OneDrive\\Desktop\\Capstone Project - IIT\\BLACKWING_AI_PILOT_MASTER PROJECT\\BLACKWING_AI_REORG\\BlackWingAI-Arun-Git",
+  "tests": 263,
+  "passed": 263,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "providers": "mocked; outbound networking blocked"
+}

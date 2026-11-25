@@ -38,8 +38,10 @@ def show_question_evaluation(case, result):
     if status in {'queued', 'running'}:
         events = result.get('events') or []
         waiting = events and events[-1].get('event') == 'waiting_for_model_response'
-        st.info('Waiting for model response. Validated question results are saved incrementally.' if waiting else
-                'Question evaluation is queued or running. Refresh comparison status to read saved progress.')
+        current = events[-1].get('question_id') if events else None
+        progress = f' Working on {current}.' if current else ''
+        st.info(('Waiting for model response.' if waiting else 'Question evaluation is queued or running.') +
+                progress + ' Status updates automatically every few seconds.')
     elif status == 'interrupted':
         st.warning('Evaluation was interrupted. Saved validated judgments are preserved; retry resumes eligible questions.')
     elif status in {'failed', 'incomplete'}:

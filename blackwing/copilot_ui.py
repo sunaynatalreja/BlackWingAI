@@ -323,12 +323,37 @@ def main(*, brand, render_report, cloud=False):
 
 
 def show_gold_comparison(case):
+    result = _read_question_comparison(case)
+    if result is None:
+        return None
+    if result.get('legacy_fallback'):
+        st.caption('Approved question coverage is unavailable for this case. The existing comparison below uses its disclosed claim or safety-policy scope.')
+        return _show_legacy_gold_comparison(case)
+    from blackwing.evaluation_ui import show_question_evaluation
+    if result.get('status') not in {'queued', 'running'}:
+        return show_question_evaluation(case, result)
+
+    # Keep the saved investigation report outside the polling fragment. Each
+    # refresh reads status only; model work remains tied to the explicit click.
+    initial_reference = result.get('reference_case', True)
+    @st.fragment(run_every='3s')
+    def live_comparison():
+        current = _read_question_comparison(case)
+        if current is None:
+            return
+        if current.get('status') not in {'queued', 'running'}:
+            st.rerun()  # Render the terminal state and stop the timed fragment.
+        show_question_evaluation(case, current)
+    live_comparison()
+    return initial_reference
+
+
+def _read_question_comparison(case):
     try:
-        result = copilot.get_report_evaluation(case['incident']['case_id'], case['report_run_id'])
+        return copilot.get_report_evaluation(case['incident']['case_id'], case['report_run_id'])
     except httpx.HTTPStatusError as exc:
         if exc.response.status_code == 404:
-            st.caption('Restart FastAPI to enable question-based evaluation. The existing comparison remains available below.')
-            return _show_legacy_gold_comparison(case)
+            return {'legacy_fallback': True}
         st.subheader('Gold comparison score')
         st.error('Cannot read the saved comparison status. Refresh after checking FastAPI; the investigation report is preserved.')
         return None
@@ -336,11 +361,6 @@ def show_gold_comparison(case):
         st.subheader('Gold comparison score')
         st.error('Cannot reach FastAPI for comparison status. The investigation report is preserved.')
         return None
-    if result.get('legacy_fallback'):
-        st.caption('Approved question coverage is unavailable for this case. The existing comparison below uses its disclosed claim or safety-policy scope.')
-        return _show_legacy_gold_comparison(case)
-    from blackwing.evaluation_ui import show_question_evaluation
-    return show_question_evaluation(case, result)
 
 
 def _show_legacy_gold_comparison(case):
