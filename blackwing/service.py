@@ -82,7 +82,7 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
                     output["limitations"] = [*output.get("limitations", []),
                         "Current event date is unknown. Retrieved archive cases are candidate analogies, not established chronological predecessors."]
             elif role == "risk" and state.get("plan", {}).get("task_modes", {}).get("risk") == "unassessed_synthetic":
-                output = ground_risk_output(unassessed_synthetic_risk(state, evidence), evidence)
+                output = ground_risk_output(unassessed_synthetic_risk(state, evidence), evidence, incident_id=state.get("source_incident_id"))
                 emit("assessment_abstained", step="risk", detail={
                     "reason": "Unverified synthetic accounts lack severity and occurrence/exposure support.",
                     "human_review_required": True})
@@ -178,7 +178,7 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
                         incident_date=state.get("incident_date"),
                     )
                 elif role == "risk":
-                    output = ground_risk_output(output, evidence)
+                    output = ground_risk_output(output, evidence, incident_id=state.get("source_incident_id"))
                 elif role == "mitigation":
                     output = ground_mitigation_output(output, state.get("outputs", {}))
                 elif role == "critic":
@@ -371,12 +371,6 @@ async def analyze_incident(
     # If older callers omit it, recover from a scoped official case-factual chunk.
     from blackwing.incident_identity import resolve_incident_reference
     source_incident_id = resolve_incident_reference(narrative, source_incident_id)
-    if not source_incident_id:
-        source_incident_id = next((
-            str(row["incident_id"])
-            for row in ((agent_evidence or {}).get("investigation") or [])
-            if row.get("incident_id") and str(row.get("evidence_role") or "").casefold() == "case_factual"
-        ), None)
     source_incident_id = source_incident_id or case_id
     narrative_evidence = _case_narrative_evidence(case_id, narrative)
     # The user's submitted account is reportable as an observation, not as an
@@ -393,6 +387,22 @@ async def analyze_incident(
                 row for row in rows
                 if str(row.get("evidence_id") or row.get("chunk_id")) != narrative_evidence["evidence_id"]
             ]]
+    # Retrieved incident reports are comparisons unless explicitly scoped to the
+    # current incident. Never let an unlabelled historical report enter a
+    # current-case agent merely because retrieval ranked it highly.
+    from blackwing.agents.evidence_utils import is_direct
+    def current_packet(rows):
+        return [row for row in rows if is_direct(row, source_incident_id)
+                or str(row.get("source_type") or row.get("document_type") or "").casefold()
+                in {"regulation", "procedure", "operational_order", "advisory", "guidance"}]
+    if run_agent_evidence is None:
+        run_agent_evidence = {role: (run_evidence if role == "similar_case" else current_packet(run_evidence))
+                              for role in ("investigation", "similar_case", "compliance", "risk", "mitigation", "critic", "verification")}
+    else:
+        for role in ("investigation", "risk", "compliance", "mitigation", "critic", "verification"):
+            run_agent_evidence[role] = current_packet(run_agent_evidence.get(role, []))
+    run_agent_evidence["investigation"] = [row for row in run_agent_evidence["investigation"]
+                                           if is_direct(row, source_incident_id)]
     initial_state: CaseState = {
         "case_id": case_id,
         "narrative": narrative.strip(),

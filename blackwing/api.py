@@ -190,7 +190,9 @@ async def _execute_run_body(
             status = "retrieval_failed"
         repo.patch_run(run_id, {"preflight_trace": [e for e in invocation_events if e.get("tool")]})
         record_event(lifecycle_event("evidence_retrieval", status, case_id=case["case_id"]))
-    evidence = [*case.get("evidence", []), *retrieved]
+    from blackwing.rag.agent_router import _case_uploads
+    uploads = _case_uploads(case.get("evidence", []), case.get("source_incident_id") or case["case_id"])
+    evidence = [*uploads, *retrieved]
     agent_evidence = None
     if use_agent_retrieval and os.getenv("BLACKWING_AGENT_RAG", "0") == "1":
         # Keep integration outside agent packages and UI. No LLM calls here.

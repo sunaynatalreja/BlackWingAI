@@ -65,6 +65,26 @@ def test_explicit_click_queues_once_and_refresh_only_reads_saved_result(monkeypa
     assert any(e.label == 'Improvements to review' for e in at.expander)
 
 
+def test_active_comparison_rereads_status_and_displays_terminal_result(monkeypatch):
+    state = snapshot('running', questions_completed=1, events=[
+        {'event':'waiting_for_model_response', 'question_id':'Q2'}])
+    reads=[]
+    def read(*args):
+        reads.append(args)
+        return deepcopy(state)
+    monkeypatch.setattr(copilot, 'get_report_evaluation', read)
+    monkeypatch.setattr(copilot, 'start_report_evaluation', forbid)
+    at=AppTest.from_string(SCRIPT).run()
+    assert not at.exception
+    assert any('Q2' in item.value and 'automatically' in item.value for item in at.info)
+    state.update(status='incomplete', questions_completed=1, questions_failed=1)
+    at.run()
+    assert not at.exception and len(reads)>=2
+    assert any('incomplete' in item.value for item in at.caption)
+    assert at.metric[0].value=='Not assessed'
+    assert any(b.label=='Retry unvalidated comparisons' for b in at.button)
+
+
 @pytest.mark.parametrize('status', ['queued', 'running', 'incomplete', 'failed', 'interrupted', 'requires_review'])
 def test_nonfinal_states_never_display_a_numeric_final_score(monkeypatch, status):
     monkeypatch.setattr(copilot, 'get_report_evaluation', lambda *args: snapshot(status, score=100))

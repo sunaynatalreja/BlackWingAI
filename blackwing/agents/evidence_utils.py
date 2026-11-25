@@ -41,7 +41,7 @@ def is_direct(row: Mapping[str, Any], incident_id: str | None = None) -> bool:
     if role not in {"case_factual", "direct", "current_case"}:
         return False
     row_incident = str(row.get("incident_id") or "").casefold()
-    return not (incident_id and row_incident and row_incident != incident_id.casefold())
+    return bool(row_incident and (not incident_id or row_incident == incident_id.casefold()))
 
 
 def citation_map(evidence: Sequence[Mapping[str, Any]]) -> dict[str, tuple[str, Mapping[str, Any]]]:

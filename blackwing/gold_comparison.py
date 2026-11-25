@@ -195,6 +195,8 @@ async def validated_evaluation(settings, system, payload, validator):
                     raise EvaluationError('invalid_evaluator_json') from None
                 try:
                     return validator(parsed)
+                except EvaluationError:
+                    raise
                 except (ValueError, KeyError, IndexError, TypeError):
                     raise EvaluationError('invalid_evaluator_quote_or_schema') from None
             except (ValueError, KeyError, IndexError, TypeError) as exc:
@@ -206,10 +208,24 @@ async def validated_evaluation(settings, system, payload, validator):
                 correction = (
                     '\nThe previous judgment failed validation (' + code + '). Re-evaluate the same data. '
                     'Return only one compact valid JSON object with exactly the required fields. '
-                    'Keep rationale under 50 words and each quote under 40 words. Copy quotes exactly '
+                    'Keep rationale under 50 words and each quote within the character limit in the original instructions. Copy quotes exactly '
                     'from the supplied text, preserving punctuation and page/field identity. '
-                    'Use not_verified when no supporting passage exists. Never manufacture support.'
+                    'Use only statuses permitted by the original instructions when support is absent. Never manufacture support.'
                 )
+                if code == 'question_schema_status_invalid_choice':
+                    correction += (
+                        ' The status field must be exactly one of: correct, partial, contradicted, missing, '
+                        'justified_abstention, not_applicable, unsupported, requires_review. '
+                        'The word supported is allowed for input_answerability, not for status.'
+                    )
+                if code == 'invalid_reference_quote_or_page':
+                    correction += (' Copy a contiguous reference_quote exactly from one supplied reference_excerpts '
+                                   'entry and use that entry’s page key. Do not combine or paraphrase passages. '
+                                   'If no suitable passage exists, use requires_review and leave the reference fields empty.')
+                if code == 'invalid_report_quote_or_field':
+                    correction += (' Copy a contiguous report_quote exactly from a single report_fields entry and use '
+                                   'that entry’s exact key as report_field. Do not combine or paraphrase passages. '
+                                   'If the report does not answer the question, use requires_review and leave both empty.')
 
 
 async def judge_claim(settings, claim, pages):
