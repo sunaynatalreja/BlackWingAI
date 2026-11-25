@@ -1,0 +1,10 @@
+{
+  "case_id": "IND-AAIB-002",
+  "case_name": "Delhi GoAir-IAF / Oct 2013",
+  "country": "IN",
+  "event_date": "2013-10-02",
+  "event_type": "runway_incursion",
+  "requested_mode": "new_case_facts_from_user_narrative_only",
+  "input_text": "On 2 October 2013 at Delhi IGI Airport, a reported runway-crossing conflict involved GoAir flight GOW336 and an Indian Air Force AN-32. Prepare a preliminary evidence-gap checklist and identify what records would be needed; withhold regulatory judgment until the correct 2013-era texts are verified.",
+  "evaluators_only_note": "Final AAIB report held out; 2025 AAI ATS manual is not date-valid for 2013 without historical verification."
+}

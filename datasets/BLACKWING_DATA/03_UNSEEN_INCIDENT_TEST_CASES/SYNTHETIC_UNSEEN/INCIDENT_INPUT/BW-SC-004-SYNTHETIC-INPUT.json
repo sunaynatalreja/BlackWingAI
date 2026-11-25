@@ -1,0 +1,9 @@
+{
+  "case_label": "SYNTHETIC_UNSEEN",
+  "case_id": "SYN-UNSEEN-001",
+  "jurisdiction": "US",
+  "incident_date": "2023-05-12",
+  "narrative": "Synthetic fictional scenario: A taxiing aircraft approaching an active runway reported uncertainty about its clearance after an interrupted radio exchange. No crossing is confirmed; obtain ATC audio, surveillance tracks and crew reports before classifying the occurrence.",
+  "input_status": "ILLUSTRATIVE_SYNTHETIC_NOT_PREVIOUS_SESSION_CASE",
+  "official_final_report": null
+}

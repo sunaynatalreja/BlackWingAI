@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import json
 import logging
+import os
 from typing import Any, Awaitable, Callable
 from uuid import uuid4
 
@@ -51,7 +52,10 @@ def get_repository() -> MemoryRepository:
 
 def get_settings() -> Settings:
     try:
-        return Settings.load()
+        settings = Settings.load()
+        retriever.configure_index_dir(settings.rag_index_dir)
+        retriever.configure_embedding_settings(settings)
+        return settings
     except (ValueError, OSError) as exc:
         raise HTTPException(status_code=503, detail=f"Application configuration unavailable: {exc}") from exc
 
@@ -92,16 +96,35 @@ async def _execute_run(
     settings: Settings,
     repo: MemoryRepository,
     runner: AnalysisRunner,
+    use_agent_retrieval: bool = True,
 ) -> None:
     repo.patch_run(run_id, {"status": "running", "started_at": datetime.now(timezone.utc)})
     evidence = [*case.get("evidence", []), *retrieved]
     try:
+        agent_evidence = None
+        if use_agent_retrieval and os.getenv("BLACKWING_AGENT_RAG", "0") == "1":
+            # Keep integration outside agent packages and UI. No LLM calls here.
+            from blackwing.rag.agent_router import build_agent_packets
+            agent_evidence = build_agent_packets(
+                retriever=retriever, narrative=case["narrative"],
+                case_id=case.get("source_incident_id") or case["case_id"],
+                jurisdiction=case.get("jurisdiction"), incident_date=str(case.get("incident_date"))
+                    if case.get("incident_date") else None,
+                documents=repo.list_documents(), uploaded_evidence=case.get("evidence", []),
+                embedding_model=settings.rag_embedding_model,
+                method=os.getenv("BLACKWING_AGENT_RAG_METHOD", "hybrid").strip().lower(),
+                limit_per_agent=3,
+            )
         result = await runner(
             case["narrative"],
             settings,
             case_id=case["case_id"],
+            source_incident_id=case.get("source_incident_id"),
             evidence=evidence,
             retrieval_count=len(retrieved),
+            jurisdiction=case.get("jurisdiction"),
+            incident_date=str(case.get("incident_date")) if case.get("incident_date") else None,
+            **({"agent_evidence": agent_evidence} if agent_evidence is not None else {}),
         )
         events = []
         for sequence, event in enumerate(result.get("trace", []), 1):
@@ -124,7 +147,11 @@ async def _execute_run(
         })
         repo.update_case(case["case_id"], {"status": "analysis_complete"})
     except AgentExecutionError as exc:
-        logger.warning("Analysis run %s failed at agent %s with code %s", run_id, exc.agent, exc.code)
+        logger.warning(
+            "Analysis run %s failed at agent %s with code %s%s",
+            run_id, exc.agent, exc.code,
+            f"; {exc.debug_detail}" if exc.debug_detail else "",
+        )
         repo.patch_run(run_id, {
             "status": "failed",
             "error_code": exc.code,
@@ -134,7 +161,7 @@ async def _execute_run(
         })
         repo.update_case(case["case_id"], {"status": "analysis_failed"})
     except Exception as exc:
-        logger.error("Analysis run %s failed with unexpected error type %s", run_id, type(exc).__name__)
+        logger.exception("Analysis run %s failed with unexpected error type %s", run_id, type(exc).__name__)
         repo.patch_run(run_id, {
             "status": "failed",
             "error_code": "internal_agent_error",
@@ -155,13 +182,13 @@ async def capabilities() -> dict[str, Any]:
         "api_version": "v1",
         "incident_categories": [{"id": "runway_incursion", "status": "supported"}],
         "workflow": "runway_incursion_investigation",
-        "agent_roles": ["investigation", "similar_case", "compliance", "risk", "mitigation", "critic", "verification"],
+        "agent_roles": ["investigation", "similar_case", "compliance", "risk", "mitigation", "critic", "verification", "report"],
         "features": {
             "case_evidence": True,
             "knowledge_document_ingestion": True,
             "keyword_retrieval": True,
             "hybrid_retrieval": True,
-            "seeded_reference_cases": True,
+            "seeded_reference_cases": False,
             "risk_matrix_scoring": False,
             "human_review_recording": True,
         },
@@ -261,7 +288,7 @@ async def create_analysis_run(
     )["results"] if request.include_retrieval else []
     run_id = str(uuid4())
     run = repo.create_run(run_id, case_id, request.workflow, settings.model_name)
-    background.add_task(_execute_run, run_id, case, retrieved, settings, repo, runner)
+    background.add_task(_execute_run, run_id, case, retrieved, settings, repo, runner, request.include_retrieval)
     return _run_response(run)
 
 
@@ -310,10 +337,18 @@ async def get_report(case_id: str, repo: MemoryRepository = Depends(get_reposito
 @app.get("/api/v1/cases/{case_id}/report/export", tags=["reports"])
 async def export_report(
     case_id: str,
-    export_format: str = Query(default="json", alias="format", pattern="^json$"),
+    export_format: str = Query(default="json", alias="format", pattern="^(json|md)$"),
     repo: MemoryRepository = Depends(get_repository),
 ) -> Response:
     report = await get_report(case_id, repo)
+    if export_format == "md":
+        from blackwing.reporting import render_markdown_report
+        filename = f"blackwing-{case_id}-report.md"
+        return Response(
+            content=render_markdown_report(report.model_dump(mode="json")),
+            media_type="text/markdown; charset=utf-8",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
     filename = f"blackwing-{case_id}-report.json"
     return Response(
         content=json.dumps(report.model_dump(mode="json"), ensure_ascii=False),

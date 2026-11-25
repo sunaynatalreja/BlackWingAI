@@ -1,0 +1,8 @@
+﻿agent,case_label,returned,top_source_id,top_citation,reference_source_hint,reference_hint_in_top5,status
+investigation,JFK,5,BW-EV-001,BW-EV-001:p3:c1,BW-EV-001,True,NONEMPTY
+similar_case,JFK,5,BW-EV-006,BW-EV-006:p3:c2,BW-EV-006,True,NONEMPTY
+compliance,JFK,5,BW-RG-004,BW-RG-004:p149:c1,BW-RG-004,True,NONEMPTY
+risk,JFK,5,BW-RK-002,BW-RK-002:p4:c1,BW-RK-002,True,NONEMPTY
+mitigation,JFK,5,BW-GD-014,BW-GD-014:p1:c3,BW-GD-002,False,NONEMPTY
+critic,JFK,5,BW-EV-001,BW-EV-001:p8:c1,BW-EV-001,True,NONEMPTY
+verification,JFK,5,BW-EV-003,BW-EV-003:p8:c5,BW-EV-001,True,NONEMPTY

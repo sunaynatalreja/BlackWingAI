@@ -16,6 +16,7 @@ from blackwing.agents.risk.schema import HazardOutput, RiskOutput
 from blackwing.agents.mitigation.schema import MitigationOptionOutput, MitigationOutput
 from blackwing.agents.critic.schema import CriticIssueOutput, CriticOutput
 from blackwing.agents.verification.schema import VerificationOutput
+from blackwing.agents.report.schema import ReportAgentOutput
 from blackwing.agents.similar_case.schema import SimilarCaseOutput
 
 
@@ -62,20 +63,22 @@ class EvidenceInput(APIModel):
     effective_date: date | None = None
     page_number: int | None = Field(default=None, ge=1)
     section_reference: str | None = Field(default=None, max_length=200)
-    excerpt: str = Field(min_length=1, max_length=20_000)
+    excerpt: str = Field(min_length=1)
 
 
 class CaseCreate(APIModel):
+    source_incident_id: str | None = Field(default=None, min_length=3, max_length=100, description="External incident source identifier for matching indexed factual reports.")
     category: IncidentCategory = IncidentCategory.RUNWAY_INCURSION
-    narrative: str = Field(min_length=20, max_length=30_000)
+    narrative: str = Field(min_length=20)
     incident_date: date | None = None
     jurisdiction: str | None = Field(default=None, max_length=100)
     location: str | None = Field(default=None, max_length=300)
-    evidence: list[EvidenceInput] = Field(default_factory=list, max_length=30)
+    evidence: list[EvidenceInput] = Field(default_factory=list)
 
 
 class CasePatch(APIModel):
-    narrative: str | None = Field(default=None, min_length=20, max_length=30_000)
+    source_incident_id: str | None = Field(default=None, min_length=3, max_length=100)
+    narrative: str | None = Field(default=None, min_length=20)
     incident_date: date | None = None
     jurisdiction: str | None = Field(default=None, max_length=100)
     location: str | None = Field(default=None, max_length=300)
@@ -124,6 +127,7 @@ class KnowledgeSearchResponse(APIModel):
 
 class CaseResponse(APIModel):
     case_id: str
+    source_incident_id: str | None = None
     category: IncidentCategory
     status: CaseStatus
     narrative: str
@@ -218,7 +222,9 @@ class AnalysisTraceEntry(APIModel):
     agent: str | None = None
     model: str | None = None
     status: str
+    detail: str | None = None
     retrieved_document_count: int | None = None
+    excluded_source_ids: list[str] | None = None
 
 
 class AnalysisReport(APIModel):
@@ -227,6 +233,7 @@ class AnalysisReport(APIModel):
     workflow: str
     model: str
     agent_outputs: AgentOutputs
+    generated_report: ReportAgentOutput | None = None
     trace: list[AnalysisTraceEntry]
     limitations: list[str]
 
