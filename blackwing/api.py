@@ -6,6 +6,7 @@ import hashlib
 import asyncio
 import logging
 import os
+from time import perf_counter
 from typing import Any, Awaitable, Callable
 from uuid import uuid4
 
@@ -26,12 +27,14 @@ from blackwing.schemas import (
     KnowledgeDocumentResponse,
     KnowledgeSearchRequest,
     KnowledgeSearchResponse,
+    OperationsMetricsResponse,
     ReportResponse,
     ReviewCreate,
     ReviewResponse,
     RunCreate,
     RunResponse,
     TraceResponse,
+    RunAuditResponse,
 )
 from blackwing.agents.base import AgentExecutionError
 from blackwing.service import analyze_incident
@@ -39,17 +42,33 @@ from blackwing.rag.retriever import retriever
 from blackwing.tools import retrieve_evidence, tool_audit
 from blackwing.diagnostics import lifecycle_event, safe_error
 from blackwing.incident_identity import resolve_incident_reference, declared_intake_metadata
+from blackwing.observability import start_run as start_external_trace, finish_run as finish_external_trace
 
 AnalysisRunner = Callable[..., Awaitable[dict[str, Any]]]
 logger = logging.getLogger("blackwing.runs")
 
 app = FastAPI(
     title="BlackWing AI API",
-    description="Versioned case, evidence, analysis, review, and trace API. Draft 1 supports runway incursions.",
+    description=(
+        "Versioned API for BlackWing runway-incursion investigations. Create cases and evidence, "
+        "start and inspect multi-agent runs, retrieve reports, record human review, and inspect "
+        "run-level trace, audit, and aggregate operations metrics. Hosted model and embedding "
+        "credentials are configured on the API server and are never accepted in request bodies."
+    ),
     version="1.0.0",
     openapi_url="/api/v1/openapi.json",
     docs_url="/api/v1/docs",
     redoc_url="/api/v1/redoc",
+    openapi_tags=[
+        {"name": "system", "description": "Health checks and supported API/workflow capabilities."},
+        {"name": "cases", "description": "Create and inspect incident cases and attach case evidence."},
+        {"name": "analysis", "description": "Start, resume, inspect, and trace multi-agent investigation runs."},
+        {"name": "reports", "description": "Read and export published reports; evaluator-only comparisons are post-generation."},
+        {"name": "evaluation", "description": "Aggregate run telemetry and evaluation status. Accuracy is reported only when judged."},
+        {"name": "review", "description": "Record human review decisions and finding overrides."},
+        {"name": "knowledge", "description": "Manage knowledge documents and search the configured RAG index."},
+        {"name": "final report evaluation", "description": "Compare published report sections with an evaluator-only gold PDF; gold material is excluded from generation and RAG."},
+    ],
 )
 
 
@@ -104,15 +123,45 @@ async def _execute_run(
     repo: MemoryRepository,
     runner: AnalysisRunner,
     use_agent_retrieval: bool = True,
+    resume: bool = False,
 ) -> None:
     """Contain background failures; cooperative server shutdown still propagates."""
+    started = perf_counter()
+    trace = start_external_trace(settings, run_id=run_id, case_id=case.get("case_id", ""))
+    status = "failed"
+    failure_type = None
     try:
-        await _execute_run_body(run_id, case, retrieved, settings, repo, runner, use_agent_retrieval)
+        await _execute_run_body(run_id, case, retrieved, settings, repo, runner, use_agent_retrieval, resume)
+        saved = repo.get_run(run_id) or {}
+        status = saved.get("status", "completed")
+        failure_type = saved.get("error_code")
     except asyncio.CancelledError as exc:
+        failure_type = type(exc).__name__
         _record_run_failure(run_id, case, repo, exc, interrupted=True)
         raise
     except (Exception, SystemExit) as exc:
+        failure_type = type(exc).__name__
         _record_run_failure(run_id, case, repo, exc)
+    finally:
+        saved = repo.get_run(run_id) or {}
+        audit = saved.get("audit_events", [])
+        tool_calls = sum(1 for event in audit if event.get("tool"))
+        prompt_tokens = sum(int(event.get("prompt_tokens") or 0) for event in audit)
+        completion_tokens = sum(int(event.get("completion_tokens") or 0) for event in audit)
+        cost = ((prompt_tokens * settings.prompt_cost_per_million +
+                 completion_tokens * settings.completion_cost_per_million) / 1_000_000
+                if settings.prompt_cost_per_million is not None and
+                   settings.completion_cost_per_million is not None else None)
+        try:
+            repo.patch_run(run_id, {"operations_metrics": {
+                "latency_ms": round((perf_counter() - started) * 1000, 1),
+                "tool_calls": tool_calls, "prompt_tokens": prompt_tokens,
+                "completion_tokens": completion_tokens, "estimated_cost_usd": cost,
+            }})
+        except Exception:
+            logger.warning("Could not persist operations metrics; run=%s", run_id)
+        finish_external_trace(trace, status=status, elapsed_ms=(perf_counter() - started) * 1000,
+                              tool_calls=tool_calls, failure_type=failure_type)
 
 
 def _record_run_failure(run_id, case, repo, exc, *, interrupted=False):
@@ -143,6 +192,7 @@ async def _execute_run_body(
     repo: MemoryRepository,
     runner: AnalysisRunner,
     use_agent_retrieval: bool = True,
+    resume: bool = False,
 ) -> None:
     case = {**case, "source_incident_id": resolve_incident_reference(case["narrative"], case.get("source_incident_id"))}
     repo.patch_run(run_id, {"status": "running", "started_at": datetime.now(timezone.utc)})
@@ -168,6 +218,9 @@ async def _execute_run_body(
         record_event({"step": "state_update", "status": "complete", "detail": state.get("trace", [])[-1:]})
     record_event(lifecycle_event("workflow_execution", "execution_started", case_id=case["case_id"],
         detail="Retrieval incident reference: " + str(case.get("source_incident_id") or "unspecified")))
+    saved_resume = (repo.get_run(run_id) or {}).get("resume_payload") if resume else None
+    if saved_resume:
+        retrieved = saved_resume.get("retrieved", [])
     if retrieved is None:
         record_event(lifecycle_event("evidence_retrieval", "retrieval_started", case_id=case["case_id"],
                                     detail="Searching the existing evidence index"))
@@ -189,12 +242,13 @@ async def _execute_run_body(
             retrieved = []
             status = "retrieval_failed"
         repo.patch_run(run_id, {"preflight_trace": [e for e in invocation_events if e.get("tool")]})
-        record_event(lifecycle_event("evidence_retrieval", status, case_id=case["case_id"]))
+        record_event(lifecycle_event("evidence_retrieval", status, case_id=case["case_id"],
+                                     retrieved_document_count=len(retrieved)))
     from blackwing.rag.agent_router import _case_uploads
     uploads = _case_uploads(case.get("evidence", []), case.get("source_incident_id") or case["case_id"])
     evidence = [*uploads, *retrieved]
-    agent_evidence = None
-    if use_agent_retrieval and os.getenv("BLACKWING_AGENT_RAG", "0") == "1":
+    agent_evidence = saved_resume.get("agent_evidence") if saved_resume else None
+    if not resume and use_agent_retrieval and os.getenv("BLACKWING_AGENT_RAG", "0") == "1":
         # Keep integration outside agent packages and UI. No LLM calls here.
         from blackwing.rag.agent_router import build_agent_packets
         record_event(lifecycle_event("evidence_retrieval", "retrieval_started", case_id=case["case_id"],
@@ -219,6 +273,9 @@ async def _execute_run_body(
             uploads = _case_uploads(case.get("evidence", []), case.get("source_incident_id") or case["case_id"])
             agent_evidence = {role: ([] if role == "similar_case" else uploads) for role in AGENT_ROLES}
     record_event(lifecycle_event("workflow_execution", "invoking_workflow", case_id=case["case_id"]))
+    if not resume:
+        repo.patch_run(run_id, {"resume_payload": {"retrieved": retrieved or [],
+            "agent_evidence": agent_evidence, "checkpoint_thread_id": run_id}})
     result = await runner(
         case["narrative"],
         settings,
@@ -228,7 +285,8 @@ async def _execute_run_body(
         retrieval_count=len(retrieved),
         jurisdiction=case.get("jurisdiction"),
         incident_date=str(case.get("incident_date")) if case.get("incident_date") else None,
-        **({"on_update": checkpoint, "on_tool_event": record_event, "on_execution_event": record_event} if runner is analyze_incident else {}),
+        **({"on_update": checkpoint, "on_tool_event": record_event, "on_execution_event": record_event,
+            "checkpoint_thread_id": run_id, "resume_from_checkpoint": resume} if runner is analyze_incident else {}),
         **({"agent_evidence": agent_evidence} if agent_evidence is not None else {}),
     )
     existing_trace = result.get("trace", [])
@@ -282,6 +340,60 @@ async def capabilities() -> dict[str, Any]:
             "risk_matrix_scoring": True,
             "human_review_recording": True,
         },
+    }
+
+
+@app.get("/api/v1/metrics/operations", response_model=OperationsMetricsResponse, tags=["evaluation"],
+         summary="Get aggregate operations metrics",
+         description="Returns task completion, latency, tool-call, token, estimated-cost, and failure-taxonomy metrics across saved investigation runs. End-to-end accuracy is null unless a completed evaluation supplied a score. Estimated costs require both configured token rates.")
+async def operations_metrics(repo: MemoryRepository = Depends(get_repository),
+                             settings: Settings = Depends(get_settings)) -> dict[str, Any]:
+    """Aggregate durable run telemetry; accuracy is reported only when judged."""
+    runs = [run for case in repo.list_cases(status=None, limit=100000, offset=0)[0]
+            for run in repo.list_case_runs(case["case_id"])]
+    total = len(runs)
+    completed = sum(run.get("status") == "completed" for run in runs)
+    failed = [run for run in runs if run.get("status") == "failed"]
+    metrics = [run.get("operations_metrics", {}) for run in runs if run.get("operations_metrics")]
+    valid_latency = [m["latency_ms"] for m in metrics if isinstance(m.get("latency_ms"), (int, float))]
+    tool_counts = [m.get("tool_calls", 0) for m in metrics]
+    prompt_tokens = sum(m.get("prompt_tokens", 0) for m in metrics)
+    completion_tokens = sum(m.get("completion_tokens", 0) for m in metrics)
+    cost_values = [m["estimated_cost_usd"] for m in metrics if isinstance(m.get("estimated_cost_usd"), (int, float))]
+    judged_scores = [run.get("question_evaluation", {}).get("score") for run in runs
+                     if run.get("question_evaluation", {}).get("status") == "completed"
+                     and isinstance(run.get("question_evaluation", {}).get("score"), (int, float))]
+    taxonomy = {"retrieval_miss": 0, "tool_call_error": 0, "reasoning_error": 0,
+                "hallucination": None, "other": 0}
+    for run in failed:
+        events = run.get("audit_events", [])
+        if any(e.get("step") == "evidence_retrieval" and (e.get("status") in {"retrieval_failed", "retrieval_no_matches"}
+               or (e.get("status") == "retrieval_completed" and e.get("retrieved_document_count") == 0)) for e in events):
+            taxonomy["retrieval_miss"] += 1
+        elif any(e.get("tool") and e.get("error") for e in events):
+            taxonomy["tool_call_error"] += 1
+        elif run.get("error_code") in {"invalid_agent_output", "agent_processing_error", "context_budget_exceeded"}:
+            taxonomy["reasoning_error"] += 1
+        else:
+            taxonomy["other"] += 1
+    # Hallucination requires an explicit groundedness judgment; do not infer it
+    # from a failed run.
+    return {
+        "run_count": total,
+        "task_completion_rate": completed / total if total else None,
+        "end_to_end_accuracy": sum(judged_scores) / len(judged_scores) if judged_scores else None,
+        "end_to_end_accuracy_basis": "Mean saved gold-question report score (0-100); not the Week 1 benchmark." if judged_scores else "No completed gold-question evaluation is saved.",
+        "average_tool_calls_per_run": sum(tool_counts) / len(tool_counts) if tool_counts else None,
+        "average_tool_calls_per_task": sum(tool_counts) / len(tool_counts) if tool_counts else None,
+        "average_latency_ms": sum(valid_latency) / len(valid_latency) if valid_latency else None,
+        "average_latency_ms_per_query": sum(valid_latency) / len(valid_latency) if valid_latency else None,
+        "prompt_tokens": prompt_tokens, "completion_tokens": completion_tokens,
+        "estimated_cost_usd": sum(cost_values) if cost_values else None,
+        "average_cost_usd_per_query": sum(cost_values) / len(cost_values) if cost_values else None,
+        "cost_note": "Estimated only when both per-million token rates are configured.",
+        "failure_taxonomy": taxonomy,
+        "hallucination_note": "Requires claim-level evidence evaluation; never inferred from status alone.",
+        "cost_rates_configured": settings.prompt_cost_per_million is not None and settings.completion_cost_per_million is not None,
     }
 
 
@@ -387,13 +499,37 @@ async def get_run(run_id: str, repo: MemoryRepository = Depends(get_repository))
     return _run_response(run)
 
 
+@app.post("/api/v1/runs/{run_id}/resume", response_model=RunResponse, status_code=status.HTTP_202_ACCEPTED, tags=["analysis"])
+async def resume_analysis_run(run_id: str, background: BackgroundTasks,
+                              repo: MemoryRepository = Depends(get_repository),
+                              settings: Settings = Depends(get_settings),
+                              runner: AnalysisRunner = Depends(get_analysis_runner)) -> RunResponse:
+    run = repo.get_run(run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    if run.get("status") != "failed" or run.get("error_code") != "interrupted" or not run.get("resume_payload"):
+        raise HTTPException(status_code=409, detail="This run has no resumable checkpoint. Start a new analysis run.")
+    case = _case_or_404(repo, run["case_id"])
+    if case.get("status") == "analysis_running":
+        raise HTTPException(status_code=409, detail="Another analysis run is active for this case")
+    repo.patch_run(run_id, {"status": "queued", "error_code": None, "error": None,
+                            "started_at": datetime.now(timezone.utc), "completed_at": None,
+                            "resumable": False})
+    repo.update_case(case["case_id"], {"status": "analysis_running"})
+    background.add_task(_execute_run, run_id, case, None, settings, repo, runner, True, True)
+    return _run_response(repo.get_run(run_id))
+
+
 @app.get("/api/v1/cases/{case_id}/runs", response_model=list[RunResponse], tags=["analysis"])
 async def list_case_runs(case_id: str, repo: MemoryRepository = Depends(get_repository)) -> list[RunResponse]:
     _case_or_404(repo, case_id)
     return [_run_response(run) for run in repo.list_case_runs(case_id)]
 
 
-@app.get("/api/v1/runs/{run_id}/trace", response_model=TraceResponse, tags=["analysis"])
+@app.get("/api/v1/runs/{run_id}/trace", response_model=TraceResponse, tags=["analysis"],
+         summary="Get a chronological run trace",
+         description="Returns ordered workflow, retrieval, agent, model-request, and tool lifecycle events for one run. This view omits per-request token counters; use the audit endpoint for detailed persisted telemetry.",
+         responses={404: {"description": "Run not found"}})
 async def get_trace(run_id: str, repo: MemoryRepository = Depends(get_repository)) -> TraceResponse:
     run = repo.get_run(run_id)
     if run is None:
@@ -404,6 +540,10 @@ async def get_trace(run_id: str, repo: MemoryRepository = Depends(get_repository
     for event in run.get("audit_events", []):
         if event.get("event_id") and event["event_id"] not in known_events or event.get("tool") and event.get("invocation_id") not in known_tools:
             copy = dict(event)
+            # Token usage belongs to the private operations metrics/audit store,
+            # not the strict public trace response schema.
+            copy.pop("prompt_tokens", None)
+            copy.pop("completion_tokens", None)
             if copy.get("detail") is not None and not isinstance(copy["detail"], str):
                 copy["detail"] = json.dumps(copy["detail"], ensure_ascii=False)
             events.append(copy)
@@ -431,12 +571,20 @@ async def get_report(case_id: str, repo: MemoryRepository = Depends(get_reposito
             detail = "Report unavailable: no investigation has completed for this case."
         raise HTTPException(status_code=409, detail=detail)
     latest = max(completed, key=lambda run: run["created_at"])
+    report_result = dict(latest["result"])
+    if isinstance(report_result.get("trace"), list):
+        report_result["trace"] = [
+            {key: value for key, value in event.items()
+             if key not in {"prompt_tokens", "completion_tokens"}}
+            if isinstance(event, dict) else event
+            for event in report_result["trace"]
+        ]
     return ReportResponse.model_validate({
         "case_id": case_id,
         "run_id": latest["run_id"],
         "case_status": case["status"],
         "analysis_status": latest["status"],
-        "report": latest["result"],
+        "report": report_result,
         "reviews": repo.list_reviews(case_id),
         "is_final": False,
         "notice": "AI output is preliminary until a qualified human reviewer records a decision.",
@@ -546,15 +694,23 @@ async def search_knowledge(
     repo: MemoryRepository = Depends(get_repository),
     settings: Settings = Depends(get_settings),
 ) -> KnowledgeSearchResponse:
-    search_result = retriever.search(
+    from blackwing.response_cache import knowledge_search_cache
+    documents = repo.list_documents()
+    cache_key = knowledge_search_cache.key(request.model_dump(mode="json"), documents,
+                                          str(retriever.index_dir) if retriever.index_dir else None,
+                                          settings.rag_embedding_model)
+    search_result = knowledge_search_cache.get(cache_key, settings.knowledge_cache_ttl_seconds)
+    if search_result is None:
+        search_result = retriever.search(
         request.query,
-        repo.list_documents(),
+        documents,
         embedding_model=settings.rag_embedding_model,
         document_types=request.document_types,
         jurisdiction=request.jurisdiction,
         incident_date=request.incident_date.isoformat() if request.incident_date else None,
         limit=request.limit,
-    )
+        )
+        knowledge_search_cache.set(cache_key, search_result, settings.knowledge_cache_ttl_seconds)
     return KnowledgeSearchResponse(
         results=search_result["results"],
         retrieval_method=search_result["retrieval_method"],
@@ -562,14 +718,21 @@ async def search_knowledge(
     )
 
 
-@app.get("/api/v1/runs/{run_id}/audit", tags=["analysis"])
+@app.get("/api/v1/runs/{run_id}/audit", response_model=RunAuditResponse, tags=["analysis"],
+         summary="Get run audit and operations details",
+         description="Returns persisted run events, workflow plan, partial outputs, execution state, lifecycle timestamps, and aggregate token/tool/latency/cost metrics. Event details may include case evidence or agent work products; do not publish this response to untrusted clients.",
+         responses={404: {"description": "Run not found"}})
 async def get_run_audit(run_id: str, repo: MemoryRepository = Depends(get_repository)) -> dict[str, Any]:
     run = repo.get_run(run_id)
     if run is None:
         raise HTTPException(status_code=404, detail="Run not found")
     return {"run_id": run_id, "events": run.get("audit_events", []), "plan": run.get("plan"),
             "partial_outputs": run.get("partial_outputs", {}), "execution_steps": run.get("execution_steps", 0),
-            "execution_state": run.get("execution_state"), "resumable": False, "recovery": "Create a new run after interruption; prior run history is retained."}
+            "execution_state": run.get("execution_state"), "operations_metrics": run.get("operations_metrics", {}),
+            "status": run.get("status"), "workflow": run.get("workflow"), "model": run.get("model"),
+            "created_at": run.get("created_at"), "started_at": run.get("started_at"),
+            "completed_at": run.get("completed_at"), "resumable": False,
+            "recovery": "Create a new run after interruption; prior run history is retained."}
 
 
 # Evaluation-only routes: gold never enters case evidence or generation.
@@ -676,3 +839,6 @@ app.include_router(build_qa_router(get_repository, get_settings))
 
 from blackwing.evaluation_routes import build_router as build_evaluation_router
 app.include_router(build_evaluation_router(get_repository, get_settings))
+
+from blackwing.final_report_evaluation_routes import build_router as build_final_report_evaluation_router
+app.include_router(build_final_report_evaluation_router(get_repository, get_settings))

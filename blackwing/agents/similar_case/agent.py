@@ -26,7 +26,15 @@ def _features(s: str) -> set[str]:
 def build_output(narrative: str, evidence: Sequence[Mapping[str, Any]], *,
                  current_incident_id: str | None = None) -> dict[str, Any]:
     reports: dict[str, Mapping[str, Any]] = {}
+    exact_records: list[Mapping[str, Any]] = []
     for item in evidence:
+        # Exact case identity is a metadata match against an independently
+        # identified current-case source. Keep it separate from analogies.
+        if (current_incident_id
+                and str(item.get("incident_id") or "").casefold() == current_incident_id.casefold()
+                and str(item.get("source_type") or "").casefold() in {"official_factual", "official_preliminary"}
+                and str(item.get("evidence_role") or "").casefold() in {"case_factual", "direct", "current_case"}):
+            exact_records.append(item)
         dtype = str(item.get("document_type") or "").casefold()
         if dtype not in {"incident_report", "voluntary_incident_report"}:
             continue
@@ -77,7 +85,10 @@ def build_output(narrative: str, evidence: Sequence[Mapping[str, Any]], *,
             differences_or_unknowns=[str(x) for x in notes][:8],
             source_findings=[str(x) for x in (item.get("historical_findings") or [])][:5],
         ))
-    if matches:
+    if exact_records:
+        status = "existing_case_match"
+        assessment = "An incident identifier matches an independently identified current-case source."
+    elif matches:
         status = "unseen_case_with_similar_historical_cases"
         assessment = f"{len(matches)} retrieved historical source(s); each analogy is a candidate only."
     else:
@@ -85,7 +96,8 @@ def build_output(narrative: str, evidence: Sequence[Mapping[str, Any]], *,
         assessment = "No historical analogy with at least two shared case-content terms was established from supplied excerpts."
     return SimilarCaseOutput(
         case_status=status, matches=matches, assessment=assessment,
-        factors_to_verify=["Check which operational conditions genuinely match before transferring any lessons."] if matches else [],
+        factors_to_verify=["Verify that the matched source covers this incident, not a related occurrence."] if exact_records else
+            (["Check which operational conditions genuinely match before transferring any lessons."] if matches else []),
         limitations=[
             "A retrieved historical case does not establish the cause or contributing factors of this event.",
             "Source authenticity, dates and comparisons require a human investigator.",

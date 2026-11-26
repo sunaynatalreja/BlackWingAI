@@ -150,4 +150,5 @@ def model_request(*, attempt):
         error = ({"code": "model_http_error", "type": "HTTPStatusError", "http_status": status,
                   "message": MESSAGES["model_http_error"]} if not 200 <= status < 300 else None)
         emit("model_request_failed" if error else "model_response_received", request_id=request_id, attempt=attempt,
-             duration_ms=round((perf_counter() - started) * 1000, 3), error=error)
+             duration_ms=round((perf_counter() - started) * 1000, 3), error=error,
+             prompt_tokens=result.get("prompt_tokens"), completion_tokens=result.get("completion_tokens"))

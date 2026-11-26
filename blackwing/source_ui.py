@@ -1,8 +1,7 @@
 """Sunayana's original investigation form; shared backend, investigation and Q&A tabs."""
 from blackwing import copilot
 from blackwing.copilot_state import execution_label, report_availability, risk_display
-from blackwing.copilot_ui import quality_panel, show_evidence, show_gold_comparison
-from blackwing.report_quality import assess_quality
+from blackwing.copilot_ui import quality_panel, report_completeness_panel, show_evidence, show_gold_comparison, show_final_report_evaluation_trace, show_final_report_gold_action
 import httpx
 import streamlit as st
 
@@ -26,20 +25,24 @@ def render_case(case, render_report):
             st.warning('Displaying the earlier completed report; the latest run has no completed report.')
     report_tab,agents_tab,trace_tab=st.tabs(['Investigation report','Agent details','Run trace'])
     with report_tab:
-        scored=report or partial
-        if scored:
-            quality=assess_quality(incident,scored)
-            st.metric('Report Completeness',f"{quality['score']}%")
-            st.caption('Structural documentation completeness; separate from aviation risk and gold comparison. Detailed checks are in Run trace.')
-            if not report:
-                st.caption('Provisional percentage from saved validated agent outputs. This is not a completed report or a factual-accuracy score.')
-        else:
-            st.metric('Report Completeness','Pending')
-        if not report:
+        if latest and latest['status'] in {'queued','running'}:
+            loader=st.status('Generating the complete investigation report…',state='running',expanded=True)
+            loader.write(execution_label(latest.get('progress')) or
+                         'The report will appear here when all required sections are ready.')
+            if report and case.get('report_run_id') != latest['run_id']:
+                st.info('A previous completed report is available below while this run finishes.')
+                with st.expander('Previous completed report',expanded=False):
+                    reference=(report.get('agent_outputs',{}).get('similar_case',{}).get('case_status')=='existing_case_match')
+                    if report.get('generated_report'):
+                        render_report(report['generated_report'],report,incident['case_id'],case['report_run_id'],reference_case=reference)
+                    else:
+                        from blackwing.reporting import render_markdown_report
+                        st.markdown(render_markdown_report(case['envelope']))
+            else:
+                st.info('No partial report is shown. The completed report will appear automatically.')
+        elif not report:
             availability=case.get('report_availability') or report_availability(case['runs'],None)
             pending='Pending' if availability['state'] in {'running','not_started'} else 'Unavailable'
-            st.metric('Gold comparison score',pending)
-            st.caption('LaaJ (LLM-as-a-Judge) / gold evaluation runs after the report completes.')
             risk=(partial or {}).get('agent_outputs',{}).get('risk')
             if risk:
                 rows=risk_display(partial)['rows']
@@ -52,7 +55,12 @@ def render_case(case, render_report):
             elif availability['state']!='running':
                 st.info(availability['message'])
         else:
-            reference=show_gold_comparison(case)
+            report_completeness_panel(incident,report)
+            gold_match=show_gold_comparison(case)
+            if not gold_match:
+                show_final_report_gold_action(case)
+            show_final_report_evaluation_trace(case)
+            reference=(report.get('agent_outputs',{}).get('similar_case',{}).get('case_status')=='existing_case_match')
             if report.get('generated_report'):
                 render_report(report['generated_report'],report,incident['case_id'],case['report_run_id'],reference_case=reference)
             else:
@@ -68,26 +76,13 @@ def render_case(case, render_report):
         if report:
             with st.expander('Evidence checklist and human review'):
                 show_evidence(case,include_quality=False)
-            from blackwing.copilot_report import render_report_pdf
-            compiled=copilot.generate_report(case)
-            if compiled['accepted_count']:
-                st.download_button('Download reviewed preliminary PDF',render_report_pdf(compiled),
-                    file_name='BLACKWING-preliminary.pdf',mime='application/pdf',key='export-pdf')
     with trace_tab:
-        if partial:
-            st.caption('Latest-run completeness below is provisional and covers only the saved validated outputs.')
-        quality_panel(incident,partial or report)
-        if latest and st.button('Load trace and audit',key='load-trace'):
-            st.session_state['loaded-run-trace']={'run_id':latest['run_id'],
-                'trace':copilot.get_trace(latest['run_id']),'audit':copilot.get_audit(latest['run_id'])}
-        snapshot=st.session_state.get('loaded-run-trace')
-        if latest and snapshot and snapshot['run_id']==latest['run_id']:
-            st.caption('Loaded trace snapshot; use the button to refresh it.')
-            st.json(snapshot['trace'])
-            st.json(snapshot['audit'])
-        with st.expander('Limitations and review boundary',expanded=True):
-            st.write((report or {}).get('limitations',[]))
-            st.info((case.get('envelope') or {}).get('notice','Human review required.'))
+        st.markdown('### Run trace')
+        if latest:
+            from blackwing.evaluation_ui import show_run_trace
+            show_run_trace(latest, report or partial)
+        else:
+            st.info('Run an investigation to see its workflow timeline and telemetry.')
 
 
 def _render_live_case(case_id, render_report):

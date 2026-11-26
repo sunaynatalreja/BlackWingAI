@@ -104,7 +104,10 @@ def _render_report(generated: dict, report: dict, case_id: str, run_id: str, *, 
     if (agent_outputs.get("risk") or {}).get("numeric_score") is not None:
         st.warning("This saved report uses the retired numeric risk calculation. Its original result is retained for audit; start a new investigation run to obtain the current categorical reference assessment.")
     indices = list(dict.fromkeys(row["Risk index"] for row in display["rows"] if row["Risk index"] != "Unassessed"))
-    left.metric("Case match", "Seen" if reference_case is True else "No reference match" if reference_case is False else "Unknown")
+    case_status = (similar or {}).get("case_status")
+    is_seen = case_status == "existing_case_match" or reference_case is True
+    is_unseen = case_status in {"unseen_case_with_similar_historical_cases", "unseen_case_no_historical_match"} or reference_case is False
+    left.metric("Case match", "Seen" if is_seen else "Unseen" if is_unseen else "Unknown")
     middle.metric("Aviation risk", " · ".join(indices) if indices else "Unassessed")
     right.metric("Review", "Required" if generated.get("human_approval_required", True) else "Pending")
     review.metric(
@@ -112,16 +115,17 @@ def _render_report(generated: dict, report: dict, case_id: str, run_id: str, *, 
         "Needs verification" if (agent_outputs.get("verification") or {}).get("completeness_status") == "incomplete" else "Human verification required",
     )
 
-    st.caption("Case match identifies a preserved reference case, not model training exposure. Historical analogies are displayed separately.")
     st.caption(display["framework"])
-    st.caption(display["notice"])
+    with st.expander("Risk assessment note"):
+        st.caption(display["notice"])
     if display["rows"]:
         st.dataframe([{key:row[key] for key in ("Hazard","Severity","Likelihood","Risk index","Classification","Status")}
                       for row in display["rows"]], hide_index=True, alt="Backend hazard severity, likelihood and categorical risk indexes")
     if not indices:
-        st.info("This saved backend assessment has no evidence-backed severity and likelihood pair, so no A1/C3-style risk index was assigned. The UI does not invent ratings.")
-    for missing in display["missing_inputs"]:
-        st.caption("Risk assessment gap: " + str(missing))
+        st.info("Risk not scored: the report does not contain supported severity and likelihood inputs for the backend matrix.")
+    if display["missing_inputs"]:
+        with st.expander("Risk assessment gaps"):
+            st.write(display["missing_inputs"])
 
     fallback_sections = [s for s in generated.get("sections", []) if s.get("generation_method") == "deterministic_fallback"]
     if fallback_sections:

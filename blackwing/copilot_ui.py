@@ -5,7 +5,6 @@ import httpx
 import streamlit as st
 
 from blackwing import copilot
-from blackwing.copilot_report import render_report_pdf
 from blackwing.copilot_state import MAX_NARRATIVE_CHARS, case_name, risk_display, report_availability, execution_label
 from blackwing.report_quality import assess_quality, build_evidence_checklist
 
@@ -17,28 +16,41 @@ def open_case(case_id):
 
 
 def quality_panel(incident, report=None):
-    # Prompt Completeness measures supplied intake only. Report Completeness
-    # never imports that score; aviation risk remains in its existing own view.
-    prompt_panel, report_panel = st.columns(2)
-    for panel, quality in ((prompt_panel, assess_quality(incident)),
-                           (report_panel, assess_quality(incident, report) if report is not None else None)):
-        with panel:
-            if quality is None:
-                st.subheader("Report Completeness")
-                st.metric("Report Completeness", "Not available")
-                st.caption("A completed backend report is required; no report score has been assigned.")
-                continue
-            st.subheader(quality["label"])
-            st.metric(quality["label"], f"{quality['score']}%")
-            st.caption(quality["method"])
-            if quality["flags"]:
-                st.caption(f"Weighted total before the disclosed integrity cap: {quality['raw_score']}/100.")
-                for flag in quality["flags"]:
-                    st.warning(flag)
-            st.info(quality["notice"])
-            st.dataframe(quality["checks"], hide_index=True, alt=quality["label"] + " weights, earned points and missing-information actions")
-            if quality["missing_information"]:
-                st.write(quality["missing_information"])
+    # This panel is for intake completeness only. Report Completeness is shown
+    # once, in the Investigation report tab via report_completeness_panel.
+    quality = assess_quality(incident)
+    st.subheader(quality["label"])
+    st.metric(quality["label"], f"{quality['score']}%")
+    st.caption(quality["method"])
+    if quality["flags"]:
+        st.caption(f"Weighted total before the disclosed integrity cap: {quality['raw_score']}/100.")
+        for flag in quality["flags"]:
+            st.warning(flag)
+    st.info(quality["notice"])
+    st.dataframe(quality["checks"], hide_index=True,
+                 alt=quality["label"] + " weights, earned points and missing-information actions")
+    if quality["missing_information"]:
+        st.write(quality["missing_information"])
+
+
+def report_completeness_panel(incident, report):
+    """Show the report's structural score in its report view; keep checks compact."""
+    quality = assess_quality(incident, report)
+    if quality is None:
+        st.metric("Report Completeness", "Not available")
+        return
+    st.metric("Report Completeness", f"{quality['score']}%")
+    if quality["flags"]:
+        for flag in quality["flags"]:
+            st.warning(flag)
+    with st.expander("Report completeness checks"):
+        st.caption(quality["method"])
+        if quality["flags"]:
+            st.caption(f"Weighted total before the disclosed integrity cap: {quality['raw_score']}/100.")
+        st.dataframe(quality["checks"], hide_index=True,
+                     alt="Report completeness weights, earned points and missing-information actions")
+        if quality["missing_information"]:
+            st.write(quality["missing_information"])
 
 
 def register_case():
@@ -177,18 +189,12 @@ def show_report(case, render_report):
         else:
             st.info(availability["message"])
         return
-    reference_case = show_gold_comparison(case)
+    reference_case = (report.get("agent_outputs", {}).get("similar_case", {}).get("case_status") == "existing_case_match")
     if report.get("generated_report"):
         render_report(report["generated_report"], report, case["incident"]["case_id"], case["report_run_id"], reference_case=reference_case)
     else:
         from blackwing.reporting import render_markdown_report
         st.markdown(render_markdown_report(case["envelope"]))
-    compiled = copilot.generate_report(case)
-    if compiled["accepted_count"]:
-        st.download_button("Download reviewed preliminary PDF", render_report_pdf(compiled),
-                           file_name=f"BLACKWING-{case['incident']['case_id']}-preliminary.pdf", mime="application/pdf", key="export-pdf")
-    else:
-        st.info("Reviewed PDF export requires accepted findings with actual source excerpts. Backend JSON/Markdown exports remain available.")
     for format, label in (("json", "JSON"), ("md", "Markdown")):
         # Fetch exports only on explicit request, not whenever a hidden tab reruns.
         if st.button(f"Prepare {label} export", key=f"prepare-export-{format}"):
@@ -246,8 +252,26 @@ def workspace(case, render_report):
     roles = report.get("agent_outputs") or {}
     tabs = st.tabs(["Investigation report", "Agent details", "Run trace"])
     with tabs[0]:
-        quality_panel(incident, case["report"])
-        show_report(case, render_report)
+        latest_id = latest["run_id"] if latest else None
+        if running:
+            loader = st.status("Generating the complete investigation report…",
+                               state="running", expanded=True)
+            label = execution_label(latest.get("progress")) if latest else None
+            loader.write(label or "The report will appear here when all required sections are ready.")
+            if report and case.get("report_run_id") != latest_id:
+                st.info("A previous completed report is available below while this run finishes.")
+                with st.expander("Previous completed report", expanded=False):
+                    show_report(case, render_report)
+            else:
+                st.info("No partial report is shown. The completed report will appear here automatically.")
+        else:
+            if report:
+                report_completeness_panel(incident, report)
+                gold_match = show_gold_comparison(case)
+                if not gold_match:
+                    show_final_report_gold_action(case)
+                show_final_report_evaluation_trace(case)
+            show_report(case, render_report)
     with tabs[1]:
         st.subheader("Source agent work products")
         st.caption("Historical analogies cannot establish current-case findings.")
@@ -259,14 +283,15 @@ def workspace(case, render_report):
         show_evidence(case, include_quality=False)
         show_saved_qa(case)
     with tabs[2]:
+        st.subheader("Run trace")
         if case["runs"]:
-            selected = st.selectbox("Inspect a backend run", [r["run_id"] for r in reversed(case["runs"])], key="history-run")
-            if st.button("Load trace and audit", key="load-trace"):
-                st.json(copilot.get_trace(selected))
-                st.json(copilot.get_audit(selected))
+            runs_by_id = {row["run_id"]: row for row in case["runs"]}
+            selected = st.selectbox("Inspect a backend run", list(reversed(runs_by_id)), key="history-run")
+            from blackwing.evaluation_ui import show_run_trace
+            selected_report = report if selected == case.get("report_run_id") else None
+            show_run_trace(runs_by_id[selected], selected_report)
         else:
-            st.info("No backend runs yet.")
-        st.caption("Backend SQLite is the sole durable history. Browser state contains only selections and an unsaved search answer.")
+            st.info("No backend runs yet. Run an investigation to see its timeline and telemetry.")
 
 
 def main(*, brand, render_report, cloud=False):
@@ -327,8 +352,12 @@ def show_gold_comparison(case):
     if result is None:
         return None
     if result.get('legacy_fallback'):
-        st.caption('Approved question coverage is unavailable for this case. The existing comparison below uses its disclosed claim or safety-policy scope.')
         return _show_legacy_gold_comparison(case)
+    # The question-based evaluator has no score for fictional/unseen cases.
+    # Do not show its stale "not applicable" verdict beside the separate
+    # evaluator-only PDF section comparison, which is the report-level score.
+    if result.get('status') == 'not_applicable':
+        return False
     from blackwing.evaluation_ui import show_question_evaluation
     if result.get('status') not in {'queued', 'running'}:
         return show_question_evaluation(case, result)
@@ -348,6 +377,111 @@ def show_gold_comparison(case):
     return initial_reference
 
 
+def show_gold_comparison_trace(case):
+    """Expose saved comparison results under Run trace without duplicate controls."""
+    result = _read_question_comparison(case)
+    if result is None:
+        return
+    from blackwing.evaluation_ui import show_question_evaluation_trace
+    if result.get('legacy_fallback'):
+        try:
+            result = copilot.get_gold_comparison(case['incident']['case_id'], case['report_run_id'])
+        except httpx.HTTPError:
+            st.subheader('Gold comparison')
+            st.info('Gold comparison details are unavailable for this run.')
+            return
+    show_question_evaluation_trace(result)
+
+
+def show_final_report_gold_action(case):
+    """Keep a visible report-tab action for a gold PDF found in the configured directory."""
+    case_id, run_id = case['incident']['case_id'], case.get('report_run_id')
+    if not run_id:
+        return
+    try:
+        result = copilot.get_final_report_evaluation(case_id, run_id)
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 404:
+            st.info('Restart FastAPI to enable gold report evaluation for this saved run.')
+        else:
+            st.info('Gold report evaluation status is unavailable; see Run trace after restarting FastAPI.')
+        return
+    except httpx.HTTPError:
+        st.info('Gold report evaluation status is unavailable; check the API connection.')
+        return
+
+    status = result.get('status')
+    if status == 'not_requested':
+        st.subheader('Gold report comparison')
+        if result.get('reference_id'):
+            st.caption('Matched gold report · ' + str(result['reference_id']))
+        if st.button('Compare with gold report', key='start-gold-section-eval-' + run_id):
+            try:
+                copilot.start_final_report_evaluation(case_id, run_id)
+            except httpx.HTTPError:
+                st.error('Could not start the gold report comparison. Check Run trace and the API log.')
+            else:
+                st.rerun()
+    elif status in {'queued', 'running'}:
+        st.subheader('Gold report comparison')
+        st.info('Gold comparison is running. Section scores will appear in the Investigation report.')
+    elif status == 'completed':
+        st.subheader('Gold report comparison')
+        st.success('Gold comparison completed. Section scores are shown in the Investigation report.')
+    elif status in {'unavailable', 'not_assessable'}:
+        st.subheader('Gold report comparison')
+        st.info(result.get('reason') or 'No matching gold report is available for this case.')
+        # Keep the requested action visible. Clicking rechecks the API's live
+        # gold-directory state, which is useful after correcting its config.
+        if st.button('Compare with gold report', key='start-gold-section-eval-' + run_id):
+            try:
+                copilot.start_final_report_evaluation(case_id, run_id)
+            except httpx.HTTPStatusError as exc:
+                try:
+                    detail = exc.response.json().get('detail')
+                except ValueError:
+                    detail = None
+                st.error(str(detail or f'Gold comparison could not start (HTTP {exc.response.status_code}).'))
+            except httpx.HTTPError:
+                st.error('Could not reach the API to check the gold report directory.')
+            else:
+                st.rerun()
+
+
+def show_final_report_evaluation_trace(case):
+    """Render saved section metrics and poll while their explicit job runs."""
+    from blackwing.evaluation_ui import show_final_report_evaluation_trace as render_evaluation
+    case_id, run_id = case['incident']['case_id'], case.get('report_run_id')
+    if not run_id:
+        st.subheader('Final report evaluation')
+        st.info('A completed saved report is required before section evaluation.')
+        return
+
+    def read_status():
+        try:
+            return copilot.get_final_report_evaluation(case_id, run_id)
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 404:
+                return {'status': 'unavailable', 'reason': 'Restart FastAPI with the final-report evaluation routes enabled.'}
+            return {'status': 'unavailable', 'reason': 'Could not read the saved final-report evaluation status.'}
+        except httpx.HTTPError:
+            return {'status': 'unavailable', 'reason': 'The API is unavailable; saved report evaluation was not changed.'}
+
+    result = read_status()
+    if result.get('status') not in {'queued', 'running'}:
+        render_evaluation(case, result)
+        return
+
+    @st.fragment(run_every='3s')
+    def live_evaluation():
+        current = read_status()
+        if current.get('status') not in {'queued', 'running'}:
+            st.rerun()
+        render_evaluation(case, current)
+
+    live_evaluation()
+
+
 def _read_question_comparison(case):
     try:
         return copilot.get_report_evaluation(case['incident']['case_id'], case['report_run_id'])
@@ -364,15 +498,17 @@ def _read_question_comparison(case):
 
 
 def _show_legacy_gold_comparison(case):
-    st.subheader('Gold comparison score')
-    st.caption('LaaJ (LLM-as-a-Judge) / gold evaluation. Separate from structural completeness and aviation risk. Human review required.')
     try:
         result = copilot.get_gold_comparison(case['incident']['case_id'], case['report_run_id'])
     except httpx.HTTPStatusError as exc:
         if exc.response.status_code == 404:
             st.info('Restart FastAPI with the updated code to enable gold comparison.')
-            return
+            return False
         raise
+    if result.get('status') == 'not_applicable':
+        return False
+    st.subheader('Gold comparison')
+    st.caption('LLM judge against an approved reference, when available. Human review required.')
     reference_case = result.get('reference_case', bool(result.get('gold_id')))
     policy_mode = result.get('comparison_mode') == 'synthetic_safety_policy'
     if result.get('scope_notice'):
@@ -382,7 +518,7 @@ def _show_legacy_gold_comparison(case):
     if result['status'] in {'not_applicable','unavailable'}:
         st.metric('Gold comparison score', 'Not applicable' if result['status'] == 'not_applicable' else 'Unavailable')
         st.info(result['reason'])
-        return reference_case
+        return False
     st.caption('Matching reference: '+result.get('gold_case','')+' · '+result.get('gold_id',''))
     if result['status'] in {'not_requested','evaluation_incomplete'}:
         st.metric('Gold comparison score', 'Not assessed')
@@ -433,4 +569,6 @@ def _show_legacy_gold_comparison(case):
         file_name='BLACKWING-gold-comparison-'+case['report_run_id']+'.json',mime='application/json',
         key='download-gold-'+case['report_run_id'])
 
-    return reference_case
+    return bool(reference_case and result.get('status') in {
+        'not_requested', 'evaluation_incomplete', 'running', 'completed'
+    })

@@ -103,6 +103,16 @@ def test_prompt_alone_and_numeric_legacy_ratings_cannot_produce_index():
         normalize_model_payload({'hazards':[{'hazard_id':'H1','description':'Legacy', 'severity':3, 'likelihood':3}]})
 
 
+def test_risk_model_scalar_list_fields_are_repaired():
+    out = normalize_model_payload({'hazards':[{'hazard_id':'H1','description':'Potential hazard',
+        'evidence_ids':'PASSAGE-1','existing_controls':'None documented','control_gaps':None,
+        'severity':None,'likelihood':None,'severity_basis':'','likelihood_basis':''}],
+        'numeric_score':None})
+    assert out['hazards'][0]['evidence_ids']==['PASSAGE-1']
+    assert out['hazards'][0]['existing_controls']==['None documented']
+    assert out['hazards'][0]['control_gaps']==[]
+
+
 def test_report_assembly_preserves_timeline_time_and_categorical_risk():
     prior = {'investigation':{'timeline_events':[{'event':'Controller issued a clearance.',
         'time_reference':'1610:21', 'evidence_ids':['FACT:1'], 'evidence_state':'documented_fact'}]},

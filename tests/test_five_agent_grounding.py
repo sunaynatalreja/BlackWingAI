@@ -69,7 +69,7 @@ def test_original_legacy_historical_test_behavior():
 def test_similar_case_deduplicates_and_excludes_current():
     record = dict(HISTORY, historical_findings=["Historical report's own finding"],
                   comparison_notes=["Weather comparison unknown"], incident_date="2022-02-03")
-    current = dict(CURRENT, document_type="incident_report", title="Current runway event")
+    current = dict(CURRENT, incident_id="OTHER-CASE", document_type="incident_report", title="Current runway event")
     out = build_output("Runway taxi clearance conflict", [record, dict(record), current],
                        current_incident_id="DCA23FA149")
     assert len(out["matches"]) == 1
@@ -82,6 +82,26 @@ def test_similar_no_match_does_not_invent():
     out = build_output("Runway conflict", [], current_incident_id="DCA23FA149")
     assert not out["matches"]
     assert out["case_status"] == "unseen_case_no_historical_match"
+
+
+def test_user_uploaded_source_identifier_does_not_make_case_seen():
+    supplied = {"source_id":"SFO-ATC", "evidence_id":"SFO17-SUMMARY",
+                "incident_id":"DCA17IA148", "source_type":"user_submitted",
+                "evidence_role":"reported", "document_type":"incident_report",
+                "excerpt":"Air Canada 759 overflew airplanes on taxiway C."}
+    out = build_output("DCA17IA148 SFO runway overflight", [supplied],
+                       current_incident_id="DCA17IA148")
+    assert out["case_status"] != "existing_case_match"
+
+
+def test_unique_uploaded_source_id_is_available_as_passage_citation():
+    from blackwing.rag.agent_router import _case_uploads
+    rows=[{'evidence_id':'uuid-1','source_id':'SFO17-SUMMARY','excerpt':'Summary excerpt.'}]
+    uploaded=_case_uploads(rows,'CASE')
+    assert uploaded[0]['chunk_id']=='SFO17-SUMMARY'
+    assert uploaded[0]['evidence_id']=='uuid-1'
+    duplicate=_case_uploads(rows+[{'evidence_id':'uuid-2','source_id':'SFO17-SUMMARY','excerpt':'Another excerpt.'}],'CASE')
+    assert all('chunk_id' not in row for row in duplicate)
 
 
 def test_mitigation_links_only_actual_hazard_and_marks_unverified():

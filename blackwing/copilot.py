@@ -189,6 +189,14 @@ def start_report_evaluation(case_id, run_id):
     return request('POST', f'/api/v1/cases/{case_id}/runs/{run_id}/report-evaluation')
 
 
+def get_final_report_evaluation(case_id, run_id):
+    return request('GET', f'/api/v1/cases/{case_id}/runs/{run_id}/final-report-evaluation')
+
+
+def start_final_report_evaluation(case_id, run_id):
+    return request('POST', f'/api/v1/cases/{case_id}/runs/{run_id}/final-report-evaluation')
+
+
 def compare_with_gold(case_id, run_id):
     # Explicit user action only; credentials and evaluation live in FastAPI.
     with client() as connection:

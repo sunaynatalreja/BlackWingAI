@@ -16,7 +16,7 @@ def sample_report(*, with_citations=True):
         "generated_report": {
             "executive_summary": "Narrative summary",
             "sections": [
-                {"key_points": [{"text": "Runway entry is documented", "classification": "documented_fact", "source_ids": ["BW-1"]}]},
+                {"key_points": [{"text": "Runway entry is documented", "classification": "documented_fact", "source_ids": ["BW-1"] if with_citations else []}]},
                 {"key_points": []},
                 {"key_points": []},
                 {"key_points": []},
@@ -55,7 +55,10 @@ def test_safe_unknowns_not_confused_with_cited_facts():
     r = sample_report()
     r["agent_outputs"]["investigation"]["documented_facts"] = []
     result = assess_quality({}, r)
-    assert result["score"] < 70
+    # The published report itself contains a cited fact, so structural report
+    # completeness must not depend on an upstream agent's internal claim list.
+    assert result["score"] >= 70
+    assert next(c for c in result["checks"] if c["check"] == "Current-case evidence represented")["earned"] == 12
     assert next(c for c in result["checks"] if c["check"] == "Unknowns/completeness disclosed")["earned"] == 7
 
 
@@ -100,8 +103,12 @@ def test_null_and_blank_ids_are_not_citations_but_valid_alternate_ids_are():
     report = sample_report()
     fact = report["agent_outputs"]["investigation"]["documented_facts"][0]
     fact["evidence_ids"] = [None, " ", ""]
-    assert assess_quality({}, report)["score"] <= 59
     fact["source_ids"] = ["ACTUAL-SOURCE-ID"]
+    report["generated_report"]["sections"][0]["key_points"][0]["source_ids"] = []
+    assert assess_quality({}, report)["score"] <= 59
+    # Agent-only IDs do not count as citations unless the published report
+    # carries them on its actual factual point.
+    report["generated_report"]["sections"][0]["key_points"][0]["source_ids"] = ["ACTUAL-SOURCE-ID"]
     assert next(c for c in assess_quality({}, report)["checks"] if c["check"] == "Factual evidence references present")["earned"] == 13
 
 
@@ -110,7 +117,7 @@ def test_grade_has_no_forced_minimum_and_discloses_integrity_caps():
     result = assess_quality({}, report)
     assert result["score"] <= 59
     assert result["raw_score"] == sum(c["earned"] for c in result["checks"])
-    assert result["flags"] and result["rubric_version"] == "2.1"
+    assert result["flags"] and result["rubric_version"] == "2.2"
     assert assess_quality({}, {})["score"] == 0
 
 

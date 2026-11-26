@@ -6,7 +6,7 @@ from datetime import date, datetime, timezone
 from enum import StrEnum
 from typing import Any
 
-from pydantic import Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
 
 from blackwing.contracts import APIModel
 from blackwing.agents.shared_schema import ClaimOutput, EvidenceState, TimelineEventOutput
@@ -167,6 +167,7 @@ class RunResponse(APIModel):
 
 
 class TraceEvent(APIModel):
+    """Credential-free lifecycle event exposed by the run trace endpoint."""
     event_id: str | None = None
     execution_id: str | None = None
     agent_key: str | None = None
@@ -178,6 +179,7 @@ class TraceEvent(APIModel):
     case_id: str | None = None
     input_identifiers: list[str] | None = None
     result_summary: dict[str, Any] | None = None
+    retrieved_document_count: int | None = None
     duration_ms: float | None = None
     error: dict[str, Any] | None = None
     sequence: int
@@ -192,6 +194,80 @@ class TraceEvent(APIModel):
 class TraceResponse(APIModel):
     run_id: str
     events: list[TraceEvent]
+
+
+class AuditEvent(APIModel):
+    """Detailed local audit event; extra event-specific fields are preserved."""
+    model_config = ConfigDict(extra="allow", use_enum_values=True)
+
+    event_id: str | None = None
+    execution_id: str | None = None
+    agent_key: str | None = None
+    agent: str | None = None
+    provider: str | None = None
+    model: str | None = None
+    request_id: str | None = None
+    attempt: int | None = None
+    tool: str | None = None
+    invocation_id: str | None = None
+    case_id: str | None = None
+    input_identifiers: list[str] | None = None
+    result_summary: dict[str, Any] | None = None
+    retrieved_document_count: int | None = None
+    duration_ms: float | None = None
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    error: dict[str, Any] | None = None
+    step: str
+    status: str
+    detail: Any | None = None
+    timestamp: datetime | None = None
+
+
+class RunOperationsMetrics(APIModel):
+    latency_ms: float | None = None
+    tool_calls: int | None = None
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    estimated_cost_usd: float | None = None
+
+
+class RunAuditResponse(APIModel):
+    """Persisted audit data and operations summary for one investigation run."""
+    run_id: str
+    events: list[AuditEvent]
+    plan: dict[str, Any] | list[Any] | None = None
+    partial_outputs: dict[str, Any] = Field(default_factory=dict)
+    execution_steps: int = 0
+    execution_state: Any | None = None
+    operations_metrics: RunOperationsMetrics = Field(default_factory=RunOperationsMetrics)
+    status: str | None = None
+    workflow: str | None = None
+    model: str | None = None
+    created_at: datetime | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    resumable: bool = False
+    recovery: str
+
+
+class OperationsMetricsResponse(APIModel):
+    run_count: int
+    task_completion_rate: float | None = None
+    end_to_end_accuracy: float | None = None
+    end_to_end_accuracy_basis: str
+    average_tool_calls_per_run: float | None = None
+    average_tool_calls_per_task: float | None = None
+    average_latency_ms: float | None = None
+    average_latency_ms_per_query: float | None = None
+    prompt_tokens: int
+    completion_tokens: int
+    estimated_cost_usd: float | None = None
+    average_cost_usd_per_query: float | None = None
+    cost_note: str
+    failure_taxonomy: dict[str, int | None]
+    hallucination_note: str
+    cost_rates_configured: bool
 
 
 class FindingOverride(APIModel):

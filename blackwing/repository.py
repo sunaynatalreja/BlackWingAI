@@ -32,6 +32,17 @@ class MemoryRepository:
         # protected final report into in-memory retrieval documents.
         self.documents: dict[str, dict[str, Any]] = {}
         self.qa_answers: dict[str, dict[str, Any]] = {}
+        self.qa_conversations: dict[str, list[dict[str, Any]]] = {}
+
+    def list_conversation_messages(self, conversation_id: str) -> list[dict[str, Any]]:
+        with self._lock:
+            return list(self.qa_conversations.get(conversation_id, []))
+
+    def append_conversation_message(self, conversation_id: str, message: dict[str, Any]) -> None:
+        with self._lock:
+            messages = self.qa_conversations.setdefault(conversation_id, [])
+            messages.append(message)
+            del messages[:-50]
 
     def save_qa_answer(self, answer_id: str, record: dict[str, Any]) -> dict[str, Any]:
         with self._lock:
@@ -241,15 +252,15 @@ class SQLiteRepository(MemoryRepository):
         self._db.execute("PRAGMA synchronous=FULL")
         self._db.execute("CREATE TABLE IF NOT EXISTS records (kind TEXT, id TEXT, payload TEXT NOT NULL, PRIMARY KEY(kind,id))")
         self._db.execute("CREATE TABLE IF NOT EXISTS audit_events (run_id TEXT, sequence INTEGER, payload TEXT NOT NULL, PRIMARY KEY(run_id,sequence))")
-        for kind in ("cases", "runs", "reviews", "documents", "qa_answers"):
+        for kind in ("cases", "runs", "reviews", "documents", "qa_answers", "qa_conversations"):
             rows = self._db.execute("SELECT id,payload FROM records WHERE kind=?", (kind,)).fetchall()
             if rows:
                 setattr(self, kind, {key: json.loads(payload, object_hook=_decode) for key, payload in rows})
         for run in self.runs.values():
             if run["status"] in {"queued", "running"}:
                 run.update(status="failed", error_code="interrupted",
-                           error="Application restarted before completion. Start a new run for controlled recovery; checkpoint resumption is unavailable.",
-                           completed_at=now(), resumable=False)
+                           error="Application restarted before completion. Resume is available when a saved LangGraph checkpoint exists.",
+                           completed_at=now(), resumable=bool(run.get("resume_payload")))
                 self.cases[run["case_id"]].update(status="analysis_failed", updated_at=now())
                 previous = run.get("execution_state") or {}
                 active = {}
@@ -267,7 +278,7 @@ class SQLiteRepository(MemoryRepository):
 
     def _flush(self):
         with self._db:
-            for kind in ("cases", "runs", "reviews", "documents", "qa_answers"):
+            for kind in ("cases", "runs", "reviews", "documents", "qa_answers", "qa_conversations"):
                 self._db.executemany("INSERT OR REPLACE INTO records VALUES (?,?,?)", [
                     (kind, key, json.dumps(value, default=_encode))
                     for key, value in getattr(self, kind).items()])
@@ -296,7 +307,7 @@ def _durable_mutation(name):
     return mutate
 
 
-for _method in ("create_case", "update_case", "add_evidence", "create_run", "patch_run", "add_review", "add_document", "save_qa_answer"):
+for _method in ("create_case", "update_case", "add_evidence", "create_run", "patch_run", "add_review", "add_document", "save_qa_answer", "append_conversation_message"):
     setattr(SQLiteRepository, _method, _durable_mutation(_method))
 
 

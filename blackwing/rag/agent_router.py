@@ -144,12 +144,23 @@ def _diverse_current(items: list[dict[str, Any]], limit: int) -> list[dict[str, 
 
 def _case_uploads(items: list[dict[str, Any]], case_id: str) -> list[dict[str, Any]]:
     """User attachments are reported observations, not official factual findings."""
+    source_counts: dict[str, int] = {}
+    for row in items:
+        source = str(row.get("source_id") or "").strip()
+        if source:
+            source_counts[source] = source_counts.get(source, 0) + 1
     uploads = []
     for row in items:
         if not row.get("evidence_id") or not row.get("excerpt"):
             continue
+        source = str(row.get("source_id") or "").strip()
+        # A unique source ID on a single submitted excerpt is a useful stable
+        # passage citation (e.g. SFO17-SUMMARY). When a document ID is shared
+        # by multiple excerpts, retain the server-generated evidence UUID.
+        passage_id = source if source and source_counts.get(source) == 1 else None
         uploads.append({
             **row,
+            **({"chunk_id": passage_id} if passage_id else {}),
             "source_id": row.get("source_id") or row["evidence_id"],
             "source_type": "user_submitted",
             "evidence_role": "reported",
@@ -227,10 +238,9 @@ def build_agent_packets(*, retriever: Any, narrative: str, case_id: str,
             limit_per_agent
         ),
 
-        "risk": _unique(
-            [*current[:max(2, limit_per_agent - 1)], *guidance[:1]],
-            limit_per_agent
-        ),
+        # Risk uses only input documents. Do not expose historical analogies or
+        # general guidance to this agent's rating decision.
+        "risk": _unique(uploads, limit_per_agent),
 
         "mitigation": _unique(
             [*guidance[:1], *current[:1]],
