@@ -35,6 +35,8 @@ The JFK scenario and the `unseen` and `golden` sample prompts are query inputs, 
 
 Set the evaluator-only **gold directory** in the API process environment before starting FastAPI. BlackWing locates a matching PDF under that directory from the case source ID, with date and location as fallback. The reports stay in the evaluator-only folder; they are not added to case evidence or RAG. In Run trace, choose **Run final report evaluations** to compare each section in the saved report to corresponding headings/passages extracted from its matching gold report. The saved trace shows section-level LLM-judge coverage/consistency, BGE cosine similarity and distance, and BERTScore precision/recall/F1. Metric families are shown separately and are never blended into one score. Qwen judging and hosted BGE embedding calls occur only after that button is clicked; BERTScore runs locally and may download its configured model the first time.
 
+Run trace also shows approved retrieval **BM25 Recall@5 and Recall@10** against human-labeled qrels when the configured index signature matches the benchmark. The current benchmark covers five queries and 50 reviewed documents from the 777-document index; the other 727 documents are outside its judgment scope. It is a dataset-level BM25 benchmark, not a score for the selected run or the production hybrid retriever. The read-only Swagger endpoint is `GET /api/v1/evaluations/retrieval`.
+
 ```bash
 export BLACKWING_FINAL_REPORT_GOLD_DIR="$HOME/Downloads/BLACKWING_REAL_UNSEEN_5_20261124_v2/EVALUATOR_ONLY"
 ```
