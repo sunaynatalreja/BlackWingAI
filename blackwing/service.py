@@ -24,7 +24,7 @@ from blackwing.agents.report.workflow import create_report
 from blackwing.agents.registry import AGENT_SPECS
 from blackwing.agents.runtime import invoke_agent
 from blackwing.config import Settings
-from blackwing.case_inputs import synthetic_accounts, unassessed_synthetic_risk
+from blackwing.case_inputs import synthetic_accounts
 from blackwing.diagnostics import execution_audit, agent_execution, emit, safe_error, MESSAGES
 from blackwing.tools import tool_audit, find_similar_incidents
 from blackwing.planning import plan_investigation, correction_target, review_correction, MAX_EXECUTION_STEPS
@@ -81,11 +81,6 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
                 if not state.get("incident_date"):
                     output["limitations"] = [*output.get("limitations", []),
                         "Current event date is unknown. Retrieved archive cases are candidate analogies, not established chronological predecessors."]
-            elif role == "risk" and state.get("plan", {}).get("task_modes", {}).get("risk") == "unassessed_synthetic":
-                output = ground_risk_output(unassessed_synthetic_risk(state, evidence), evidence, incident_id=state.get("source_incident_id"))
-                emit("assessment_abstained", step="risk", detail={
-                    "reason": "Unverified synthetic accounts lack severity and occurrence/exposure support.",
-                    "human_review_required": True})
             elif role == "compliance" and (state.get("plan", {}).get("task_modes", {}).get("compliance") == "unassessed" or not any(
                 str(item.get("document_type", "")).casefold() in compliance_sources
                 or str(item.get("source_type", "")).casefold() in compliance_sources
@@ -249,7 +244,7 @@ def _agent_node(spec: AgentSpec, client: httpx.AsyncClient, settings: Settings):
     return run
 
 
-def _build_graph(client: httpx.AsyncClient, settings: Settings, on_update=None):
+def _build_graph(client: httpx.AsyncClient, settings: Settings, on_update=None, checkpointer=None):
     graph = StateGraph(CaseState)
     specs = {spec.key: spec for spec in AGENT_SPECS}
 
@@ -330,7 +325,7 @@ def _build_graph(client: httpx.AsyncClient, settings: Settings, on_update=None):
     graph.add_conditional_edges("critic", route, {"correction": "correction", "verification": "verification"})
     graph.add_edge("correction", "verification")
     graph.add_edge(ordered[-1], END)
-    return graph.compile()
+    return graph.compile(checkpointer=checkpointer)
 
 
 def _case_narrative_evidence(case_id: str, narrative: str) -> dict[str, Any]:
@@ -365,6 +360,8 @@ async def analyze_incident(
     on_update=None,
     on_tool_event=None,
     on_execution_event=None,
+    checkpoint_thread_id: str | None = None,
+    resume_from_checkpoint: bool = False,
 ) -> dict[str, Any]:
     case_id = case_id or str(uuid4())
     # The source incident reference is different from the application's UUID.
@@ -437,10 +434,18 @@ async def analyze_incident(
                 tool_events.append(event)
                 if on_tool_event:
                     on_tool_event(event)
-            graph = _build_graph(client, settings, on_update)
-            emit("workflow_ready", step="workflow_execution")
-            with tool_audit(case_id, record_tool):
-                final_state = await graph.ainvoke(initial_state, {"recursion_limit": 16})
+            from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
+            checkpoint_path = Path(settings.checkpoint_database_path).expanduser()
+            checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+            async with AsyncSqliteSaver.from_conn_string(str(checkpoint_path)) as checkpointer:
+                await checkpointer.setup()
+                graph = _build_graph(client, settings, on_update, checkpointer)
+                emit("workflow_ready", step="workflow_execution")
+                invoke_config = {"recursion_limit": 16,
+                    "configurable": {"thread_id": checkpoint_thread_id or case_id}}
+                with tool_audit(case_id, record_tool):
+                    final_state = await graph.ainvoke(
+                        None if resume_from_checkpoint else initial_state, invoke_config)
 
     outputs = dict(final_state["outputs"])
     generated_report = outputs.pop("report", None)
@@ -448,7 +453,8 @@ async def analyze_incident(
     trace = [
         *final_state["trace"],
         *tool_events,
-        *execution_events,
+        *[{key: value for key, value in event.items()
+           if key not in {"prompt_tokens", "completion_tokens"}} for event in execution_events],
         {"step": "investigation_outcome", "status": "requires_human_review", "detail": {
             "execution_steps": final_state["execution_steps"], "correction_attempts": final_state["correction_attempts"],
             "unresolved_issues": len(outputs.get("critic", {}).get("issues", []))}},

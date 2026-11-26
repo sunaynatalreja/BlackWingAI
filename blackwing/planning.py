@@ -1,6 +1,5 @@
 """Deterministic investigation planning and evidence-gated correction policy."""
 from blackwing.agents.critic.grounding import audit_critic_output
-from blackwing.case_inputs import synthetic_risk_unassessed
 
 MAX_EXECUTION_STEPS = 10
 CORRECTABLE = {"ungrounded_fact": "investigation", "ungrounded_hazard": "risk",
@@ -18,10 +17,7 @@ def plan_investigation(state):
              "compliance": "model_with_grounding" if has_rules else "unassessed",
              "risk": "model_then_reference_tool_per_hazard", "mitigation": "model_with_hazard_links",
              "critic": "model_and_deterministic_audit", "verification": "model_and_deterministic_checks",
-             "report": "deterministic_assembly"}
-    abstain_risk = synthetic_risk_unassessed(state, sources("risk"))
-    if abstain_risk:
-        modes["risk"] = "unassessed_synthetic"
+             "report": "task_decomposed_generation"}
     return {"task_modes": modes, "tool_requirements": {
                 "retrieve_evidence": "preflight retrieval when requested; use supplied evidence otherwise",
                 "find_similar_incidents": "compare supplied historical records, including explicit no-match results",
@@ -30,7 +26,7 @@ def plan_investigation(state):
             "decisions": {"investigation": "ground supplied evidence; preserve unknowns",
                           "similar_case": "compare historical records separately",
                           "compliance": "compare authoritative rules" if has_rules else "unassessed: authoritative rules missing",
-                          "risk": "unassessed: unverified synthetic accounts provide no rated-input basis" if abstain_risk else "score only supported severity and likelihood",
+                          "risk": "estimate categorical ratings from current-case input only; exclude historical incidents",
                           "correction": "one evidence-gated target; unresolved issues require human review"},
             "source_counts": {role: len(sources(role)) for role in ("investigation", "similar_case", "compliance", "risk")},
             "max_execution_steps": MAX_EXECUTION_STEPS, "max_corrections": 1}

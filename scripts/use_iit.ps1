@@ -100,7 +100,7 @@ $env:BLACKWING_UI_TIMEOUT_SECONDS = '1800'
 $env:BLACKWING_LLM_PROVIDER = 'openai_compatible'
 $env:BLACKWING_LLM_API_MODEL = 'Qwen/Qwen3-8B'
 $env:BLACKWING_LLM_API_TIMEOUT_SECONDS = '300'
-$env:BLACKWING_LLM_API_TEMPERATURE = '0.1'
+$env:BLACKWING_LLM_API_TEMPERATURE = '0.0'
 $env:BLACKWING_LLM_API_MAX_OUTPUT_TOKENS = '1024'
 $env:BLACKWING_AGENT_TOKEN_QUOTA_INVESTIGATION = '1024'
 $env:BLACKWING_AGENT_TOKEN_QUOTA_MITIGATION = '768'
@@ -111,7 +111,15 @@ $env:BLACKWING_RAG_RERANKER = 'crossencoder' # Local reranking, not local embedd
 $env:BLACKWING_AGENT_RAG = '1'
 $env:BLACKWING_AGENT_RAG_METHOD = 'rerank'
 $env:BLACKWING_RAG_CACHE = Join-Path $iitRepoRoot 'rag_cache\embeddings_iit.sqlite'
-$env:BLACKWING_API_JSON_RESPONSE_FORMAT = 'false'
+$iitFinalGoldDir = $env:BLACKWING_FINAL_REPORT_GOLD_DIR
+if ([string]::IsNullOrWhiteSpace($iitFinalGoldDir)) {
+    $iitFinalGoldDir = Join-Path $env:USERPROFILE 'Downloads\BLACKWING_REAL_UNSEEN_5_20261124_v2\EVALUATOR_ONLY'
+}
+$env:BLACKWING_FINAL_REPORT_GOLD_DIR = $iitFinalGoldDir
+if (-not (Test-Path -LiteralPath $iitFinalGoldDir -PathType Container)) {
+    Write-Warning 'Final report evaluation gold directory was not found; set BLACKWING_FINAL_REPORT_GOLD_DIR to its location.'
+}
+$env:BLACKWING_API_JSON_RESPONSE_FORMAT = 'true'
 $env:BLACKWING_IIT_MIN_INTERVAL_SECONDS = '1.1'
 
 Write-Host 'LM/chat and BGE embedding credentials are configured separately.'

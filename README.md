@@ -8,7 +8,7 @@ See [local agentic delivery and validation](docs/local-agentic-delivery.md) for 
 
 The LangGraph Planner selects execution modes. The Executor runs the existing roles, the Critic can trigger one evidence-supported targeted revision, and the workflow stops within ten counted execution steps. The report role assembles four typed sections deterministically within this budget; standalone report drafting remains available through its existing function.
 
-Cases, evidence, runs, partial/final outputs, tool traces, reviews and report references use SQLite. Interrupted runs are retained as failed with `error_code=interrupted`; recovery creates a new run rather than claiming checkpoint resumption. Run one API worker per database and hosted API key.
+Cases, evidence, runs, partial/final outputs, tool traces, reviews, Q&A conversations and report references use SQLite. Interrupted runs retain their LangGraph checkpoints when present and can be resumed with `POST /api/v1/runs/{run_id}/resume`. Run one API worker per database and hosted API key.
 
 Retrieval keeps current-case evidence separate from historical analogies, including voluntary ASRS reports. The existing FAA reference matrix supplies provisional categorical risk only when supporting inputs exist; numeric scores remain null. Human approval is required. Existing saved indexes are reused without rebuilding.
 
@@ -30,6 +30,16 @@ Prompting strategies are role-specific: the Investigation Agent uses few-shot ex
 Cases and user-ingested knowledge sources use an in-memory repository and are lost when the API stops. The RAG index is built from the approved source manifest in `datasets/BLACKWING_DATA/01_RAG_KNOWLEDGE_BASE`; protected final reports, gold evaluation files, and unseen case prompts are excluded. Retrieval combines BM25 and hosted BGE dense embeddings with reciprocal-rank fusion. The API uses the shared IIT BGE-small-en-v1.5 embedding endpoint for dense retrieval and falls back to BM25 only when dense retrieval is unavailable. Risk uses a provisional 5×5 severity × likelihood estimate, always subject to qualified human review; it is not an approved operational risk determination. The app records review decisions but does not authenticate reviewers or publish a final regulatory determination. See the architecture document before using it beyond local development.
 
 The JFK scenario and the `unseen` and `golden` sample prompts are query inputs, never index sources. Historical factual records in the knowledge base may be retrieved as analogies, while final reports and evaluation answers remain held out.
+
+### Final-report section evaluation
+
+Set the evaluator-only **gold directory** in the API process environment before starting FastAPI. BlackWing locates a matching PDF under that directory from the case source ID, with date and location as fallback. The reports stay in the evaluator-only folder; they are not added to case evidence or RAG. In Run trace, choose **Run final report evaluations** to compare each section in the saved report to corresponding headings/passages extracted from its matching gold report. The saved trace shows section-level LLM-judge coverage/consistency, BGE cosine similarity and distance, and BERTScore precision/recall/F1. Metric families are shown separately and are never blended into one score. Qwen judging and hosted BGE embedding calls occur only after that button is clicked; BERTScore runs locally and may download its configured model the first time.
+
+```bash
+export BLACKWING_FINAL_REPORT_GOLD_DIR="$HOME/Downloads/BLACKWING_REAL_UNSEEN_5_20261124_v2/EVALUATOR_ONLY"
+```
+
+Install updated dependencies with `pip install -r requirements.txt` to enable local BERTScore. Set `BLACKWING_BERTSCORE_MODEL` only if you want a different local Hugging Face model. If no unique PDF matches the case metadata, the evaluator reports that result instead of comparing against an unrelated report.
 
 ### Build and use the dataset RAG index
 
@@ -103,7 +113,7 @@ echo
 export BLACKWING_LLM_API_KEY
 export BLACKWING_LLM_CA_CERT="<path to your assigned inference-group CA certificate>"
 export BLACKWING_LLM_API_TIMEOUT_SECONDS="300"
-export BLACKWING_LLM_API_TEMPERATURE="0.1"
+export BLACKWING_LLM_API_TEMPERATURE="0.0"
 export BLACKWING_LLM_API_MAX_OUTPUT_TOKENS="768"
 export BLACKWING_AGENT_TOKEN_QUOTA_INVESTIGATION="768"
 export BLACKWING_AGENT_TOKEN_QUOTA_COMPLIANCE="768"
@@ -113,7 +123,7 @@ export BLACKWING_AGENT_TOKEN_QUOTA_CRITIC="512"
 export BLACKWING_AGENT_TOKEN_QUOTA_VERIFICATION="512"
 export BLACKWING_AGENT_TOKEN_QUOTA_REPORT_PLANNER="256"
 export BLACKWING_AGENT_TOKEN_QUOTA_REPORT_SECTION="768"
-export BLACKWING_API_JSON_RESPONSE_FORMAT="false"
+export BLACKWING_API_JSON_RESPONSE_FORMAT="true"
 export BLACKWING_EMBEDDING_URL="https://103.42.50.41:1035/v1"
 export BLACKWING_EMBEDDING_MODEL="bge-small-en-v1.5"
 read -s "BLACKWING_EMBEDDING_API_KEY?Enter the shared embeddings API key: "
@@ -196,3 +206,7 @@ Agent-start, physical model-wait, completion/failure and restart-interruption ev
 ## Independent completeness results
 
 The integrated v2 rubric separately reports Prompt Completeness (supplied intake) and Report Completeness (investigation documentation), with weighted checks and disclosed integrity ceilings. Aviation risk remains in its independent backend-calculated view, and Sunayana's original evidence checklist is retained. See [the scorer integration and saved-report evaluation](docs/quality-scorer-v2.md): 158 regression tests passed; existing JFK/Austin reports scored 84/58 for report completeness without model calls or report changes.
+
+## Track B observability, evaluation, recovery and safety
+
+See [Track B gap closure](docs/track-b-gap-closure.md) for the three-strategy baseline command, persisted Q&A conversation IDs and checkpoint recovery, operations metrics endpoint, the 20-case red-team corpus, TTL settings for retrieval-only caching, and opt-in metadata-only LangSmith integration. LangSmith is off by default; no narrative, evidence, prompts, report text or credentials are sent to it.

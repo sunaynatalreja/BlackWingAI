@@ -133,6 +133,12 @@ def test_empty_normalized_model_section_is_not_a_success():
         normalize_report_section({'summary': ' ', 'findings': [{}]})
 
 
+def test_missing_report_summary_reuses_first_valid_point():
+    section=normalize_report_section({'summary':' ', 'key_points':[{'text':'Source-backed detail',
+        'classification':'reported_observation','evidence_ids':['E1'],'source_ids':['S1']}]})
+    assert section['summary']=='Source-backed detail'
+
+
 def test_completeness_credits_attribution_without_certifying_truth():
     report = sample_report()
     inv = report['agent_outputs']['investigation']
@@ -140,10 +146,30 @@ def test_completeness_credits_attribution_without_certifying_truth():
     inv['documented_facts'] = []
     report['generated_report']['sections'][0]['key_points'][0]['classification'] = 'reported_observation'
     result = assess_quality({}, report)
-    assert result['rubric_version'] == '2.1'
+    assert result['rubric_version'] == '2.2'
     assert sum(c['weight'] for c in result['checks']) == 100
     assert next(c for c in result['checks'] if c['check'] == 'Current-case evidence represented')['earned'] == 12
     assert any('not independently verified' in f for f in result['flags'])
+
+
+def test_completeness_uses_cited_attributed_points_in_the_published_report():
+    report = sample_report()
+    report['agent_outputs']['investigation']['documented_facts'] = [
+        {'text': 'The position requires verification.', 'evidence_state': 'unknown',
+         'evidence_ids': [], 'source_ids': []}
+    ]
+    report['generated_report']['sections'][0]['key_points'] = [{
+        'text': 'A supplied account reports the aircraft lined up on the taxiway.',
+        'classification': 'reported_observation', 'evidence_ids': ['UPLOAD:1'],
+    }]
+
+    result = assess_quality({}, report)
+
+    checks = {item['check']: item for item in result['checks']}
+    assert checks['Current-case evidence represented']['earned'] == 12
+    assert checks['Factual evidence references present']['earned'] == 13
+    assert result['score'] > 69
+    assert any('not independently verified' in flag for flag in result['flags'])
 
 
 def test_empty_claims_and_citation_only_entries_do_not_earn_coverage():

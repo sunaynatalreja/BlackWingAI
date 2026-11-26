@@ -38,7 +38,8 @@ def test_opening_report_only_reads_question_status(monkeypatch):
     assert at.metric[0].label == 'Gold comparison score'
     assert at.metric[0].value == 'Not assessed'
     assert any(b.label == 'Compare with gold report' for b in at.button)
-    assert any('Question-based comparison' in c.value for c in at.caption)
+    assert any('approved reference' in c.value for c in at.caption)
+    assert not any('Question-based comparison' in c.value for c in at.caption)
 
 
 def test_explicit_click_queues_once_and_refresh_only_reads_saved_result(monkeypatch):

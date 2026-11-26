@@ -261,6 +261,11 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
         attempted = [r for r in xs if r["status"] != "PREVIEW_NOT_EXECUTED"]
         complete = [r for r in attempted if r["status"] == "COMPLETED"]
         latency = [r["latency_ms"] for r in attempted if isinstance(r.get("latency_ms"), (int, float))]
+        failures: dict[str, int] = {}
+        for row in attempted:
+            if row.get("failure_type_auto"):
+                label = row["failure_type_auto"]
+                failures[label] = failures.get(label, 0) + 1
         summary["strategies"][strategy] = {
             "planned": len(xs), "attempted": len(attempted), "valid_json_and_schema": len(complete),
             "schema_validity_rate": len(complete) / len(attempted) if attempted else None,
@@ -269,7 +274,18 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
                                             if isinstance(r.get("completion_tokens"), int)]), 1)
                                       if any(isinstance(r.get("completion_tokens"), int) for r in attempted) else None,
             "human_factual_accuracy": None,
+            "failure_taxonomy": failures,
         }
+    summary["comparison"] = {
+        "schema_validity_delta_percentage_points": {
+            f"{a}_vs_{b}": round((summary["strategies"][a]["schema_validity_rate"] -
+                summary["strategies"][b]["schema_validity_rate"]) * 100, 1)
+            for a, b in (("few_shot", "zero_shot"), ("decomposition", "zero_shot"))
+            if summary["strategies"][a]["schema_validity_rate"] is not None and
+               summary["strategies"][b]["schema_validity_rate"] is not None
+        },
+        "interpretation": "Descriptive paired comparison only; factual quality requires blinded human/gold review.",
+    }
     return summary
 
 

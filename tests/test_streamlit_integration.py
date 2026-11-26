@@ -167,7 +167,7 @@ def test_streamlit_create_upload_run_review_and_exports(backend):
     at.text_area(key="review-rationale").set_value("Verified actual source text")
     at.checkbox(key="review-confirmed").check()
     at.button(key="accept-finding").click().run()
-    assert not at.exception and at.get_by_key("export-pdf")
+    assert not at.exception and not any(b.key == "export-pdf" for b in at.button)
     at.run()
     assert len(backend.runs) == 1 and len(backend.cases) == 1
 

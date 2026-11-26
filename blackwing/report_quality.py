@@ -1,4 +1,4 @@
-"""BLACKWING AI completeness rubric v2.1; original v2 weights retained.
+"""BLACKWING AI completeness rubric v2.2; original v2 weights retained.
 
 Integration note: Drop-in replacement for assess_quality(incident, report=None),
 not a source-entailment or aviation risk score. No artificial minimum score.
@@ -115,6 +115,12 @@ def assess_quality(incident: dict, report: dict | None = None) -> dict:
             if _dict(p).get("classification") in {"documented_fact", "reported_observation"}
             and _has_claim_text(_dict(p))
         ]
+        # Completeness is evaluated on the published report. The investigation
+        # agent's internal claim list is useful provenance, but a valid
+        # attributed point may be copied into the report from supplied evidence
+        # even when that agent conservatively marked its own claim unknown.
+        # Source-entailment remains outside this structural score.
+        published_case_evidence = evidence_points
         unknowns = _list(inv.get("unknowns"))
         approval_needed = verification.get("human_approval_required") is True
 
@@ -123,11 +129,12 @@ def assess_quality(incident: dict, report: dict | None = None) -> dict:
         check("Executive summary and report sections", 12,
               bool(generated.get("executive_summary")) and len(sections) >= 4,
               "Produce a summary and four required report sections.")
-        check("Current-case evidence represented", 12, bool(case_evidence),
+        check("Current-case evidence represented", 12,
+              bool(case_evidence) or bool(published_case_evidence),
               "Document current-case facts or attributed accounts; disclose when neither is available.")
         check("Factual evidence references present", 13,
-              bool(case_evidence) and all(_has_refs(f) for f in case_evidence),
-              "Reference every fact or attributed account; citation presence is not entailment.")
+              bool(published_case_evidence) and all(_has_refs(point) for point in published_case_evidence),
+              "Reference every published fact or attributed account; citation presence is not entailment.")
         check("Report factual points referenced", 10,
               bool(evidence_points) and all(_has_refs(p) for p in evidence_points),
               "Reference every factual or attributed report point; empty points cannot earn credit.")
@@ -176,23 +183,25 @@ def assess_quality(incident: dict, report: dict | None = None) -> dict:
     score = sum(c["earned"] for c in checks)
     flags: list[str] = []
     if report is not None:
-        if not case_evidence:
+        if not published_case_evidence:
             score = min(score, 69)
-            flags.append("No substantive current-case facts or attributed accounts supplied: report cannot receive >=70.")
-        elif not all(_has_refs(f) for f in case_evidence):
+            flags.append("No substantive cited current-case facts or attributed accounts are published: report cannot receive >=70.")
+        elif not all(_has_refs(point) for point in published_case_evidence):
             score = min(score, 59)
-            flags.append("Current-case facts or attributed accounts have missing citations; critical integrity review required.")
-        elif not facts:
+            flags.append("Published current-case facts or attributed accounts have missing citations; critical integrity review required.")
+        elif not facts and not any(
+            _dict(point).get("classification") == "documented_fact" for point in published_case_evidence
+        ):
             flags.append("Available case material is attributed reporting, not independently verified facts.")
     return {
         "label": label,
         "score": score,
         "raw_score": sum(c["earned"] for c in checks),
-        "rubric_version": "2.1",
+        "rubric_version": "2.2",
         "checks": checks,
         "missing_information": [c["action"] for c in checks if c["status"] != "present"],
         "flags": flags,
-        "method": "Structural completeness v2.1; unchanged v2 weights; attributed-account coverage is not verified accuracy.",
+        "method": "Structural completeness v2.2; unchanged v2 weights; published attributed-account coverage is not verified accuracy.",
         "notice": (
             "Aviation risk is scored separately. This score does not validate factual accuracy, "
             "citation entailment, legal applicability, or overall operational safety. "

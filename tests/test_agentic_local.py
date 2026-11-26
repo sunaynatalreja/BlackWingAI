@@ -118,6 +118,7 @@ def test_planner_routes_rules_and_evidence_without_airport_logic():
         state = {"narrative": airport, "agent_evidence": {"compliance": []}}
         plan = plan_investigation(state)
         assert "unassessed" in plan["decisions"]["compliance"]
+        assert plan["task_modes"]["report"] == "task_decomposed_generation"
         state["agent_evidence"]["compliance"] = [{"source_type": "regulation"}]
         assert plan_investigation(state)["decisions"]["compliance"] == "compare authoritative rules"
         assert plan["max_execution_steps"] == 10 and plan["max_corrections"] == 1

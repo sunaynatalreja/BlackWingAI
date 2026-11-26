@@ -1,0 +1,12 @@
+{
+  "status": "ready",
+  "source_records": 777,
+  "chunks": 27255,
+  "all_token_budgets_passed": true,
+  "protected_gold_chunks": 0,
+  "batch_size": 16,
+  "estimated_document_requests_before_deduplication": 1704,
+  "missing_configuration": [],
+  "output": "/Users/sunaynatalreja/BlackWing AI/BlackWingAI/rag_indexes/sunayana_iit_bge_v1",
+  "hosted_calls_made": 0
+}

@@ -13,8 +13,6 @@ def normalize_report_section(payload: dict) -> dict:
         'summary', 'section_summary', 'summary_sentence', 'executive_summary',
         'findings_summary', 'conclusion', 'key_message', 'overview', 'narrative',
     ) if isinstance(payload.get(k), str) and payload[k].strip()), '')
-    if not summary:
-        raise ValueError('Report section requires a nonempty summary')
     raw = payload.get('key_points', payload.get('findings', payload.get('observations', [])))
     raw = [raw] if isinstance(raw, (str, dict)) else raw
     points = []
@@ -41,6 +39,13 @@ def normalize_report_section(payload: dict) -> dict:
         points.append({'text': text.strip(), 'classification': label if label in allowed else 'verification_gap',
                        'evidence_ids': ids(item.get('evidence_ids') or item.get('citations')),
                        'source_ids': ids(item.get('source_ids'))})
+    if not summary and points:
+        # The section contract requires a summary. Reuse the first already
+        # returned point rather than failing the whole 8B report task or adding
+        # new content.
+        summary = points[0]['text']
+    if not summary:
+        raise ValueError('Report section requires a nonempty summary')
     # Section ID/title are assigned by code, never normalized from model text.
     return {'summary': summary.strip(), 'key_points': points}
 

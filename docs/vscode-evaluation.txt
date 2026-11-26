@@ -119,3 +119,22 @@ report and matching-reference quotations. Numerical aggregation is deterministic
 The next live checks are one seen report evaluation, human comparison of its
 judgments, then approved unseen testing. Keep completeness, Gold comparison,
 retrieval recall and aviation risk separate. No commit, merge or push was made.
+
+7. GENERIC SECTION-LEVEL FINAL REPORT EVALUATION
+
+Set this in the API terminal before starting FastAPI (the directory path is read
+through config/blackwing.properties; gold PDFs are not added to RAG or evidence):
+
+export BLACKWING_FINAL_REPORT_GOLD_DIR="$HOME/Downloads/BLACKWING_REAL_UNSEEN_5_20261124_v2/EVALUATOR_ONLY"
+
+After restarting FastAPI and Streamlit, open a completed report, select Run
+trace, and choose Run final report evaluations. The evaluator searches this
+directory recursively and matches PDFs to a case using its source incident ID,
+then date/location as fallback. It extracts matching headings where available;
+otherwise BGE selects report-relevant passages from the matched PDF. It saves
+per-section LLM-judge coverage/consistency, cosine similarity/distance, and local
+BERTScore precision/recall/F1. Metrics remain separate. Qwen and hosted embedding
+calls occur only after the button click; BERTScore runs locally and may download
+weights on first use. Install the updated dependencies with
+`pip install -r requirements.txt`. Ambiguous or missing gold matches are left
+unscored rather than compared with an unrelated report.

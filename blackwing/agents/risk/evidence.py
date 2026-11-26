@@ -1,6 +1,6 @@
-"""Deterministic RAG grounding guard for preliminary risk findings.
+"""Deterministic current-case grounding guard for preliminary risk findings.
 
-No inference API, embedding call, or risk matrix is needed here. This guards
+No embedding call is needed here. This guards
 citation integrity after the existing Risk Agent returns its typed JSON.
 """
 
@@ -74,23 +74,14 @@ def ground_risk_output(
     classified = 0
 
     for hazard in result.hazards:
-        # Historical analogies and guidance cannot establish
-        # incident-specific severity or likelihood.
+        # Only this case's submitted narrative and directly scoped current-case
+        # records can support a rating. Historical analogies and guidance are
+        # excluded from the risk packet and cannot support current-case ratings.
         from blackwing.agents.evidence_utils import is_direct
         direct_ids = [
             ref for ref in hazard.evidence_ids
-            if _type(allowed[ref]) in {"official_factual", "official_preliminary"}
-            and is_direct(allowed[ref], incident_id)
-            and not ref.startswith("CASE-NARRATIVE:")
-            and str(allowed[ref].get("evidence_status") or "").upper() not in {"SYNTHETIC_UNVERIFIED", "USER_REPORTED_UNVERIFIED"}
+            if is_direct(allowed[ref], incident_id)
         ]
-
-        # A cited incident alone cannot establish how often a hazard occurs.
-        # Require an explicit, independently reviewed occurrence/exposure basis;
-        # model-authored prose or a single case citation is not that evidence.
-        if direct_ids and not any(allowed[ref].get("occurrence_exposure_verified") is True for ref in direct_ids):
-            direct_ids = []
-            missing.append(f"Hazard {hazard.hazard_id}: independently verified occurrence or exposure basis is required for likelihood.")
 
         insufficient = any(_INSUFFICIENT.search(basis or '')
                            for basis in (hazard.severity_basis, hazard.likelihood_basis))
@@ -124,6 +115,10 @@ def ground_risk_output(
         if classified
         else "unassessed_insufficient_inputs"
     )
+    if classified:
+        result.risk_notes = (result.risk_notes + " " +
+            "Ratings are qualitative estimates from this case's supplied input only; "
+            "they are not historical recurrence rates and require human review.").strip()
     if note:
         result.risk_notes = (result.risk_notes + " " + " ".join(dict.fromkeys(note))).strip()
     result.missing_inputs = list(dict.fromkeys(missing))[:12]

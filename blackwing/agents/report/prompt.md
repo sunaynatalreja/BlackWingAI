@@ -22,3 +22,10 @@ incident's cause. Do not assign blame, legal liability, or operational direction
 Human approval is always required. Keep the generated section concise, with no
 more than five model-authored key points; the application may append exact
 source-agent details so their chronology and citations are not lost.
+
+Return exactly one JSON object with a nonempty `summary` (one or two concise
+sentences) and `key_points` (an array). Each point has `text`, `classification`,
+`evidence_ids` and `source_ids`; arrays must remain arrays when empty. Use only
+these classifications: `documented_fact`, `reported_observation`, `hypothesis`,
+`historical_analogy`, `proposal`, `verification_gap`. The application assigns
+the task ID and heading; do not add either field. Never omit `summary`.

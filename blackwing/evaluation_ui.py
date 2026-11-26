@@ -1,5 +1,6 @@
 """Question evaluation inside the existing report panel; no generation or scoring."""
 import json
+from datetime import datetime
 
 import httpx
 import streamlit as st
@@ -7,10 +8,357 @@ import streamlit as st
 from blackwing import copilot
 
 
+def _event_time(event):
+    value = event.get('timestamp') or ''
+    try:
+        parsed = datetime.fromisoformat(str(value).replace('Z', '+00:00'))
+        return parsed.timestamp()
+    except ValueError:
+        return 0.0
+
+
+def _trace_events(trace, audit):
+    """Merge public trace and audit records without rendering duplicate spans."""
+    events, seen = [], set()
+    for event in [*(trace.get('events') or []), *(audit.get('events') or [])]:
+        identity = event.get('event_id') or event.get('invocation_id')
+        if identity is None:
+            identity = (event.get('timestamp'), event.get('step'), event.get('status'),
+                        event.get('agent_key') or event.get('agent'), event.get('tool'))
+        if identity in seen:
+            continue
+        seen.add(identity)
+        events.append(event)
+    return sorted(events, key=_event_time)
+
+
+def show_run_trace(run, report=None):
+    """Render operational telemetry as a readable dashboard, not raw JSON."""
+    run_id = str(run.get('run_id') or '')
+    if not run_id:
+        st.info('No run is selected.')
+        return
+
+    state_key = 'run-trace-snapshot-' + run_id
+    if st.button('Refresh run trace', key='refresh-run-trace-' + run_id):
+        st.session_state.pop(state_key, None)
+    snapshot = st.session_state.get(state_key)
+    if snapshot is None:
+        with st.spinner('Loading run timeline and audit details…'):
+            try:
+                snapshot = {'trace': copilot.get_trace(run_id), 'audit': copilot.get_audit(run_id)}
+                st.session_state[state_key] = snapshot
+            except httpx.HTTPError as exc:
+                status = exc.response.status_code if exc.response is not None else None
+                st.error(f'Could not load run telemetry{f" (HTTP {status})" if status else ""}. The run and report are preserved.')
+                return
+
+    trace = snapshot.get('trace') or {}
+    audit = snapshot.get('audit') or {}
+    events = _trace_events(trace, audit)
+    metrics = audit.get('operations_metrics') or {}
+    tool_events = [event for event in events if event.get('tool')]
+    agent_events = [event for event in events if event.get('agent_key') or event.get('agent')]
+    errors = [event for event in events if event.get('error') or event.get('status') in {'failed', 'agent_failed', 'model_request_failed', 'execution_failed'}]
+
+    st.subheader('Run overview')
+    columns = st.columns(5)
+    columns[0].metric('Run status', str(audit.get('status') or run.get('status') or 'unknown').replace('_', ' ').title())
+    latency = metrics.get('latency_ms')
+    columns[1].metric('End-to-end latency', f'{latency / 1000:.1f} s' if isinstance(latency, (int, float)) else 'In progress' if run.get('status') in {'queued', 'running'} else 'Unavailable')
+    columns[2].metric('Agents involved', len({event.get('agent_key') or event.get('agent') for event in agent_events}))
+    columns[3].metric('Tool calls', metrics.get('tool_calls', len(tool_events)))
+    tokens = (metrics.get('prompt_tokens') or 0) + (metrics.get('completion_tokens') or 0)
+    columns[4].metric('Model tokens', f'{tokens:,}' if tokens else 'Unavailable')
+    cost = metrics.get('estimated_cost_usd')
+    st.caption(f"Model: {audit.get('model') or run.get('model') or 'not recorded'} · "
+               f"Execution steps: {audit.get('execution_steps', '—')} · "
+               f"Estimated cost: ${cost:.4f}" if isinstance(cost, (int, float)) else
+               f"Model: {audit.get('model') or run.get('model') or 'not recorded'} · Execution steps: {audit.get('execution_steps', '—')} · Cost rates are not configured")
+
+    if not events:
+        st.info('No trace events were recorded for this run.')
+        return
+
+    st.subheader('Execution timeline')
+    display_rows = []
+    for index, event in enumerate(events, 1):
+        error = event.get('error') or {}
+        timestamp = event.get('timestamp') or ''
+        display_rows.append({
+            '#': event.get('sequence') or index,
+            'Time': str(timestamp).replace('T', ' ')[:23],
+            'Stage': str(event.get('step') or event.get('event') or 'workflow').replace('_', ' ').title(),
+            'Agent / tool': event.get('agent') or event.get('agent_key') or event.get('tool') or '—',
+            'Status': str(event.get('status') or 'recorded').replace('_', ' ').title(),
+            'Duration (ms)': event.get('duration_ms'),
+            'Attempt': event.get('attempt'),
+            'Evidence count': event.get('retrieved_document_count') or
+                              (event.get('result_summary') or {}).get('count'),
+            'Error': error.get('code') or error.get('type') or '',
+        })
+    st.dataframe(display_rows, hide_index=True, width='stretch',
+                 alt='Chronological agent, retrieval, tool, and workflow events for this run')
+
+    if errors:
+        grouped = {}
+        for event in errors:
+            error = event.get('error') or {}
+            label = error.get('code') or error.get('type') or event.get('status') or 'unknown'
+            grouped[label] = grouped.get(label, 0) + 1
+        st.subheader('Failures and retries')
+        st.dataframe([{'Failure': name.replace('_', ' '), 'Occurrences': count}
+                      for name, count in sorted(grouped.items())], hide_index=True,
+                     width='stretch', alt='Recorded failures grouped by error code')
+
+    st.subheader('Event details')
+    for index, event in enumerate(events, 1):
+        title = (f"{event.get('sequence') or index}. "
+                 f"{str(event.get('step') or event.get('event') or 'event').replace('_', ' ')} · "
+                 f"{str(event.get('status') or 'recorded').replace('_', ' ')}")
+        with st.expander(title, expanded=False):
+            detail = event.get('detail')
+            if detail:
+                if not isinstance(detail, str):
+                    detail = json.dumps(detail, ensure_ascii=False, default=str)
+                st.write(detail[:5000] + ('…' if len(detail) > 5000 else ''))
+            summary = event.get('result_summary')
+            if summary:
+                st.write('Result summary')
+                st.json(summary)
+            identifiers = event.get('input_identifiers')
+            if identifiers:
+                st.caption('Evidence identifiers: ' + ', '.join(map(str, identifiers)))
+            error = event.get('error')
+            if error:
+                safe_error = {key: error.get(key) for key in
+                              ('code', 'type', 'message', 'http_status', 'json_error', 'validation_fields')
+                              if error.get(key) is not None}
+                st.error(safe_error or 'The event recorded an error.')
+            for field, label in (('request_id', 'Request ID'), ('execution_id', 'Execution ID'),
+                                 ('invocation_id', 'Tool invocation ID')):
+                if event.get(field):
+                    st.caption(f'{label}: {event[field]}')
+
+    with st.expander('Workflow and review notes', expanded=False):
+        plan = audit.get('plan')
+        if plan:
+            st.write('Saved workflow plan')
+            if isinstance(plan, (dict, list)):
+                st.json(plan)
+            else:
+                st.write(str(plan))
+        limitations = (report or {}).get('limitations') or []
+        for limitation in limitations:
+            st.write('• ' + str(limitation))
+        st.info('AI output is preliminary until a qualified human reviewer records a decision.')
+
+    case_id = (run.get('case_id') or '')
+    if case_id:
+        st.subheader('Evaluation activity')
+        st.caption('This trace shows evaluation status and coverage. Report completeness and gold-comparison scores stay in the Investigation report.')
+        evaluations = []
+        try:
+            final_eval = copilot.get_final_report_evaluation(case_id, run_id)
+            sections = final_eval.get('sections') or {}
+            scored = sum(bool((row.get('llm_judge') or {}).get('score') is not None) for row in sections.values())
+            semantic = sum(bool(row.get('cosine') or row.get('bertscore')) for row in sections.values())
+            evaluations.append({'Evaluation': 'Final report section evaluation',
+                                'Status': str(final_eval.get('status') or 'unknown').replace('_', ' '),
+                                'Coverage': f'{scored}/{final_eval.get("sections_total", len(sections))} judge sections · {semantic}/{len(sections)} with semantic metrics'})
+        except httpx.HTTPError:
+            evaluations.append({'Evaluation': 'Final report section evaluation', 'Status': 'unavailable',
+                                'Coverage': 'Could not load evaluation status'})
+        try:
+            report_eval = copilot.get_report_evaluation(case_id, run_id)
+            total = report_eval.get('questions_total', 0)
+            completed = report_eval.get('questions_completed', 0)
+            evaluations.append({'Evaluation': 'Question-based report evaluation',
+                                'Status': str(report_eval.get('status') or 'unknown').replace('_', ' '),
+                                'Coverage': f'{completed}/{total} judgments validated' if total else 'No question set configured'})
+        except httpx.HTTPError:
+            evaluations.append({'Evaluation': 'Question-based report evaluation', 'Status': 'unavailable',
+                                'Coverage': 'Could not load evaluation status'})
+        st.dataframe(evaluations, hide_index=True, width='stretch',
+                     alt='Evaluation stage status and completed coverage; numeric scores are displayed in the investigation report')
+
+
+def show_evaluation_options():
+    """Explain complementary checks without presenting uncomputed scores."""
+    with st.expander('Other evaluation options'):
+        st.markdown(
+            '- **Claim grounding:** check each report claim against its cited passage; '
+            'label supported, partial, unsupported or not verifiable.\n'
+            '- **Section rubric:** score chronology, attribution, uncertainty, hazards, '
+            'mitigations and required unknowns against a short rubric.\n'
+            '- **Retrieval quality:** measure recall@k and precision against human-labeled '
+            'relevant passages, separately from report quality.\n'
+            '- **Safety checks:** deterministic tests for invented citations, protected-gold '
+            'leakage, unsupported causal claims and jurisdiction mismatches.\n'
+            '- **Workflow metrics:** task completion, retries, tool calls, latency and token use.'
+        )
+        st.caption('Only evaluators shown in this Run trace have scores. The other checks are recommendations, not hidden scores.')
+
+
+def show_question_evaluation_trace(result):
+    """Read-only evaluation detail for Run trace; actions stay in the report view."""
+    st.subheader('Gold comparison')
+    if not result:
+        st.info('Gold comparison status is unavailable for this run.')
+        return
+    if result.get('reference_id'):
+        st.caption('Approved reference · ' + str(result['reference_id']))
+    status = result.get('status', 'unavailable')
+    score = result.get('score')
+    final_score = status in {'completed', 'proposed'} and type(score) in (int, float) and 0 <= score <= 100
+    st.metric('Gold comparison score', f'{score:g}/100' if final_score else
+              'Unavailable' if status == 'unavailable' else
+              'Not assessable' if status == 'not_assessable' else 'Not assessed')
+    total = result.get('questions_total', 0)
+    completed = result.get('questions_completed', 0)
+    if total:
+        st.caption(f'Status: {status.replace("_", " ")} · Validated: {completed}/{total} · '
+                   f'Scored: {result.get("questions_scored", 0)} · '
+                   f'Excluded: {result.get("questions_excluded", 0)} · '
+                   f'Needs review: {result.get("questions_requires_review", 0)} · '
+                   f'Failed: {result.get("questions_failed", 0)}')
+    else:
+        st.caption('Status: ' + status.replace('_', ' '))
+    if result.get('reason'):
+        st.info(result['reason'])
+    questions = {q['question_id']: q['question'] for q in result.get('questions', [])}
+    rows = result.get('judgments') or []
+    if rows:
+        st.dataframe([
+            {'question_id': row.get('question_id'),
+             'question': questions.get(row.get('question_id'), ''),
+             **{key: row.get(key) for key in ('status', 'points', 'report_field',
+                                               'report_quote', 'reference_page',
+                                               'reference_quote', 'rationale', 'error_code')}}
+            for row in rows
+        ], hide_index=True, alt='Gold comparison judgments and report/reference evidence')
+    comparisons = result.get('comparisons') or []
+    if comparisons:
+        st.dataframe(comparisons, hide_index=True,
+                     alt='Gold comparison claim judgments and supporting quotations')
+    if result.get('improvements'):
+        with st.expander('Evaluation findings to review'):
+            for item in result['improvements']:
+                st.write(str(item.get('report_field') or 'Report') + ' — ' +
+                         str(item.get('issue') or 'Review this finding.'))
+                st.write(item.get('action') or 'Human review required.')
+
+
+def show_final_report_evaluation_trace(case, result):
+    """Show section-level final-report metrics and explicit evaluation control."""
+    st.subheader('Final report evaluation')
+    st.markdown('**LLM-as-a-Judge · Semantic similarity (BGE cosine similarity/distance) · BERTScore**')
+    if not result:
+        st.info('Final report evaluation status is unavailable.')
+        return
+    status = result.get('status', 'unavailable')
+    st.caption(result.get('notice') or 'Gold reference is evaluator-only and excluded from report generation and RAG.')
+    if result.get('reason'):
+        st.info(result['reason'])
+    if result.get('reference_id'):
+        st.caption(f"Reference: {result['reference_id']} · {result.get('reference_page_count', '—')} pages · section-level comparison")
+    if result.get('sections_not_available'):
+        st.caption('No generated section available: ' + ', '.join(result['sections_not_available']))
+
+    if status in {'not_requested', 'interrupted', 'failed', 'incomplete'}:
+        from blackwing import copilot
+        label = 'Run final report evaluations' if status == 'not_requested' else 'Retry final report evaluations'
+        if st.button(label, key='run-final-report-evals-' + str(result.get('run_id') or case['report_run_id'])):
+            try:
+                copilot.start_final_report_evaluation(case['incident']['case_id'], case['report_run_id'])
+            except httpx.HTTPStatusError as exc:
+                if exc.response.status_code == 409:
+                    st.error('Wait for the active investigation to finish, or check that a unique matching gold report exists in the configured directory.')
+                elif exc.response.status_code == 503:
+                    st.error('The evaluator-only gold directory is unavailable. Check the API environment and directory contents.')
+                else:
+                    st.error(f'Final report evaluation could not start (HTTP {exc.response.status_code}).')
+            except httpx.HTTPError:
+                st.error('Could not reach the API to start final report evaluation.')
+            else:
+                st.rerun()
+    elif status in {'queued', 'running'}:
+        st.info(f"Evaluation {status}. Section results are saved as each section completes.")
+    elif status == 'not_applicable':
+        st.caption('No matching gold reference applies to this saved run, so no score is produced.')
+    elif status == 'unavailable':
+        st.caption('Configure the evaluator-only gold directory in the API environment to enable section scoring.')
+        st.button('Run final report evaluations', disabled=True,
+                  help='Set BLACKWING_FINAL_REPORT_GOLD_DIR and restart FastAPI.',
+                  key='final-report-evals-disabled-' + str(result.get('run_id') or case.get('report_run_id') or 'none'))
+    elif status == 'not_assessable':
+        st.caption('No unique matching gold PDF was found, so unrelated reports were not used.')
+        st.button('Run final report evaluations', disabled=True,
+                  help='Add a uniquely matching PDF to the configured gold directory.',
+                  key='final-report-evals-unmatched-' + str(result.get('run_id') or case.get('report_run_id') or 'none'))
+
+    overall = result.get('overall') or {}
+    if result.get('metric_warnings'):
+        st.caption('Some metrics could not be computed: ' + ', '.join(
+            f"{item.get('metric')} ({item.get('error_type')})" for item in result['metric_warnings']))
+    if overall:
+        metrics = st.columns(3)
+        with metrics[0]:
+            value = overall.get('llm_judge_score')
+            st.metric('LLM judge', f'{value:g}/100' if value is not None else 'Unavailable')
+        with metrics[1]:
+            value = overall.get('cosine_similarity_percent')
+            st.metric('Cosine similarity', f'{value:g}%' if value is not None else 'Unavailable')
+            distance = overall.get('cosine_distance')
+            if distance is not None:
+                st.caption(f'Cosine distance: {distance:.4f}')
+        with metrics[2]:
+            value = overall.get('bertscore_f1_percent')
+            st.metric('BERTScore F1', f'{value:g}%' if value is not None else 'Unavailable')
+        st.caption(overall.get('aggregation', 'Metrics are reported separately; they are not combined.'))
+
+    sections = result.get('sections') or {}
+    if sections:
+        rows = []
+        for key, item in sections.items():
+            judge = item.get('llm_judge') or {}
+            cosine = item.get('cosine') or {}
+            bert = item.get('bertscore') or {}
+            rows.append({
+                'Report section': item.get('title') or key,
+                'LLM judge / 100': judge.get('score'),
+                'Coverage / 100': judge.get('coverage'),
+                'Consistency / 100': judge.get('consistency'),
+                'Cosine similarity': cosine.get('cosine_similarity'),
+                'Cosine distance': cosine.get('cosine_distance'),
+                'BERTScore F1': bert.get('f1'),
+                'Status': item.get('status'),
+            })
+        st.dataframe(rows, hide_index=True, use_container_width=True,
+                     alt='Final report evaluation scores by published report section')
+        for key, item in sections.items():
+            with st.expander(item.get('title') or key):
+                st.caption('Gold section used: ' + str(item.get('reference_scope') or ''))
+                judge = item.get('llm_judge') or {}
+                if judge.get('rationale'):
+                    st.write(judge['rationale'])
+                if judge.get('material_omissions'):
+                    st.markdown('**Material omissions identified by judge**')
+                    for line in judge['material_omissions']:
+                        st.write('• ' + line)
+                if judge.get('unsupported_or_conflicting_claims'):
+                    st.markdown('**Unsupported or conflicting claims**')
+                    for line in judge['unsupported_or_conflicting_claims']:
+                        st.write('• ' + line)
+                if item.get('judge_error'):
+                    st.caption('LLM judge unavailable for this section: ' + str(item['judge_error']))
+    if status in {'queued', 'running'}:
+        st.caption('Refresh this tab to load newly completed section scores.')
+
+
 def show_question_evaluation(case, result):
-    st.subheader('Gold comparison score')
-    st.caption('LaaJ (LLM-as-a-Judge) / gold evaluation. Separate from structural completeness and aviation risk. Human review required.')
-    st.caption('Question-based comparison of the saved report against its matching approved reference.')
+    st.subheader('Gold comparison')
+    st.caption('LLM judge against an approved reference, when available. Human review required.')
     if result.get('reference_id'):
         st.caption('Matching reference: ' + result['reference_id'])
     if result.get('evaluation_split') == 'held_out_reference_case':
@@ -24,7 +372,10 @@ def show_question_evaluation(case, result):
     st.caption('Comparison status: ' + status.replace('_', ' '))
     if status == 'unavailable':
         st.info(result.get('reason') or 'Matching approved questions and reference are unavailable.')
-        return result.get('reference_case')
+        return False
+    if status == 'not_assessable':
+        st.info(result.get('reason') or 'Question-based gold comparison is unavailable for this report.')
+        return False
 
     total = result.get('questions_total', 0)
     completed = result.get('questions_completed', 0)
