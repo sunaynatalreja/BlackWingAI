@@ -19,7 +19,12 @@ from blackwing.agents.compliance.agent import normalize_model_payload as normali
 from blackwing.agents.critic.agent import normalize_model_payload as normalize_critic_payload
 from blackwing.agents.risk.agent import normalize_model_payload as normalize_risk_payload
 from blackwing.agents.risk.schema import RiskOutput
-from blackwing.agents.report.schema import ReportSectionDraft, normalize_report_section
+from blackwing.agents.report.schema import (
+    ReportSectionDraft,
+    normalize_report_plan_payload,
+    normalize_report_section,
+)
+from blackwing.agents.shared_schema import normalize_evidence_state_labels
 from blackwing.config import Settings
 from blackwing.diagnostics import model_request
 from blackwing.rag.small_context import build_small_messages, verify_retry_budget
@@ -214,6 +219,17 @@ async def invoke_agent(
                 parsed = normalize_risk_payload(parsed)
             elif spec.key.startswith("report_") and spec.output_schema is ReportSectionDraft:
                 parsed = normalize_report_section(parsed)
+            elif spec.key == "report_planner":
+                parsed, plan_normalized = normalize_report_plan_payload(parsed)
+                if plan_normalized:
+                    logger.warning("Report planner output normalized; accepted task_order alias and enforced canonical task order")
+            evidence_state_changes = normalize_evidence_state_labels(parsed)
+            if evidence_state_changes:
+                logger.warning(
+                    "Agent evidence-state labels normalized to unknown; agent=%s count=%s",
+                    spec.key,
+                    evidence_state_changes,
+                )
             validated = spec.output_schema.model_validate(parsed).model_dump(mode="json")
             logger.info(
                 "Agent response validated; agent=%s provider=%s model=%s attempt=%s elapsed_seconds=%.2f response_chars=%s",
@@ -292,6 +308,12 @@ async def invoke_agent(
                     "Omit optional source_ids and rationale; do not duplicate citations. "
                     "Keep the seven investigation top-level keys, with unused lists empty. "
                     "evidence_state must be documented_fact, reported_observation, analytical_inference, hypothesis or unknown; no custom labels."
+                )
+            elif spec.key == "report_planner":
+                instruction += (
+                    'Return exactly {"task_ids":["overview","findings_and_causes",'
+                    '"comparisons_and_compliance","risk_and_follow_up"]}. '
+                    "Do not use task_order or add other keys."
                 )
             elif spec.key == "mitigation":
                 instruction += (

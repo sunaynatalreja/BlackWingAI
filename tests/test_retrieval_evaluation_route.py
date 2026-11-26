@@ -10,6 +10,7 @@ def test_route_recomputes_scoped_recall_from_approved_qrels_and_saved_rankings(t
     qrels = {
         'unit': 'document', 'index_signature': 'sig', 'scope_id': 'qrels-test',
         'scope_description': 'One reviewed query in a bounded test corpus.',
+        'full_corpus_relevance_complete': True,
         'approval': {'status': 'APPROVED'}, 'eligible_ids': ['A', 'B', 'C'],
         'questions': [{'question_id': 'Q1', 'query': 'query', 'complete_relevance': True,
                        'relevant_ids': ['A', 'C']}],

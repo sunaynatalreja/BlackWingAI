@@ -65,6 +65,23 @@ REPORT_TASK_ORDER: tuple[str, ...] = (
 )
 
 
+def normalize_report_plan_payload(payload: dict) -> tuple[dict, bool]:
+    """Repair the common ``task_order`` alias and enforce canonical order."""
+    if not isinstance(payload, dict):
+        return payload, False
+    normalized = dict(payload)
+    used_alias = False
+    if "task_ids" not in normalized and isinstance(normalized.get("task_order"), list):
+        normalized["task_ids"] = normalized.pop("task_order")
+        used_alias = True
+    tasks = normalized.get("task_ids")
+    if isinstance(tasks, list) and len(tasks) == len(REPORT_TASK_ORDER) and set(tasks) == set(REPORT_TASK_ORDER):
+        if tasks != list(REPORT_TASK_ORDER):
+            normalized["task_ids"] = list(REPORT_TASK_ORDER)
+            used_alias = True
+    return normalized, used_alias
+
+
 class ReportPlanOutput(APIModel):
     """A constrained plan: task IDs are fixed and section work is independent."""
 
