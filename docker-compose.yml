@@ -1,0 +1,97 @@
+services:
+  api:
+    build: .
+    image: blackwing-ai:latest
+    env_file:
+      - path: .env
+        required: true
+    ports: ["127.0.0.1:8000:8000"]
+    environment:
+      BLACKWING_INSECURE_TLS: "1"
+      PYTHONPATH: /app:/app/insecure_tls
+    volumes:
+      - ./insecure_tls:/app/insecure_tls:ro        # TEMP: TLS-verification shim
+      - bw_data:/data                              # SQLite history
+      - bw_rag_cache:/app/rag_cache                # embedding cache
+      - ./rag_indexes:/app/rag_indexes             # index built by the rag-build step
+      - ./certs:/app/certs:ro                      # llm-ca.crt, embeddings-ca.crt (optional override)
+    restart: unless-stopped                        # keep ONE api replica (SQLite + API-key rate limit)
+
+  ui:
+    image: blackwing-ai:latest
+    depends_on: { api: { condition: service_healthy } }
+    environment:
+      BLACKWING_UI_API_URL: http://api:8000
+      BLACKWING_INSECURE_TLS: "1"
+      PYTHONPATH: /app:/app/insecure_tls
+    volumes:
+      - ./insecure_tls:/app/insecure_tls:ro        # TEMP: TLS-verification shim
+    command: ["python", "-m", "streamlit", "run", "blackwing/ui.py",
+              "--server.address", "0.0.0.0", "--server.port", "8501", "--server.headless", "true"]
+    ports: ["127.0.0.1:8501:8501"]
+    restart: unless-stopped
+
+  rag-build:                                       # one-off: docker compose --profile tools run --rm rag-build
+    profiles: ["tools"]
+    image: blackwing-ai:latest
+    env_file:
+      - path: .env
+        required: true
+    command: ["python", "-m", "blackwing.rag.build", "--dataset-root", "datasets/BLACKWING_DATA",
+              "--output", "/app/rag_indexes/blackwing-kb-iit-bge-v1", "--backend", "iit",
+              "--cache", "/app/rag_cache/embeddings_iit.sqlite", "--strategy", "fixed"]
+    volumes:
+      - ./rag_indexes:/app/rag_indexes
+      - bw_rag_cache:/app/rag_cache
+      - ./certs:/app/certs:ro
+
+  # ---- RAG index pipeline (team procedure), run in this order -----------------
+  # 0. put the base index (expanded_bge_asrs_20261121) in ./rag_indexes/
+  # 1. metadata-v2  -> rag_indexes/expanded_bge_asrs_metadata_v2   (local BGE, no IIT calls)
+  # 2. iit-index-check -> config check only, no IIT calls
+  # 3. iit-index-build -> embeds uncached chunks via IIT, creates rag_indexes/sunayana_iit_bge_v1
+  metadata-v2:
+    profiles: ["tools"]
+    image: blackwing-ai:latest
+    command: ["python", "BLACKWING_METADATA_V2_CREATION.py"]
+    volumes:
+      - ./rag_indexes:/app/rag_indexes
+
+  iit-index-check:
+    profiles: ["tools"]
+    image: blackwing-ai:latest
+    env_file:
+      - path: .env
+        required: true
+    command: ["python", "build_iit_index.py", "--source", "rag_indexes/expanded_bge_asrs_metadata_v2",
+              "--output", "rag_indexes/sunayana_iit_bge_v1"]
+    volumes:
+      - ./rag_indexes:/app/rag_indexes
+      - ./certs:/app/certs:ro
+      - bw_iit_cache:/app/cache
+
+  iit-index-build:
+    profiles: ["tools"]
+    image: blackwing-ai:latest
+    env_file:
+      - path: .env
+        required: true
+    command: ["python", "build_iit_index.py", "--source", "rag_indexes/expanded_bge_asrs_metadata_v2",
+              "--output", "rag_indexes/sunayana_iit_bge_v1", "--build"]
+    volumes:
+      - ./rag_indexes:/app/rag_indexes
+      - ./certs:/app/certs:ro
+      - bw_iit_cache:/app/cache                    # resumable: reruns reuse already-embedded batches
+
+  tests:                                           # docker compose --profile tools run --rm tests
+    profiles: ["tools"]
+    build:
+      context: .
+      target: test
+    image: blackwing-ai:test
+    command: ["python", "-m", "pytest", "-q"]
+
+volumes:
+  bw_data:
+  bw_rag_cache:
+  bw_iit_cache:
