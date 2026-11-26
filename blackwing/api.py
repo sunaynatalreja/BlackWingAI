@@ -842,3 +842,6 @@ app.include_router(build_evaluation_router(get_repository, get_settings))
 
 from blackwing.final_report_evaluation_routes import build_router as build_final_report_evaluation_router
 app.include_router(build_final_report_evaluation_router(get_repository, get_settings))
+
+from blackwing.retrieval_evaluation_routes import build_router as build_retrieval_evaluation_router
+app.include_router(build_retrieval_evaluation_router(get_settings))

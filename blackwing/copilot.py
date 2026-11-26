@@ -193,6 +193,10 @@ def get_final_report_evaluation(case_id, run_id):
     return request('GET', f'/api/v1/cases/{case_id}/runs/{run_id}/final-report-evaluation')
 
 
+def get_retrieval_evaluation():
+    return request('GET', '/api/v1/evaluations/retrieval')
+
+
 def start_final_report_evaluation(case_id, run_id):
     return request('POST', f'/api/v1/cases/{case_id}/runs/{run_id}/final-report-evaluation')
 

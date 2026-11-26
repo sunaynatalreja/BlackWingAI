@@ -158,29 +158,79 @@ def show_run_trace(run, report=None):
         st.subheader('Evaluation activity')
         st.caption('This trace shows evaluation status and coverage. Report completeness and gold-comparison scores stay in the Investigation report.')
         evaluations = []
-        try:
-            final_eval = copilot.get_final_report_evaluation(case_id, run_id)
-            sections = final_eval.get('sections') or {}
-            scored = sum(bool((row.get('llm_judge') or {}).get('score') is not None) for row in sections.values())
-            semantic = sum(bool(row.get('cosine') or row.get('bertscore')) for row in sections.values())
-            evaluations.append({'Evaluation': 'Final report section evaluation',
-                                'Status': str(final_eval.get('status') or 'unknown').replace('_', ' '),
-                                'Coverage': f'{scored}/{final_eval.get("sections_total", len(sections))} judge sections · {semantic}/{len(sections)} with semantic metrics'})
-        except httpx.HTTPError:
-            evaluations.append({'Evaluation': 'Final report section evaluation', 'Status': 'unavailable',
-                                'Coverage': 'Could not load evaluation status'})
-        try:
-            report_eval = copilot.get_report_evaluation(case_id, run_id)
-            total = report_eval.get('questions_total', 0)
-            completed = report_eval.get('questions_completed', 0)
-            evaluations.append({'Evaluation': 'Question-based report evaluation',
-                                'Status': str(report_eval.get('status') or 'unknown').replace('_', ' '),
-                                'Coverage': f'{completed}/{total} judgments validated' if total else 'No question set configured'})
-        except httpx.HTTPError:
-            evaluations.append({'Evaluation': 'Question-based report evaluation', 'Status': 'unavailable',
-                                'Coverage': 'Could not load evaluation status'})
+        run_status = str(audit.get('status') or run.get('status') or '').lower()
+        if run_status != 'completed':
+            evaluations.extend([
+                {'Evaluation': 'Final report section evaluation', 'Status': 'waiting',
+                 'Coverage': 'Available after the investigation report completes'},
+                {'Evaluation': 'Question-based report evaluation', 'Status': 'waiting',
+                 'Coverage': 'Available after the investigation report completes'},
+            ])
+        else:
+            try:
+                final_eval = copilot.get_final_report_evaluation(case_id, run_id)
+                sections = final_eval.get('sections') or {}
+                scored = sum(bool((row.get('llm_judge') or {}).get('score') is not None) for row in sections.values())
+                semantic = sum(bool(row.get('cosine') or row.get('bertscore')) for row in sections.values())
+                evaluations.append({'Evaluation': 'Final report section evaluation',
+                                    'Status': str(final_eval.get('status') or 'unknown').replace('_', ' '),
+                                    'Coverage': f'{scored}/{final_eval.get("sections_total", len(sections))} judge sections · {semantic}/{len(sections)} with semantic metrics'})
+            except httpx.HTTPError as exc:
+                status = exc.response.status_code if exc.response is not None else None
+                waiting = status == 409
+                evaluations.append({'Evaluation': 'Final report section evaluation',
+                                    'Status': 'waiting' if waiting else 'unavailable',
+                                    'Coverage': 'Available after the investigation report completes' if waiting else 'Could not load evaluation status'})
+            try:
+                report_eval = copilot.get_report_evaluation(case_id, run_id)
+                total = report_eval.get('questions_total', 0)
+                completed = report_eval.get('questions_completed', 0)
+                evaluations.append({'Evaluation': 'Question-based report evaluation',
+                                    'Status': str(report_eval.get('status') or 'unknown').replace('_', ' '),
+                                    'Coverage': f'{completed}/{total} judgments validated' if total else 'No question set configured'})
+            except httpx.HTTPError as exc:
+                status = exc.response.status_code if exc.response is not None else None
+                waiting = status == 409
+                evaluations.append({'Evaluation': 'Question-based report evaluation',
+                                    'Status': 'waiting' if waiting else 'unavailable',
+                                    'Coverage': 'Available after the investigation report completes' if waiting else 'Could not load evaluation status'})
         st.dataframe(evaluations, hide_index=True, width='stretch',
                      alt='Evaluation stage status and completed coverage; numeric scores are displayed in the investigation report')
+
+    st.subheader('Retrieval benchmark')
+    st.caption('Offline retrieval quality against approved human relevance labels. This benchmark is separate from the selected run and report quality.')
+    try:
+        retrieval_eval = copilot.get_retrieval_evaluation()
+    except httpx.HTTPError:
+        retrieval_eval = {'status': 'unavailable', 'reason': 'Could not load retrieval benchmark results.'}
+    if retrieval_eval.get('status') == 'completed':
+        summaries = retrieval_eval.get('summary') or []
+        selected = next((row for row in summaries if row.get('method') == 'bm25'), None)
+        if selected:
+            cols = st.columns(2)
+            recall5, recall10 = selected.get('recall@5'), selected.get('recall@10')
+            cols[0].metric('BM25 Recall@5', f'{recall5:.1%}' if recall5 is not None else 'Unavailable')
+            cols[1].metric('BM25 Recall@10', f'{recall10:.1%}' if recall10 is not None else 'Unavailable')
+            item_label = 'documents' if retrieval_eval.get('unit') == 'document' else 'chunks'
+            st.caption(f"{selected.get('queries_measured', 0)}/{selected.get('queries_total', 0)} queries measured · "
+                       f"{retrieval_eval.get('unit', 'unknown')} level · scope: {retrieval_eval.get('scope_id', 'not recorded')}")
+            st.info(retrieval_eval.get('scope_description') or retrieval_eval.get('notice') or '')
+            query_rows = retrieval_eval.get('queries') or []
+            if query_rows:
+                st.dataframe([{
+                    'Query': row.get('question_id'), 'Status': row.get('status'),
+                    f'Relevant {item_label}': row.get('relevant_count'),
+                    f'Found {item_label} @5': row.get('relevant_retrieved@5'),
+                    'Recall@5': row.get('recall@5'),
+                    f'Found {item_label} @10': row.get('relevant_retrieved@10'),
+                    'Recall@10': row.get('recall@10'),
+                } for row in query_rows if row.get('method') == 'bm25'],
+                    hide_index=True, width='stretch',
+                    alt='Approved query-level BM25 Recall at 5 and 10 results')
+        else:
+            st.info('No approved BM25 retrieval benchmark is available.')
+    else:
+        st.info(retrieval_eval.get('reason') or 'Approved retrieval benchmark is unavailable.')
 
 
 def show_evaluation_options():
