@@ -198,7 +198,7 @@ def show_run_trace(run, report=None):
                      alt='Evaluation stage status and completed coverage; numeric scores are displayed in the investigation report')
 
     st.subheader('Retrieval benchmark')
-    st.caption('Offline retrieval quality against approved human relevance labels. This benchmark is separate from the selected run and report quality.')
+    st.caption('Offline BM25 retrieval benchmark using generic questions plus structured case context.')
     try:
         retrieval_eval = copilot.get_retrieval_evaluation()
     except httpx.HTTPError:
@@ -207,26 +207,59 @@ def show_run_trace(run, report=None):
         summaries = retrieval_eval.get('summary') or []
         selected = next((row for row in summaries if row.get('method') == 'bm25'), None)
         if selected:
+            query_rows = [row for row in (retrieval_eval.get('queries') or []) if row.get('method') == 'bm25']
             cols = st.columns(2)
-            recall5, recall10 = selected.get('recall@5'), selected.get('recall@10')
-            cols[0].metric('BM25 Recall@5', f'{recall5:.1%}' if recall5 is not None else 'Unavailable')
-            cols[1].metric('BM25 Recall@10', f'{recall10:.1%}' if recall10 is not None else 'Unavailable')
+            trial = retrieval_eval.get('source_hint_trial') or {}
+            recall_available = retrieval_eval.get('full_corpus_recall_available') is True
+            if trial.get('status') == 'technical_trial':
+                cols[0].metric('BM25 source-hint Hit@5 · trial', f"{trial['hit@5']:.1%}")
+                cols[1].metric('BM25 source-hint Hit@10 · trial', f"{trial['hit@10']:.1%}")
+                st.caption(f"{trial['hit@10_count']}/{trial['queries']} source hints found at 10 · "
+                           f"cases: {', '.join(trial['cases'])} · prior index: {trial.get('index_chunks')} chunks")
+                st.info('This is a broader technical-trial source-hint Hit@K proxy, not Recall@K. '
+                        'It uses one expected source hint per query and an older index. True corpus Recall@10 '
+                        'is still unavailable because the current approved labels cover only part of the index.')
+            else:
+                recall5 = selected.get('recall@5')
+                recall10 = selected.get('recall@10')
+                cols[0].metric('BM25 Recall@5',
+                               f'{recall5:.1%}' if recall_available and recall5 is not None else 'Not measurable')
+                cols[1].metric('BM25 Recall@10',
+                               f'{recall10:.1%}' if recall_available and recall10 is not None else 'Not measurable')
             item_label = 'documents' if retrieval_eval.get('unit') == 'document' else 'chunks'
-            st.caption(f"{selected.get('queries_measured', 0)}/{selected.get('queries_total', 0)} queries measured · "
-                       f"{retrieval_eval.get('unit', 'unknown')} level · scope: {retrieval_eval.get('scope_id', 'not recorded')}")
-            st.info(retrieval_eval.get('scope_description') or retrieval_eval.get('notice') or '')
-            query_rows = retrieval_eval.get('queries') or []
-            if query_rows:
-                st.dataframe([{
-                    'Query': row.get('question_id'), 'Status': row.get('status'),
-                    f'Relevant {item_label}': row.get('relevant_count'),
-                    f'Found {item_label} @5': row.get('relevant_retrieved@5'),
-                    'Recall@5': row.get('recall@5'),
-                    f'Found {item_label} @10': row.get('relevant_retrieved@10'),
-                    'Recall@10': row.get('recall@10'),
-                } for row in query_rows if row.get('method') == 'bm25'],
-                    hide_index=True, width='stretch',
-                    alt='Approved query-level BM25 Recall at 5 and 10 results')
+            if not trial:
+                st.caption(f"{selected.get('queries_measured', 0)}/{selected.get('queries_total', 0)} queries · "
+                           f"{retrieval_eval.get('judged_source_count', 0)} of "
+                           f"{retrieval_eval.get('retrieval_universe_count', 0)} sources judged")
+                if recall_available:
+                    st.info('Recall is measured against complete relevance judgments for the indexed retrieval corpus.')
+                else:
+                    st.info('Recall@k is not measurable yet: relevance judgments cover only part of the indexed corpus. '
+                            'The pilot label-coverage diagnostic is shown separately below and must not be read as Recall.')
+            baseline = retrieval_eval.get('query_only_control') or {}
+            if baseline:
+                base5 = baseline.get('labeled_source_coverage@5')
+                base10 = baseline.get('labeled_source_coverage@10')
+                value5 = f'{base5:.1%}' if base5 is not None else 'unavailable'
+                value10 = f'{base10:.1%}' if base10 is not None else 'unavailable'
+                with st.expander('Query-only control'):
+                    st.caption(f'Without case metadata · pilot label coverage: top 5 {value5} · top 10 {value10}')
+            if query_rows and not recall_available:
+                with st.expander('Pilot labeled-source coverage (diagnostic, not Recall)'):
+                    st.caption('This small pilot retrieves 11 of 11 labeled relevant sources at 10 passages. '
+                               'It covers five queries across two cases; the remaining indexed sources are unjudged, '
+                               'so this result is not a realistic estimate of corpus Recall@10.')
+                    st.dataframe([{
+                        'Query': row.get('question_id'), 'Status': row.get('status'),
+                        f'Relevant {item_label}': row.get('relevant_count'),
+                        'Sources hit @5': f"{row.get('relevant_retrieved@5', 0)} / {row.get('relevant_count', 0)}",
+                        'Pilot coverage @5': (f"{row['labeled_source_coverage@5']:.1%}"
+                                              if row.get('labeled_source_coverage@5') is not None else 'Unavailable'),
+                        'Sources hit @10': f"{row.get('relevant_retrieved@10', 0)} / {row.get('relevant_count', 0)}",
+                        'Pilot coverage @10': (f"{row['labeled_source_coverage@10']:.1%}"
+                                               if row.get('labeled_source_coverage@10') is not None else 'Unavailable'),
+                    } for row in query_rows], hide_index=True, width='stretch',
+                        alt='Pilot coverage of labeled relevant sources among top passage results; not corpus recall')
         else:
             st.info('No approved BM25 retrieval benchmark is available.')
     else:

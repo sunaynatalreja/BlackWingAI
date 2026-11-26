@@ -18,13 +18,42 @@ class EvidenceState(StrEnum):
 
 
 def _canonical_evidence_state(value):
-    # Normalize spelling format only. Unknown or stronger custom claims must
-    # still fail validation; no unverified assertion is promoted to a fact.
+    # Normalize known spelling variants. A label outside the closed enum is
+    # conservatively treated as unknown rather than failing the whole agent
+    # output or being promoted to a stronger evidence state.
     if isinstance(value, str):
         canonical = "_".join(value.strip().casefold().replace("-", " ").replace("_", " ").split())
         if canonical in {state.value for state in EvidenceState}:
             return canonical
-    return value
+    return EvidenceState.UNKNOWN.value
+
+
+def normalize_evidence_state_labels(payload):
+    """Conservatively normalize invalid nested evidence-state labels in-place.
+
+    Returns the number of values changed so the runtime can record that the
+    model used a non-contract label. No fact text or citations are modified.
+    """
+    changes = 0
+
+    def visit(value):
+        nonlocal changes
+        if isinstance(value, dict):
+            if "evidence_state" in value:
+                original = value["evidence_state"]
+                normalized = _canonical_evidence_state(original)
+                if original != normalized:
+                    value["evidence_state"] = normalized
+                    changes += 1
+            for key, child in value.items():
+                if key != "evidence_state":
+                    visit(child)
+        elif isinstance(value, list):
+            for child in value:
+                visit(child)
+
+    visit(payload)
+    return changes
 
 
 class ClaimOutput(APIModel):

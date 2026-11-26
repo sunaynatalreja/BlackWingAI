@@ -35,13 +35,21 @@ def test_run_trace_renders_structured_timeline_without_raw_json(monkeypatch):
         'status': 'not_requested', 'questions_total': 0,
     })
     monkeypatch.setattr(copilot, 'get_retrieval_evaluation', lambda: {
-        'status': 'completed', 'unit': 'document', 'scope_id': 'approved-test-scope',
+        'status': 'completed', 'unit': 'document', 'retrieval_unit': 'passage',
+        'judged_source_count': 50, 'retrieval_universe_count': 777,
+        'scope_id': 'approved-test-scope',
         'scope_description': 'Five queries over 50 reviewed sources.',
+        'full_corpus_recall_available': False,
+        'full_corpus_recall_unavailable_reason': 'Relevance judgments do not cover every source in the retrieval corpus.',
+        'query_only_control': {'labeled_source_coverage@5': 0.0, 'labeled_source_coverage@10': 0.0667},
         'summary': [{'method': 'bm25', 'queries_total': 5, 'queries_measured': 5,
-                     'recall@5': 0.4, 'recall@10': 0.5333}],
+                     'recall@5': None, 'recall@10': None,
+                     'labeled_source_coverage@5': 2/3, 'labeled_source_coverage@10': 2/3}],
         'queries': [{'question_id': 'Q1', 'method': 'bm25', 'status': 'measured',
                      'relevant_count': 3, 'relevant_retrieved@5': 2, 'recall@5': 2/3,
-                     'relevant_retrieved@10': 2, 'recall@10': 2/3}],
+                     'labeled_source_coverage@5': 2/3,
+                     'relevant_retrieved@10': 2, 'recall@10': 2/3,
+                     'labeled_source_coverage@10': 2/3}],
     })
 
     at = AppTest.from_string(SCRIPT).run()
@@ -50,8 +58,10 @@ def test_run_trace_renders_structured_timeline_without_raw_json(monkeypatch):
     assert any(metric.label == 'Tool calls' and metric.value == '2' for metric in at.metric)
     assert len(at.dataframe) >= 2  # Timeline and evaluation activity tables.
     assert any('scores stay in the Investigation report' in caption.value for caption in at.caption)
-    assert any(metric.label == 'BM25 Recall@5' and metric.value == '40.0%' for metric in at.metric)
-    assert any(metric.label == 'BM25 Recall@10' and metric.value == '53.3%' for metric in at.metric)
+    assert any(metric.label == 'Labeled-source coverage · top 5 passages' and metric.value == '66.7%' for metric in at.metric)
+    assert any(metric.label == 'Labeled-source coverage · top 10 passages' and metric.value == '66.7%' for metric in at.metric)
+    assert any('Full-corpus Recall@k cannot be calculated' in info.value for info in at.info)
+    assert any('Query-only control' in expander.label for expander in at.expander)
 
 
 def test_swagger_documents_trace_audit_and_operations_metrics_contracts():
