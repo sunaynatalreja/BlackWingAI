@@ -1,0 +1,18 @@
+# Only things that are not project content or must never ship:
+.git
+.venv
+**/__pycache__
+**/*.pyc
+.pytest_cache
+*.egg-info
+.DS_Store
+# secrets (pass via -e / .env at run time)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+# runtime state, recreated inside the container
+work/
+rag_cache/
+*.sqlite3
