@@ -1,0 +1,5 @@
+Synopsis:
+Flight Instructor on training flight with student in C-172 aircraft reported crossing runway hold short line without clearance.
+
+Narrative:
+I was providing instruction to a student on his first flight. We were instructed to taxi to the runup area Hot Spot X. After completing run-up we were instructed to taxi via X and hold short Runway XXR at [Taxiway] X and monitor Tower. I allowed the student to taxi to the hold short line for [Runway] XXR; while holding short of [Runway] XXR; Tower instructed us to cross [Runway] XXR and hold short [Runway] XXL at [Taxiway] X; I allowed the student to continue the taxi. While crossing the runway I looked at final to verify we were clear to taxi and then looked inside to turn all of our lights on. After clearing Runway XXR I looked back inside to turn our lights back off. When I looked up we had already crossed the hold short line for Runway XXL; I immediately applied brakes and brought the plane to a stop. Approximately 10 seconds after the incident another aircraft touched down on [Runway] XXL and was rolling out past us.

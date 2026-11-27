@@ -1,0 +1,13 @@
+{
+  "branch": "feature/arun-rag-risk-compliance",
+  "preexisting_python_files_changed": [
+    "blackwing/ui.py",
+    "blackwing/cloud/streamlit_app.py"
+  ],
+  "backend_implementation_unchanged": true,
+  "rag_files_compared": 12,
+  "rag_files_changed": 0,
+  "report_renderer_identical_to_source_branch": true,
+  "evidence_checklist_ast_identical_to_source_branch": true,
+  "source_ref": "b0e24b40b473162f9ee32758ee58ec5b54f81410"
+}

@@ -1,0 +1,5 @@
+Synopsis:
+PA28 pilot reported runway incursion during taxi.
+
+Narrative:
+I intended to taxi my aircraft northbound across Runway XX on the taxiway directly across from the fuel pit. (I don't recall the taxiway designator.) I looked to the east and saw an airplane in the run-up area for Runway XX. I started across the runway; just as I entered the runway I saw the airplane at [Runway] XX pull onto the runway and start a takeoff roll. I applied full throttle to clear the runway as quickly as possible. The other airplane got airborne well to the east of me; and cleared my path at an estimated 200 feet just as I exited the runway. I emphasize I was on the runway before the other airplane started his (her?) takeoff roll. There was no real conflict. Nevertheless; if the timing had been slightly different; or if I had not seen the other airplane as quickly as I did; things could have turned out differently. Since my airplane did not have an operative radio at the time; I do not know whether the other pilot made a radio call. ZZZ being an uncontrolled airport; many NORDO operations take place there. Next time I have to operate NORDO there; I will carry a handheld.

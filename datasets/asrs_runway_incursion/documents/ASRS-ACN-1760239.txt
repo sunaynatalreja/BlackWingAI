@@ -1,0 +1,5 @@
+Synopsis:
+Pilot reported violating taxi clearance and crossing an active runway.
+
+Narrative:
+The occurrence happened taxiing back to the hangar after the flight was finished. We had been flying and had very marginal VFR because of smoke from wildfires. All tower directives were clear and normal as expected; landing was normal and departure from runway was normal. Ground directed me to taxi and hold short XXL approach. The XYL; XXR runway has been closed for several weeks due to construction; which is my normal runway. XYR was the active runway at the time; I cannot give you a reason why; except for maybe being tired from flying in marginal smoky conditions that I just blew through the approach at XXL and held short of the approach at XXR. As I reached that approach I realized I had made a big mistake. I called ground immediately to say what I had done and then called Tower after. I do believe that tiredness from flying in such conditions could have added to the mistake; and in hindsight maybe I should have waited another day before flying.

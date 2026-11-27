@@ -1,0 +1,5 @@
+Synopsis:
+Corporate Pilot reported Runway Hold Short lines are faded.
+
+Narrative:
+Received ATIS and requested taxi clearance with VFR Flight Following. Instructed to taxi to runway 35R via the ramp and cross Runway 35L. Started the taxi and received the VFR Flight Following instructions on the taxi. During taxi I was looking for the ramp taxiway lines; unable to see them due to fading. Entered Runway 35L; with no knowledge of crossing a hold short lines.  There is no difference between ramp and Runway 35L concrete and the ramp was covered in weeds.  Cleared the runway at 35L and asked for instructions from Tower to Runway 35R. Was instructed to taxi down Runway 35L to Taxiway G then holdshort of Runway 35R.

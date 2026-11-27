@@ -1,0 +1,140 @@
+BLACKWING EVALUATION IN VS CODE — 24 NOVEMBER 2026
+Arun & Sunayna approve
+
+Work from the BlackWingAI-Arun-Git repository on feature/arun-rag-risk-compliance.
+The commands below assume its virtual environment is activated.
+
+1. OFFLINE RETRIEVAL CHECK: NO MODEL, EMBEDDING CALL OR INDEX REBUILD
+
+python -m blackwing.evaluation.retrieval --qrels .\evaluation_results\recall5q_20261123\qrels_document.json --bm25-index .\rag_indexes\expanded_iit_bge_20261122_v1 --output .\work\recall_check_01
+
+Use a fresh output directory on each run. metrics.json contains per-query and macro
+Recall@5/10; rankings.json preserves the actual ranked IDs.
+This initial benchmark is DOCUMENT recall for five questions over 50 approved,
+unchanged labeled sources inside the current 777-source index. Documents are ranked
+by their best-scoring passage, then deduplicated before cutoff. It is NOT passage
+recall, full-777-source recall, or a dense/hybrid/reranker result. The other methods
+need compatible ranked results and qrels; they were not called by this delivery.
+
+2. LIST EXISTING COMPLETED REPORTS: READ-ONLY, NO RECOVERY OR MODEL CALLS
+
+python -m blackwing.evaluation.cli --database .\work\blackwing.sqlite3 --list-runs
+
+Choose a matching saved case_id/run_id. Do not create a duplicate investigation.
+
+3. PREPARE ONE SAVED REPORT EVALUATION: NO MODEL CALL
+
+python -m blackwing.evaluation.cli --database .\work\blackwing.sqlite3 --case-id CASE_ID --run-id RUN_ID --output .\work\judge_prepare_01
+
+Replace CASE_ID/RUN_ID. The output contains protected expected-answer/reference
+excerpts and must remain evaluation-only. Never upload it as incident evidence,
+put it in RAG sources, or use it as a generation prompt. Default mode is preparation;
+score remains null and status is PREPARED_NOT_EXECUTED.
+
+4. START A HOSTED EVALUATION ONLY WHEN READY TO SPEND IIT QUOTA
+
+Restart FastAPI to load the new routes. Keep the already configured separate LM/BGE
+credentials and existing index. Do not rebuild embeddings.
+
+python -m uvicorn blackwing.api:app --host 127.0.0.1 --port 8001
+
+In another VS Code PowerShell terminal:
+
+.\scripts\report_evaluation.ps1 -CaseId CASE_ID -RunId RUN_ID -Start
+.\scripts\report_evaluation.ps1 -CaseId CASE_ID -RunId RUN_ID
+
+-Start posts a background evaluation job. The second command reads status and
+saved progress; it never starts model inference. Poll manually as needed. The same
+routes are available in http://127.0.0.1:8001/docs under report-evaluation.
+POST: /api/v1/cases/{case_id}/runs/{run_id}/report-evaluation
+GET:  /api/v1/cases/{case_id}/runs/{run_id}/report-evaluation
+
+JFK has ten approved questions, Austin fifteen. A full job can use one request per
+question plus bounded validation retries. Calls reuse the existing paced hosted
+helper and TLS verification. Other learners can still occupy the shared group key.
+Do not run a separate CLI judge concurrently with API model tasks: serialization
+is process-local. The server API is the preferred execution route.
+
+CLI alternative (explicitly consumes model quota): add --execute to command 3.
+The CLI writes separate evaluation results without changing saved reports. The
+server API stores progress in the existing SQLite run metadata and recovers an
+interrupted evaluation, reusing only validated, identity-matching judgments.
+
+5. UNDERSTAND WHAT IS READY
+
+The existing UI layout and tabs are preserved. The existing Gold comparison score
+panel now uses the question-based evaluator when approved matching questions and
+reference are available. Its Compare with gold report button starts a background
+job. Refresh comparison status reads saved progress; opening or refreshing a report
+never launches judge inference. Failed, interrupted or unvalidated results have no
+invented numerical score. Question quotations and improvement actions are displayed.
+The old asserted-claim/synthetic-policy comparator remains available for cases
+without approved question coverage, with that scope stated. It is not question recall.
+Stored old scores are preserved and are not converted into question-based scores.
+
+After restarting FastAPI, launch the preserved Streamlit entry point in another
+terminal from the repository root:
+
+python -m streamlit run blackwing/ui.py --server.port 8502
+
+Open http://localhost:8502, select an existing saved report, and use its existing
+Gold comparison score panel. Controlled live evaluation consumes IIT quota only
+after the comparison button is clicked. Do not submit a duplicate investigation.
+Additional held-out references do not establish that a case was used in development;
+their split is disclosed separately from a match to the preserved reference catalog.
+
+The 80-question workbook is unchanged and all 80 rows were already APPROVED. Its
+cases include JFK, Austin, Goa, Delhi 2013, Delhi 2025 and synthetic policy questions.
+Existing question/final-reference coverage does not automatically cover every one
+of the nine final reports. Missing matching questions or final references return
+an unavailable result; no unrelated reference or new answer is invented.
+
+For additional approved case pairs, set BLACKWING_EVAL_CASES_MANIFEST to the private
+approved_extra_cases_PRIVATE.json supplied separately. The first three new US
+case pairs are registered. Seven other candidates retain source/reference gates.
+The manifest and expected answers are not stored in the application source tree.
+
+6. COMPLETENESS 97% AND RISK/VERIFICATION
+
+Completeness is recomputed from saved report data on UI rendering. Ten of fifteen
+completed saved reports currently score 97: they lose three points because Critic
+review/issue handling earns 2/5. There is no cached completeness field in those runs.
+This is structural completeness, not 97% factual accuracy.
+
+Risk/Verification prompts now contain internal evidence checklists and require
+concise public findings in the existing JSON fields. They do not expose private
+chain-of-thought, access gold answers, change the risk matrix, or force a rating.
+
+The installed tokenizer returned BatchEncoding; the old counter counted its two
+keys. The fixed counter reads input_ids and handles flat/single-batch IDs. The
+prepared saved-JFK packets were checked locally: 2384-2639 input tokens, plus 768
+output and 256 safety reserve, all below 8192. No hosted call was used for that check.
+
+Saved reports created before input-snapshot capture retain their history. Their
+original input availability cannot be reconstructed as complete by assumption.
+Unverifiable absence/abstention therefore needs review rather than an invented
+zero or a fabricated 100. Correct/partial/contradictory comparisons require exact
+report and matching-reference quotations. Numerical aggregation is deterministic.
+
+The next live checks are one seen report evaluation, human comparison of its
+judgments, then approved unseen testing. Keep completeness, Gold comparison,
+retrieval recall and aviation risk separate. No commit, merge or push was made.
+
+7. GENERIC SECTION-LEVEL FINAL REPORT EVALUATION
+
+Set this in the API terminal before starting FastAPI (the directory path is read
+through config/blackwing.properties; gold PDFs are not added to RAG or evidence):
+
+export BLACKWING_FINAL_REPORT_GOLD_DIR="$HOME/Downloads/BLACKWING_REAL_UNSEEN_5_20261124_v2/EVALUATOR_ONLY"
+
+After restarting FastAPI and Streamlit, open a completed report, select Run
+trace, and choose Run final report evaluations. The evaluator searches this
+directory recursively and matches PDFs to a case using its source incident ID,
+then date/location as fallback. It extracts matching headings where available;
+otherwise BGE selects report-relevant passages from the matched PDF. It saves
+per-section LLM-judge coverage/consistency, cosine similarity/distance, and local
+BERTScore precision/recall/F1. Metrics remain separate. Qwen and hosted embedding
+calls occur only after the button click; BERTScore runs locally and may download
+weights on first use. Install the updated dependencies with
+`pip install -r requirements.txt`. Ambiguous or missing gold matches are left
+unscored rather than compared with an unrelated report.

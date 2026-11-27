@@ -8,6 +8,7 @@ from blackwing.agents.risk import SPEC as RISK
 from blackwing.agents.mitigation import SPEC as MITIGATION
 from blackwing.agents.critic import SPEC as CRITIC
 from blackwing.agents.verification import SPEC as VERIFICATION
+from blackwing.agents.report import SPEC as REPORT
 
 
 AGENT_SPECS: tuple[AgentSpec, ...] = (
@@ -18,5 +19,6 @@ AGENT_SPECS: tuple[AgentSpec, ...] = (
     MITIGATION,
     CRITIC,
     VERIFICATION,
+    REPORT,
 )
 AGENT_BY_ID = {spec.key: spec for spec in AGENT_SPECS}

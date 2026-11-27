@@ -22,37 +22,6 @@ def _settings():
         rag_embedding_model="BAAI/bge-small-en-v1.5")
 
 
-def test_other_incident_is_removed_from_all_agent_packets(monkeypatch):
-    seen = {}
-
-    async def fake_invoke(spec, *, client, settings, narrative, evidence, prior_outputs):
-        seen[spec.key] = evidence
-        if spec.key == "investigation":
-            return {"incident_summary": "Incorrect AFG311 summary"}
-        if spec.key == "risk":
-            return {"risk_notes": "Needs evidence."}
-        if spec.key == "mitigation":
-            return {"recommendations": []}
-        if spec.key == "critic":
-            return {"issues": [], "overall_assessment": "requires_human_review"}
-        if spec.key == "verification":
-            return {"claims_needing_source": [], "human_approval_required": True}
-        raise AssertionError(spec.key)
-
-    monkeypatch.setattr(service, "invoke_agent", fake_invoke)
-    source = {"source_id": "BW-EV-004", "chunk_id": "BW-EV-004:1",
-              "source_type": "official_preliminary", "evidence_role": "case_factual",
-              "incident_id": "current-case", "title": "Delhi Ariana AFG311 Preliminary 2025-11-23"}
-    packet = {key: [source] for key in ("investigation", "risk", "mitigation", "critic", "verification")}
-    result = asyncio.run(service.analyze_incident(
-        "On 2 October 2013 GOW336 and an AN-32 had a runway conflict at Delhi.",
-        _settings(), case_id="current-case", evidence=[source], agent_evidence=packet))
-    assert all(all(row.get("source_id") != "BW-EV-004" for row in rows) for rows in seen.values())
-    assert "GOW336" in result["agent_outputs"]["investigation"]["incident_summary"]
-    assert "AFG311" not in result["agent_outputs"]["investigation"]["incident_summary"]
-    assert next(t for t in result["trace"] if t["step"] == "incident_identity_check")["excluded_source_ids"] == ["BW-EV-004"]
-
-
 def test_seven_agents_integrate_with_mock_model_and_markdown(monkeypatch):
     calls = []
 

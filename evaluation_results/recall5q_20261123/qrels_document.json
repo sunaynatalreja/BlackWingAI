@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "unit": "document",
+  "index_signature": "5a4031a05054904abac5b6d443f87ee58f8a378475a84003c8d778c64da93ae9",
+  "scope_id": "approved-5q-50-unchanged-sources-20261123",
+  "scope_description": "Five existing questions over the 50 previously labeled, unchanged non-protected sources present in the 777-source IIT index. The other 727 sources are outside this benchmark; this is NOT whole-corpus or passage-level recall.",
+  "approval": {
+    "status": "APPROVED",
+    "statement": "Arun & Sunayna approve",
+    "approved_by": [
+      "Arun",
+      "Sunayna"
+    ]
+  },
+  "label_source_sha256": "e99b4a6a566a7d29788f234a6463050457d6fa4076e58063d78dacaca7e21de3",
+  "source_hash_validation": "All 50 PDFs have identical source hashes in the prior labeled index and current index.",
+  "eligible_ids": [
+    "BW-EV-001",
+    "BW-EV-002",
+    "BW-EV-003",
+    "BW-EV-004",
+    "BW-EV-006",
+    "BW-EV-007",
+    "BW-EV-008",
+    "BW-EV-009",
+    "BW-EV-010",
+    "BW-EV-011",
+    "BW-EV-012",
+    "BW-EV-013",
+    "BW-EV-014",
+    "BW-EV-015",
+    "BW-GD-001",
+    "BW-GD-002",
+    "BW-GD-003",
+    "BW-GD-004",
+    "BW-GD-005",
+    "BW-GD-006",
+    "BW-GD-007",
+    "BW-GD-008",
+    "BW-GD-009",
+    "BW-GD-010",
+    "BW-GD-011",
+    "BW-GD-012",
+    "BW-GD-013",
+    "BW-GD-014",
+    "BW-GD-015",
+    "BW-MT-001",
+    "BW-MT-002",
+    "BW-MT-003",
+    "BW-MT-004",
+    "BW-RG-001",
+    "BW-RG-002",
+    "BW-RG-003",
+    "BW-RG-004",
+    "BW-RG-005",
+    "BW-RG-006",
+    "BW-RG-007",
+    "BW-RG-008",
+    "BW-RG-009",
+    "BW-RK-001",
+    "BW-RK-002",
+    "BW-RK-003",
+    "BW-RK-004",
+    "BW-RK-005",
+    "BW-RK-006",
+    "BW-RK-007",
+    "BW-RK-008"
+  ],
+  "questions": [
+    {
+      "question_id": "BW-G001",
+      "query": "On which local date and at what airport did the AAL106/DAL1943 occurrence take place?",
+      "complete_relevance": true,
+      "relevant_ids": [
+        "BW-EV-001",
+        "BW-EV-002",
+        "BW-EV-003"
+      ]
+    },
+    {
+      "question_id": "BW-G002",
+      "query": "Name the two flights and aircraft types involved in the JFK incursion.",
+      "complete_relevance": true,
+      "relevant_ids": [
+        "BW-EV-001",
+        "BW-EV-002",
+        "BW-EV-003"
+      ]
+    },
+    {
+      "question_id": "BW-G005",
+      "query": "What difference is shown between AAL106\u2019s assigned taxi route and the observed route?",
+      "complete_relevance": true,
+      "relevant_ids": [
+        "BW-EV-001",
+        "BW-EV-002",
+        "BW-EV-003"
+      ]
+    },
+    {
+      "question_id": "BW-G011",
+      "query": "Identify the date, airport, and two flights involved in DCA23FA149.",
+      "complete_relevance": true,
+      "relevant_ids": [
+        "BW-EV-006"
+      ]
+    },
+    {
+      "question_id": "BW-G014",
+      "query": "Which aircraft was arriving and which was departing, and which runway was in use?",
+      "complete_relevance": true,
+      "relevant_ids": [
+        "BW-EV-006"
+      ]
+    }
+  ]
+}

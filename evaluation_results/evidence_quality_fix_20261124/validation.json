@@ -1,0 +1,34 @@
+{
+  "approval": "Arun & Sunayna approve",
+  "branch": "feature/arun-rag-risk-compliance",
+  "tests": [
+    {
+      "artifact": "focused_tests.xml",
+      "passed": 93,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "artifact": "pending_score_test.xml",
+      "passed": 1,
+      "failures": 0,
+      "errors": 0
+    }
+  ],
+  "checks_passed": 94,
+  "prompt_counts": {
+    "seen": 30,
+    "synthetic_unseen": 20
+  },
+  "seen_strategies": {
+    "Few-shot": 10,
+    "Chain-of-thought (CoT)": 10,
+    "Task decomposition": 10
+  },
+  "live_model_calls": 0,
+  "full_suite_rerun": false,
+  "files_applied": 10,
+  "committed": false,
+  "merged": false,
+  "pushed": false
+}

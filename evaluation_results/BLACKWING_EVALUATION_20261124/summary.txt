@@ -1,0 +1,58 @@
+BLACKWING EVALUATION UPDATE — 24 NOVEMBER 2026
+Arun & Sunayna approve
+
+Applied in BlackWingAI-Arun-Git, branch feature/arun-rag-risk-compliance.
+Final complete offline regression: 263 passed, 0 failed. Raw log/XML are included.
+No hosted IIT/Ollama calls, index rebuild, protected-gold edit, commit, merge or push.
+
+THE REPORT PANEL IS NOW CONNECTED
+The existing Gold comparison score panel uses question-based saved-report LaaJ
+where approved matching questions/reference are configured. Opening a report reads
+status only. Compare with gold report explicitly queues a background evaluator job.
+Refresh comparison status reads incremental SQLite progress. Failed/interrupted/
+unvalidated results have no invented numerical score. The panel shows question
+judgments, report/reference quotations, points and suggested improvements for review.
+Old claim/synthetic-policy comparisons remain available with their scope stated
+where approved question coverage is unavailable. They are not question coverage.
+
+The existing layout and tabs are preserved. No changes to ui.py, source_ui.py,
+qa_ui.py, the aviation risk matrix, completeness weights or original evidence
+checklist were made in this panel-connection batch. Prompt checks remain in Run
+trace; Report Completeness remains visible in the report. Scores stay independent.
+
+VERIFIED OFFLINE
+Real Streamlit runtime, isolated mocked responses: initial display did not submit;
+an explicit click queued exactly one evaluation; manual refresh displayed its
+completed mock score without resubmission. The 75/100 fixture is NOT a measured
+JFK or other report score. Temporary test servers were stopped.
+
+97% completeness is not cached. Ten of fifteen saved reports score 97; each loses
+three points because Critic issue handling earns 2/5. Do not remove unresolved
+Critic findings to inflate completeness. This percentage is structural completeness.
+
+Document Recall@5 is 40.0%; Recall@10 is 53.3%. Scope: five questions and 50 approved
+unchanged sources. These are not passage-level, full-777-source or dense/hybrid/
+reranker results. The remaining 727 source records are outside this initial benchmark.
+
+JFK's ten question packets are prepared: 2384–2639 input tokens plus 768 output and
+256 safety reserve fit 8192. No actual-case question score has been generated yet.
+The tokenizer preflight fix counts input_ids rather than BatchEncoding fields.
+
+START LOCAL UI TESTING
+Restart the backend in the terminal with your existing IIT environment configured:
+python -m uvicorn blackwing.api:app --host 127.0.0.1 --port 8001
+
+In another terminal from the repository root with .venv activated:
+python -m streamlit run blackwing/ui.py --server.port 8502
+
+Open http://localhost:8502 and an existing completed report. Use its Gold comparison
+score button when ready to consume IIT quota; then Refresh comparison status.
+Detailed API, CLI and offline Recall commands are in vscode-evaluation.txt.
+
+REMAINING
+Controlled seen-report IIT pilot, human review/calibration, then frozen unseen runs.
+Expand retrieval qrels/method evaluation before claiming broader Recall performance.
+Seven additional candidate cases still have source/reference/provenance gates; all
+ten must not be presented as test-ready. Finish submission evidence and packaging.
+
+All 13 checked protected-gold files and 18 checked index files retain their hashes.

@@ -1,175 +1,206 @@
-"""Chunked hybrid retrieval with local BGE embeddings and lexical fallback."""
-
 from __future__ import annotations
 
-from collections import Counter
-from importlib.resources import files
 import json
 import logging
-import math
-import re
+import os
+from pathlib import Path
 from typing import Any, Iterable
 
+from .embeddings import make_embeddings
+from .engine import CrossEncoderReranker, HybridIndex
+
 logger = logging.getLogger("blackwing.rag")
-TOKEN_RE = re.compile(r"[a-z0-9]+(?:[-'][a-z0-9]+)*", re.I)
 
 
-def load_seed_documents() -> list[dict[str, Any]]:
-    seed_dir = files("blackwing.rag").joinpath("seed")
-    documents = []
-    for resource in seed_dir.iterdir():
-        if resource.name.endswith(".json"):
-            documents.append(json.loads(resource.read_text(encoding="utf-8")))
-    return documents
-
-
-def _tokens(text: str) -> list[str]:
-    return [t.casefold() for t in TOKEN_RE.findall(text) if len(t) > 1]
-
-
-def _chunk_document(document: dict[str, Any], chunk_words: int = 150, overlap_words: int = 30) -> list[dict[str, Any]]:
-    words = document.get("content", "").split()
-    if not words:
-        return []
-    chunks = []
-    start = 0
-    while start < len(words):
-        end = min(start + chunk_words, len(words))
-        chunks.append({
-            **document,
-            "chunk_id": f"{document['document_id']}:{len(chunks) + 1}",
-            "chunk_index": len(chunks),
-            "excerpt": " ".join(words[start:end]),
-        })
-        if end == len(words):
-            break
-        start = end - overlap_words
-    return chunks
+def _compat_document(item: dict[str, Any]) -> dict[str, Any]:
+    """Normalize runtime uploads without inventing incident identities."""
+    row = dict(item)
+    row.setdefault("document_id", str(row.get("source_id") or row.get("title") or "unnamed"))
+    dtype = str(row.get("document_type") or "").casefold()
+    status = str(row.get("source_status") or "").casefold()
+    if "source_type" not in row:
+        if dtype in {"regulation", "procedure"}:
+            row["source_type"] = "regulation" if dtype == "regulation" else "operational_order"
+        elif dtype in {"guidance", "advisory"}:
+            row["source_type"] = "advisory"
+        elif "final" in status:
+            row["source_type"] = "official_final"
+        elif status in {"user_report", "reported", "unverified_voluntary_report"}:
+            row["source_type"] = "user_submitted"
+        else:
+            # Unknown incoming reports cannot be promoted to official factual evidence.
+            row["source_type"] = "unverified_reference"
+    kind = row["source_type"]
+    row.setdefault("evidence_role", "historical_analogy" if kind == "official_final" else
+                   "general_guidance" if kind == "advisory" else
+                   "regulatory_reference" if kind in {"regulation", "operational_order"} else
+                   "reported" if kind == "user_submitted" else "unverified_reference")
+    row.setdefault("incident_id", row.get("case_id") or (row.get("source_id") if dtype == "incident_report" else "") or "")
+    row.setdefault("original_filename", row.get("title"))
+    row.setdefault("publication_date", row.get("document_date"))
+    row.setdefault("evidence_status", "RETRIEVED_NOT_VERIFIED")
+    row.setdefault("source_id", row["document_id"])
+    return row
 
 
 class RAGRetriever:
-    """BM25 + BGE dense retrieval fused with reciprocal rank and a small reranker.
+    """Use explicit source filters and local/IIT BGE; BM25 fallback is always labeled."""
+    def __init__(self, index_dir: str | Path | None = None, *, strategy: str = "fixed",
+                 embedder: Any = None, reranker: Any = None) -> None:
+        self.index_dir = Path(index_dir) if index_dir else (
+            Path(os.environ["BLACKWING_RAG_INDEX_DIR"]) if os.environ.get("BLACKWING_RAG_INDEX_DIR") else None)
+        self.strategy = strategy
+        self.embedder = embedder
+        self.reranker = reranker
+        self.embedding_settings: Any = None
+        self._index: HybridIndex | None = None
+        self._signature: str | None = None
+        self._dense_error: str | None = None
+        self._rerank_error: str | None = None
 
-    Dense retrieval uses FastEmbed's local BAAI/bge-small-en-v1.5 model. If model
-    assets are unavailable (for example, before the first model download), the
-    retriever remains usable via BM25 and reports that fallback in its response.
-    """
+    def configure_index_dir(self, index_dir: str | Path | None) -> None:
+        """Apply the property-file-resolved index path and discard stale loaded data."""
+        target = Path(index_dir).expanduser() if index_dir else None
+        if target != self.index_dir:
+            self.index_dir = target
+            self._index = None
+            self._signature = None
+            self._dense_error = None
+            self._rerank_error = None
 
-    def __init__(self) -> None:
-        self._embedding_model_name: str | None = None
-        self._embedder: Any = None
-        self._embedding_failure: str | None = None
-        self._vector_cache: dict[str, Any] = {}
+    def configure_embedding_settings(self, settings: Any) -> None:
+        """Apply API embedding secrets and policy resolved from properties."""
+        old = self.embedding_settings
+        new_identity = (
+            settings.rag_backend, settings.rag_embedding_model,
+            settings.rag_embedding_url, settings.rag_embedding_ca_cert,
+            settings.rag_embedding_api_key, settings.rag_embedding_timeout_seconds,
+            settings.rag_embedding_retries, settings.rag_cache_path,
+        )
+        old_identity = None if old is None else (
+            old.rag_backend, old.rag_embedding_model, old.rag_embedding_url,
+            old.rag_embedding_ca_cert, old.rag_embedding_api_key,
+            old.rag_embedding_timeout_seconds, old.rag_embedding_retries,
+            old.rag_cache_path,
+        )
+        self.embedding_settings = settings
+        if old_identity != new_identity:
+            self._index = None
+            self._signature = None
+            self.embedder = None
 
-    def _dense_rank(self, query: str, chunks: list[dict[str, Any]], model_name: str) -> list[tuple[float, int]]:
-        if self._embedding_model_name != model_name:
-            self._embedding_model_name = model_name
-            self._embedder = None
-            self._embedding_failure = None
-            self._vector_cache.clear()
-        if self._embedding_failure:
-            return []
+    def _embedding(self, mode: str = "local"):
+        if self.embedder is not None:
+            return self.embedder
         try:
-            if self._embedder is None:
-                from fastembed import TextEmbedding
-                self._embedder = TextEmbedding(model_name=model_name)
-            query_vector = next(iter(self._embedder.embed(["Represent this sentence for searching relevant passages: " + query])))
-            missing = [c for c in chunks if c["chunk_id"] not in self._vector_cache]
-            if missing:
-                for chunk, vector in zip(missing, self._embedder.embed([c["excerpt"] for c in missing])):
-                    self._vector_cache[chunk["chunk_id"]] = vector
-            q = query_vector
-            ranked = []
-            for index, chunk in enumerate(chunks):
-                vector = self._vector_cache[chunk["chunk_id"]]
-                # FastEmbed returns normalized vectors for BGE; cosine is explicit
-                # here so this remains correct if provider defaults change.
-                dot = sum(float(a) * float(b) for a, b in zip(q, vector))
-                qn = math.sqrt(sum(float(x) ** 2 for x in q)) or 1.0
-                vn = math.sqrt(sum(float(x) ** 2 for x in vector)) or 1.0
-                ranked.append((dot / (qn * vn), index))
-            return sorted(ranked, reverse=True)
-        except Exception as exc:  # retrieval must remain available when local weights aren't installed
-            self._embedding_failure = type(exc).__name__
-            logger.warning("Dense retrieval unavailable (%s); using BM25 until the embedding model is available", type(exc).__name__)
-            return []
+            cache = self.embedding_settings.rag_cache_path if self.embedding_settings else None
+            return make_embeddings(mode, cache_path=cache or None, settings=self.embedding_settings)
+        except Exception as exc:
+            self._dense_error = f"{type(exc).__name__}: {str(exc)[:160]}"
+            logger.warning("RAG dense unavailable (%s); lexical-only fallback", type(exc).__name__)
+            return None
 
-    @staticmethod
-    def _bm25_rank(query: str, chunks: list[dict[str, Any]]) -> list[tuple[float, int]]:
-        query_terms = set(_tokens(query))
-        tokenized = [_tokens(c["excerpt"] + " " + c.get("title", "")) for c in chunks]
-        if not chunks or not query_terms:
-            return []
-        avg_len = sum(map(len, tokenized)) / len(tokenized) or 1.0
-        doc_freq = Counter(term for terms in map(set, tokenized) for term in terms if term in query_terms)
-        scored = []
-        for index, terms in enumerate(tokenized):
-            tf = Counter(terms)
-            score = 0.0
-            for term in query_terms:
-                freq = tf[term]
-                if not freq:
-                    continue
-                idf = math.log(1 + (len(chunks) - doc_freq[term] + 0.5) / (doc_freq[term] + 0.5))
-                score += idf * freq * 2.2 / (freq + 1.2 * (0.25 + 0.75 * len(terms) / avg_len))
-            if score > 0:
-                scored.append((score, index))
-        return sorted(scored, reverse=True)
+    def _reranker(self):
+        if self.reranker is not None:
+            return self.reranker
+        if os.getenv("BLACKWING_RAG_RERANKER", "none").strip().lower() != "crossencoder":
+            return None
+        try:
+            self.reranker = CrossEncoderReranker()
+            return self.reranker
+        except Exception as exc:
+            self._rerank_error = type(exc).__name__
+            return None
 
-    @staticmethod
-    def _rerank_bonus(query: str, chunk: dict[str, Any]) -> int:
-        """Small transparent boost for exact operational identifiers/entities."""
-        q = query.casefold()
-        text = (chunk.get("title", "") + " " + chunk.get("excerpt", "")).casefold()
-        anchors = ("runway incursion", "takeoff roll", "runway crossing", "runway occupancy", "rejected takeoff", "controller", "surface detection", "takeoff clearance", "loss of separation")
-        return sum(1 for anchor in anchors if anchor in q and anchor in text)
+    def _open_index(self, documents: list[dict[str, Any]], embedding_model: str) -> HybridIndex:
+        requested_mode = (self.embedding_settings.rag_backend if self.embedding_settings
+                          else os.getenv("BLACKWING_RAG_BACKEND", "iit")).lower()
+        # Original FastAPI passes a model name; fail safely for unsupported model.
+        if "bge-small-en-v1.5" not in embedding_model.casefold() and self.embedder is None:
+            raise ValueError("This IIT pipeline requires BGE-small-en-v1.5; no MiniLM/BGE vector mixing")
+        if self.index_dir:
+            if self._index is None:
+                embedder = self._embedding(requested_mode)
+                try:
+                    self._index = HybridIndex.load(self.index_dir, embeddings=embedder)
+                except ValueError:
+                    # A saved IIT/local index must NOT be searched with mismatched vectors.
+                    raise
+                except Exception as exc:
+                    logger.warning("Dense index could not be opened (%s); lexical-only load", type(exc).__name__)
+                    self._dense_error = type(exc).__name__
+                    self._index = HybridIndex.load(self.index_dir)
+            # In-memory case documents are additions, not replacements for the approved corpus.
+            self._index.add_documents([_compat_document(row) for row in documents])
+            return self._index
+        # The in-memory API path is intentionally for small prototype corpora.
+        # For 500-2000 real documents use a prebuilt versioned index on disk.
+        if not documents and self._index is not None:
+            return self._index
+        prepared = [_compat_document(item) for item in documents]
+        doc_signature = json.dumps([(x["document_id"], x.get("content", ""), x.get("page_number"),
+                                     x.get("effective_date")) for x in prepared], sort_keys=True, default=str)
+        if self._index is not None and self._signature == doc_signature:
+            return self._index
+        embedder = self._embedding(requested_mode)
+        if embedder is not None:
+            try:
+                self._index = HybridIndex.from_documents(prepared, strategy=self.strategy, embeddings=embedder)
+            except (ImportError, RuntimeError, ValueError) as exc:
+                self._dense_error = f"{type(exc).__name__}: {str(exc)[:160]}"
+                logger.warning("Dense build unavailable (%s); using lexical-only", type(exc).__name__)
+                self._index = HybridIndex.from_documents(prepared, strategy=self.strategy)
+        else:
+            self._index = HybridIndex.from_documents(prepared, strategy=self.strategy)
+        self._signature = doc_signature
+        return self._index
 
-    def search(
-        self,
-        query: str,
-        documents: Iterable[dict[str, Any]],
-        *,
-        embedding_model: str,
-        document_types: list[str] | None = None,
-        jurisdiction: str | None = None,
-        incident_date: str | None = None,
-        limit: int = 5,
-    ) -> dict[str, Any]:
-        docs = list(documents)
-        if document_types:
-            wanted = set(document_types)
-            docs = [d for d in docs if d.get("document_type") in wanted]
-        if jurisdiction:
-            docs = [d for d in docs if not d.get("jurisdiction") or d["jurisdiction"].casefold() == jurisdiction.casefold()]
-        if incident_date:
-            docs = [d for d in docs if not d.get("effective_date") or str(d["effective_date"]) <= incident_date]
-        chunks = [chunk for doc in docs for chunk in _chunk_document(doc)]
-        lexical = self._bm25_rank(query, chunks)
-        dense = self._dense_rank(query, chunks, embedding_model)
-        fused: dict[int, float] = {}
-        for rank, (_, index) in enumerate(lexical, 1):
-            fused[index] = fused.get(index, 0.0) + 1.0 / (60 + rank)
-        for rank, (_, index) in enumerate(dense, 1):
-            fused[index] = fused.get(index, 0.0) + 1.0 / (60 + rank)
-        ranked = sorted(fused, key=lambda i: (-(fused[i] + self._rerank_bonus(query, chunks[i]) * 0.0002), chunks[i]["chunk_id"]))[:limit]
-        results = []
-        for index in ranked:
-            chunk = chunks[index]
-            results.append({key: chunk.get(key) for key in (
-                "document_id", "chunk_id", "chunk_index", "title", "document_type",
-                "authority_type", "source_status", "version", "source_id", "source_url",
-                "jurisdiction", "document_date", "effective_date", "page_number", "section_reference",
-                "historical_findings", "comparison_notes",
-            )} | {
-                "excerpt": chunk["excerpt"],
-                "ranking_score": round(fused[index], 8),
-                "rerank_anchor_matches": self._rerank_bonus(query, chunk),
-            })
-        method = "bm25+dense_bge_rrf+entity_rerank" if dense else "bm25+entity_rerank"
-        limitations = ["Retrieved historical cases are analogies only. Their probable causes are not findings about the new case.", "A retrieved passage does not establish source applicability or prove a new case's facts."]
-        if not dense:
-            limitations.insert(0, f"BGE dense retrieval is not active yet ({self._embedding_failure or 'no dense candidates'}); this search used BM25 lexical retrieval.")
-        return {"results": results, "retrieval_method": method, "limitations": limitations}
+    def search(self, query: str, documents: Iterable[dict[str, Any]], *,
+               embedding_model: str = "BAAI/bge-small-en-v1.5",
+               document_types: list[str] | None = None,
+               jurisdiction: str | None = None, incident_date: str | None = None,
+               limit: int = 5, method: str = "rerank", scope: str = "all",
+               case_id: str | None = None,
+               include_retrospective_guidance: bool = False) -> dict[str, Any]:
+        """Fully compatible with the existing API/search call; no JFK/Austin special cases."""
+        index = self._open_index(list(documents), embedding_model)
+        try:
+            result = index.search(query, top_k=limit, method=method, scope=scope,
+                                  case_id=case_id, jurisdiction=jurisdiction,
+                                  incident_date=str(incident_date) if incident_date else None,
+                                  document_types=document_types,
+                                  include_retrospective_guidance=include_retrospective_guidance,
+                                  reranker=self._reranker())
+        except (ImportError, RuntimeError, OSError) as exc:
+            # CrossEncoder weights absent or a local provider unexpectedly failed.
+            self._rerank_error = f"{type(exc).__name__}: {str(exc)[:160]}"
+            logger.warning("CrossEncoder unavailable; reverting to hybrid/BM25 (%s)", type(exc).__name__)
+            result = index.search(query, top_k=limit, method="hybrid", scope=scope,
+                                  case_id=case_id, jurisdiction=jurisdiction,
+                                  incident_date=str(incident_date) if incident_date else None,
+                                  document_types=document_types,
+                                  include_retrospective_guidance=include_retrospective_guidance)
+            result["limitations"].append("CrossEncoder failed at runtime; reranking requirement NOT VERIFIED")
+        if self._dense_error:
+            result["limitations"].append("Dense backend not active: " + self._dense_error)
+        if self._rerank_error:
+            result["limitations"].append("Reranker not active: " + self._rerank_error)
+        return result
+
+    def retrieve_evidence(self, query: str, *, case_id: str, limit: int = 5) -> dict[str, Any]:
+        if self._index is None and not self.index_dir:
+            raise RuntimeError("Load or build an index before retrieve_evidence")
+        return self.search(query, [], case_id=case_id, scope="direct", limit=limit)
+
+    def retrieve_regulations(self, query: str, *, jurisdiction: str,
+                             incident_date: str, limit: int = 5) -> dict[str, Any]:
+        return self.search(query, [], scope="regulatory", jurisdiction=jurisdiction,
+                           incident_date=incident_date, limit=limit)
+
+    def find_similar_incidents(self, query: str, *, case_id: str,
+                               incident_date: str | None = None, limit: int = 5) -> dict[str, Any]:
+        return self.search(query, [], scope="historical", case_id=case_id,
+                           incident_date=incident_date, limit=limit)
 
 
 retriever = RAGRetriever()

@@ -1,0 +1,326 @@
+[
+  {
+    "run_id": "09eefdb5-80a3-43aa-b323-8d53dcbd6fcb",
+    "case_id": "b46ad8fa-38ac-4b4e-a950-567eeb1d6e39",
+    "score": 92,
+    "rubric_version": "2.1",
+    "lost_checks": [
+      {
+        "check": "Mitigation traceability",
+        "weight": 9,
+        "earned": 4,
+        "status": "partial",
+        "action": "Link every recommendation to an existing hazard or evidenced factor; explicitly defer when data is insufficient."
+      },
+      {
+        "check": "Critic review and issue handling",
+        "weight": 5,
+        "earned": 2,
+        "status": "partial",
+        "action": "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+      }
+    ],
+    "cached_quality_fields": []
+  },
+  {
+    "run_id": "0e35c525-8a7a-4a7f-b44a-fb2af0ea6690",
+    "case_id": "05d47336-0a55-402c-9614-f886cc6e2cc8",
+    "score": 97,
+    "rubric_version": "2.1",
+    "lost_checks": [
+      {
+        "check": "Critic review and issue handling",
+        "weight": 5,
+        "earned": 2,
+        "status": "partial",
+        "action": "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+      }
+    ],
+    "cached_quality_fields": []
+  },
+  {
+    "run_id": "13a74973-f53b-49ac-8b10-f80c298cb5de",
+    "case_id": "e047cc01-d21b-478d-adf7-9f9d53d470dc",
+    "score": 62,
+    "rubric_version": "2.1",
+    "lost_checks": [
+      {
+        "check": "Current-case evidence represented",
+        "weight": 12,
+        "earned": 0,
+        "status": "missing_or_needs_review",
+        "action": "Document current-case facts or attributed accounts; disclose when neither is available."
+      },
+      {
+        "check": "Factual evidence references present",
+        "weight": 13,
+        "earned": 0,
+        "status": "missing_or_needs_review",
+        "action": "Reference every fact or attributed account; citation presence is not entailment."
+      },
+      {
+        "check": "Report factual points referenced",
+        "weight": 10,
+        "earned": 0,
+        "status": "missing_or_needs_review",
+        "action": "Reference every factual or attributed report point; empty points cannot earn credit."
+      },
+      {
+        "check": "Critic review and issue handling",
+        "weight": 5,
+        "earned": 2,
+        "status": "partial",
+        "action": "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+      }
+    ],
+    "cached_quality_fields": []
+  },
+  {
+    "run_id": "14738b58-46bb-4dd3-b618-460b82b9df72",
+    "case_id": "31d6d30c-8d1a-49e9-8ec2-364e1792484a",
+    "score": 97,
+    "rubric_version": "2.1",
+    "lost_checks": [
+      {
+        "check": "Critic review and issue handling",
+        "weight": 5,
+        "earned": 2,
+        "status": "partial",
+        "action": "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+      }
+    ],
+    "cached_quality_fields": []
+  },
+  {
+    "run_id": "1f273084-ea56-4860-98e5-af76a06fd837",
+    "case_id": "45a1c815-9f6c-4ebe-ba27-151cdadd9d73",
+    "score": 97,
+    "rubric_version": "2.1",
+    "lost_checks": [
+      {
+        "check": "Critic review and issue handling",
+        "weight": 5,
+        "earned": 2,
+        "status": "partial",
+        "action": "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+      }
+    ],
+    "cached_quality_fields": []
+  },
+  {
+    "run_id": "1f2eb30e-5644-4472-b25a-fa2625599580",
+    "case_id": "0e212b10-e1ec-4d95-a643-0878123b4ca3",
+    "score": 97,
+    "rubric_version": "2.1",
+    "lost_checks": [
+      {
+        "check": "Critic review and issue handling",
+        "weight": 5,
+        "earned": 2,
+        "status": "partial",
+        "action": "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+      }
+    ],
+    "cached_quality_fields": []
+  },
+  {
+    "run_id": "25e2b710-f268-4335-9b31-6bbfc4cb638e",
+    "case_id": "46c39276-7019-46b5-839f-16f2ac157623",
+    "score": 97,
+    "rubric_version": "2.1",
+    "lost_checks": [
+      {
+        "check": "Critic review and issue handling",
+        "weight": 5,
+        "earned": 2,
+        "status": "partial",
+        "action": "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+      }
+    ],
+    "cached_quality_fields": []
+  },
+  {
+    "run_id": "3ee8bf8d-75b9-477f-8547-6f07e247a49d",
+    "case_id": "1da5958c-f835-4252-adfb-ca383d7a2d29",
+    "score": 54,
+    "rubric_version": "2.1",
+    "lost_checks": [
+      {
+        "check": "Current-case evidence represented",
+        "weight": 12,
+        "earned": 0,
+        "status": "missing_or_needs_review",
+        "action": "Document current-case facts or attributed accounts; disclose when neither is available."
+      },
+      {
+        "check": "Factual evidence references present",
+        "weight": 13,
+        "earned": 0,
+        "status": "missing_or_needs_review",
+        "action": "Reference every fact or attributed account; citation presence is not entailment."
+      },
+      {
+        "check": "Report factual points referenced",
+        "weight": 10,
+        "earned": 0,
+        "status": "missing_or_needs_review",
+        "action": "Reference every factual or attributed report point; empty points cannot earn credit."
+      },
+      {
+        "check": "Risk rationale or explicit abstention",
+        "weight": 8,
+        "earned": 0,
+        "status": "missing_or_needs_review",
+        "action": "Record evidence-backed ratings or explicit unassessed status; do not manufacture a score."
+      },
+      {
+        "check": "Critic review and issue handling",
+        "weight": 5,
+        "earned": 2,
+        "status": "partial",
+        "action": "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+      }
+    ],
+    "cached_quality_fields": []
+  },
+  {
+    "run_id": "4c556875-5e1f-41d6-bc1f-79108d493e89",
+    "case_id": "90fc78a9-9c93-4454-b698-f2ea73a5fc8e",
+    "score": 97,
+    "rubric_version": "2.1",
+    "lost_checks": [
+      {
+        "check": "Critic review and issue handling",
+        "weight": 5,
+        "earned": 2,
+        "status": "partial",
+        "action": "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+      }
+    ],
+    "cached_quality_fields": []
+  },
+  {
+    "run_id": "6a01e652-6501-4fdc-b133-b8685a748522",
+    "case_id": "6417b3e6-0d0c-425f-901c-5bee0960421e",
+    "score": 92,
+    "rubric_version": "2.1",
+    "lost_checks": [
+      {
+        "check": "Mitigation traceability",
+        "weight": 9,
+        "earned": 4,
+        "status": "partial",
+        "action": "Link every recommendation to an existing hazard or evidenced factor; explicitly defer when data is insufficient."
+      },
+      {
+        "check": "Critic review and issue handling",
+        "weight": 5,
+        "earned": 2,
+        "status": "partial",
+        "action": "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+      }
+    ],
+    "cached_quality_fields": []
+  },
+  {
+    "run_id": "95000457-9313-447c-ba07-f819a0217670",
+    "case_id": "0c9a2abb-73f3-428c-9715-e88f5e09c43a",
+    "score": 97,
+    "rubric_version": "2.1",
+    "lost_checks": [
+      {
+        "check": "Critic review and issue handling",
+        "weight": 5,
+        "earned": 2,
+        "status": "partial",
+        "action": "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+      }
+    ],
+    "cached_quality_fields": []
+  },
+  {
+    "run_id": "9fb004af-8692-4d96-b87e-c0f5abcf43d7",
+    "case_id": "1e09cc5a-fed7-4983-9bb3-69011376e387",
+    "score": 62,
+    "rubric_version": "2.1",
+    "lost_checks": [
+      {
+        "check": "Current-case evidence represented",
+        "weight": 12,
+        "earned": 0,
+        "status": "missing_or_needs_review",
+        "action": "Document current-case facts or attributed accounts; disclose when neither is available."
+      },
+      {
+        "check": "Factual evidence references present",
+        "weight": 13,
+        "earned": 0,
+        "status": "missing_or_needs_review",
+        "action": "Reference every fact or attributed account; citation presence is not entailment."
+      },
+      {
+        "check": "Report factual points referenced",
+        "weight": 10,
+        "earned": 0,
+        "status": "missing_or_needs_review",
+        "action": "Reference every factual or attributed report point; empty points cannot earn credit."
+      },
+      {
+        "check": "Critic review and issue handling",
+        "weight": 5,
+        "earned": 2,
+        "status": "partial",
+        "action": "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+      }
+    ],
+    "cached_quality_fields": []
+  },
+  {
+    "run_id": "c3464fb7-7cbb-4c15-99b1-464bc6ba80f8",
+    "case_id": "974e8a84-25df-4b1b-a9b4-e68fe9a4f402",
+    "score": 97,
+    "rubric_version": "2.1",
+    "lost_checks": [
+      {
+        "check": "Critic review and issue handling",
+        "weight": 5,
+        "earned": 2,
+        "status": "partial",
+        "action": "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+      }
+    ],
+    "cached_quality_fields": []
+  },
+  {
+    "run_id": "f50c5f2f-4763-4127-b86a-8989c9fabaef",
+    "case_id": "95aabfd7-52a7-4daf-9342-78ffbf9c157c",
+    "score": 97,
+    "rubric_version": "2.1",
+    "lost_checks": [
+      {
+        "check": "Critic review and issue handling",
+        "weight": 5,
+        "earned": 2,
+        "status": "partial",
+        "action": "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+      }
+    ],
+    "cached_quality_fields": []
+  },
+  {
+    "run_id": "fcbc5bd6-16cb-4761-8dde-2416da2e422c",
+    "case_id": "b790a463-0cb2-4c9b-91f6-ffe8bb9e3b9f",
+    "score": 97,
+    "rubric_version": "2.1",
+    "lost_checks": [
+      {
+        "check": "Critic review and issue handling",
+        "weight": 5,
+        "earned": 2,
+        "status": "partial",
+        "action": "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+      }
+    ],
+    "cached_quality_fields": []
+  }
+]

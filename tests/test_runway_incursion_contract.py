@@ -22,7 +22,7 @@ from blackwing.schemas import (
 
 def test_runway_incursion_contract_vertical_slice() -> None:
     assert [spec.key for spec in AGENT_SPECS] == [
-        "investigation", "similar_case", "compliance", "risk", "mitigation", "critic", "verification"
+        "investigation", "similar_case", "compliance", "risk", "mitigation", "critic", "verification", "report"
     ]
     assert all(spec.prompt_path.is_file() for spec in AGENT_SPECS)
     repo = MemoryRepository()
@@ -141,7 +141,8 @@ def test_runway_incursion_contract_vertical_slice() -> None:
 
             trace = client.get(f"/api/v1/runs/{run_id}/trace")
             assert trace.status_code == 200
-            assert len(trace.json()["events"]) == 7
+            assert len([e for e in trace.json()["events"] if e.get("agent")]) == 7
+            assert any(e.get("tool") == "retrieve_evidence" for e in trace.json()["events"])
 
             review = client.post(f"/api/v1/cases/{case_id}/reviews", json={
                 "reviewer_id": "reviewer-1",

@@ -1,0 +1,12 @@
+BLACKWING scorer v2 validation - 21 November 2026
+Branch: feature/arun-rag-risk-compliance
+Regression: 158 passed; 0 failures; 0 errors; 0 skipped.
+Pytest reported duration: 13.74 seconds; two existing dependency deprecation warnings.
+Previous tests: 141 retained. Scorer cases added: 17, including all eight supplied ZIP tests.
+Running Streamlit check: separate Prompt Completeness 80%, Report Completeness 87%, independent aviation-risk display (synthetic mocked report).
+Actual saved reports: JFK Report Completeness 84/100; Austin 58/100.
+Actual Prompt Completeness: unavailable; exports lack intake records and read-only SQLite lookup found no matching cases. Not inferred from generated text.
+JFK diagnostics duplicate export deduplicated. Input report hashes unchanged.
+Original evidence checklist AST identical to Sunayana branch. All 12 RAG-index files unchanged versus prior preservation manifest.
+Risk, API/backend, diagnostics, tools and planning code not modified. No models called, indexes rebuilt, or protected datasets changed.
+Temporary validation servers stopped. No commit, merge, branch switch or push.

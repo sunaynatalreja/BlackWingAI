@@ -1,0 +1,36 @@
+[
+  {
+    "run_id": "4c102e79-bd51-413e-b2d0-ff65ab9fb837",
+    "case_id": "3cc2c2dd-41d1-47bd-a7da-da948536257c",
+    "saved_summary": "A training crew received a taxi-route amendment but did not fully read it due to a cabin call.",
+    "prospective_attributed_summary": "Unverified fictional scenario. Supplied account: \"ORIGINAL FICTIONAL training scenario at Birch Ferry Airport. A training crew reports receiving a taxi-route amendment while a cabin call interrupted the readback. The controller note records an acknowledgement but does not identify the words used. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.\"",
+    "saved_report_changed": false,
+    "visible_report_fields": 37,
+    "exact_packet_input_token_min": 1370,
+    "exact_packet_input_token_max": 1379,
+    "output_reserve": 768,
+    "safety_reserve": 256,
+    "fits_8192": true,
+    "risk_status_preserved": "unassessed_insufficient_inputs",
+    "live_laaJ_score": null,
+    "hosted_calls": 0,
+    "notice": "Offline formatting and input-budget check only. No model judgment or numerical report score produced."
+  },
+  {
+    "run_id": "0c38e41e-cb1f-4901-afdf-5b29cbbaeab0",
+    "case_id": "ec80e691-e0fe-4a6a-8f63-459e11c8f3f1",
+    "saved_summary": "An operations vehicle inspected a runway light, but its position relative to the protected area is unclear.",
+    "prospective_attributed_summary": "Unverified fictional scenario. Supplied account: \"ORIGINAL FICTIONAL training scenario at Coral Basin Aerodrome. An operations vehicle was tasked with checking a runway light. A radio note says the inspection ended, while a camera screenshot cannot place the vehicle relative to the protected area. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.\"",
+    "saved_report_changed": false,
+    "visible_report_fields": 38,
+    "exact_packet_input_token_min": 1399,
+    "exact_packet_input_token_max": 1408,
+    "output_reserve": 768,
+    "safety_reserve": 256,
+    "fits_8192": true,
+    "risk_status_preserved": "unassessed_insufficient_inputs",
+    "live_laaJ_score": null,
+    "hosted_calls": 0,
+    "notice": "Offline formatting and input-budget check only. No model judgment or numerical report score produced."
+  }
+]

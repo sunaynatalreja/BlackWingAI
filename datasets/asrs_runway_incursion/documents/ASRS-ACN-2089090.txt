@@ -1,0 +1,5 @@
+Synopsis:
+EMB-145 flight crew reported a ground conflict while lined up and waiting for takeoff clearance.
+
+Narrative:
+We were cleared to line up and wait on [Runway] XX; awaiting release from ZZZ TRACON. While waiting in position for takeoff clearance; hear Tower clear Aircraft Y to turn final at or above 3000 feet; cleared to land [Runway] XX. Since this was day two of First Officer OE I discussed the need to maintain situational awareness and monitor the aircraft cleared to land on our runway. We waited longer than usual for takeoff clearance and the landing traffic continued to approach Runway XX. We continued to monitor the Aircraft Y's progress and when TCAS display showed only +4 ( a little over a mile out) I queried the Tower; is there a traffic conflict for Aircraft X?" Tower immediately sent Aircraft Y on a go-around and a few moments later told us to exit the runway at [Taxiway] 1. After exiting; we were subsequently cleared to taxi to Runway XX and cleared for takeoff uneventfully.Possible loss of situational awareness by ZZZ Tower and Aircraft Y.Suggestion: Wondering if Aircraft Y's. TCAS would have alerted the pilot of the traffic conflict."

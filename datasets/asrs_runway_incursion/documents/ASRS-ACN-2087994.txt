@@ -1,0 +1,5 @@
+Synopsis:
+Flight Instructor with student reported a critical ground conflict upon landing with an aircraft that touched down behind the instructor then did a touch-and-go while the instructor was still on the runway.
+
+Narrative:
+Airplane took off behind us but since we were doing a touch-and-go; the plane taking off had its crosswind inside of ours. He fell in behind us very closely (too close for comfort); and he did not have working ADSB-Out so we could not track him during or after the flight. We continued normally; and noticed he was keeping his traffic pattern very close to ours. We did a soft-field full-stop landing; and while we were still on our runway roll; we noticed he had already touched down behind us and did a touch-and-go while we were still on the runway itself; not counting the runway environment that continued further. We watched him do something similar to another company aircraft right after us while they were still on the runway turnoff as we were exiting our aircraft. We were in Aircraft X; the offending aircraft was Aircraft Y; and the company aircraft was Aircraft Z.

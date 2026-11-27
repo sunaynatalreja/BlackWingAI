@@ -1,0 +1,239 @@
+{
+  "rubric": "downloaded BLACKWING v2 with documented schema aliases",
+  "live_model_calls": 0,
+  "input_reports_modified": false,
+  "database_access": "read-only",
+  "notice": "Structural completeness only; not factual accuracy, citation entailment or aviation risk. Missing prompt metadata is not reconstructed from generated text.",
+  "reports": [
+    {
+      "report_file": "work\\austin_report_local.json",
+      "sha256": "822e8efc28a7d0771e184c8514560483ee547a13828b78bfa4de85cb88c943b9",
+      "duplicate_exports": [],
+      "case_id": "f30ee44c-6e88-4525-8e83-b7b59e65876d",
+      "run_id": "f7278dd7-b8f9-405d-b0b1-7214922f37b2",
+      "prompt_source": "not available; not inferred from generated report",
+      "prompt_completeness": null,
+      "report_completeness": {
+        "label": "Report Completeness",
+        "score": 58,
+        "raw_score": 58,
+        "rubric_version": "2",
+        "checks": [
+          {
+            "check": "Seven required agent outputs",
+            "weight": 8,
+            "earned": 8,
+            "status": "present",
+            "action": ""
+          },
+          {
+            "check": "Executive summary and report sections",
+            "weight": 12,
+            "earned": 0,
+            "status": "missing_or_needs_review",
+            "action": "Produce a summary and four required report sections."
+          },
+          {
+            "check": "Current-case factual evidence",
+            "weight": 12,
+            "earned": 12,
+            "status": "present",
+            "action": ""
+          },
+          {
+            "check": "Factual evidence references present",
+            "weight": 13,
+            "earned": 13,
+            "status": "present",
+            "action": ""
+          },
+          {
+            "check": "Report factual points referenced",
+            "weight": 10,
+            "earned": 0,
+            "status": "missing_or_needs_review",
+            "action": "Reference each factual point in the generated report; no points cannot earn this credit."
+          },
+          {
+            "check": "Human verification required",
+            "weight": 8,
+            "earned": 8,
+            "status": "present",
+            "action": ""
+          },
+          {
+            "check": "Unknowns/completeness disclosed",
+            "weight": 7,
+            "earned": 7,
+            "status": "present",
+            "action": ""
+          },
+          {
+            "check": "Regulatory applicability review recorded",
+            "weight": 8,
+            "earned": 8,
+            "status": "present",
+            "action": ""
+          },
+          {
+            "check": "Risk rationale or explicit abstention",
+            "weight": 8,
+            "earned": 0,
+            "status": "missing_or_needs_review",
+            "action": "Record evidence-backed ratings or explicit unassessed status; do not manufacture a score."
+          },
+          {
+            "check": "Mitigation traceability",
+            "weight": 9,
+            "earned": 0,
+            "status": "missing_or_needs_review",
+            "action": "Link every recommendation to an existing hazard or evidenced factor; explicitly defer when data is insufficient."
+          },
+          {
+            "check": "Critic review and issue handling",
+            "weight": 5,
+            "earned": 2,
+            "status": "partial",
+            "action": "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+          }
+        ],
+        "missing_information": [
+          "Produce a summary and four required report sections.",
+          "Reference each factual point in the generated report; no points cannot earn this credit.",
+          "Record evidence-backed ratings or explicit unassessed status; do not manufacture a score.",
+          "Link every recommendation to an existing hazard or evidenced factor; explicitly defer when data is insufficient.",
+          "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+        ],
+        "flags": [],
+        "method": "Transparent weighted presence/consistency rubric v2; provisional; not a validated safety metric.",
+        "notice": "Aviation risk is scored separately. This score does not validate factual accuracy, citation entailment, legal applicability, or overall operational safety. Do not treat 70 as automatic acceptance."
+      },
+      "agent_roles": [
+        "compliance",
+        "critic",
+        "investigation",
+        "mitigation",
+        "risk",
+        "similar_case",
+        "verification"
+      ],
+      "current_case_fact_count": 1,
+      "critic_issue_count": 5
+    },
+    {
+      "report_file": "work\\JFK_Investigation_Report_da0e8da7-7aea-4ade-a227-70f4900673ce.json",
+      "sha256": "48754d06787e1b9c52baaae9271e12dd3abde263251574c79bf5cfa78481f917",
+      "duplicate_exports": [
+        "work\\JFK_Agent_Diagnostics.json"
+      ],
+      "case_id": "48da1ebb-283f-419b-aa1c-8292a49abd36",
+      "run_id": "da0e8da7-7aea-4ade-a227-70f4900673ce",
+      "prompt_source": "not available; not inferred from generated report",
+      "prompt_completeness": null,
+      "report_completeness": {
+        "label": "Report Completeness",
+        "score": 84,
+        "raw_score": 84,
+        "rubric_version": "2",
+        "checks": [
+          {
+            "check": "Seven required agent outputs",
+            "weight": 8,
+            "earned": 8,
+            "status": "present",
+            "action": ""
+          },
+          {
+            "check": "Executive summary and report sections",
+            "weight": 12,
+            "earned": 12,
+            "status": "present",
+            "action": ""
+          },
+          {
+            "check": "Current-case factual evidence",
+            "weight": 12,
+            "earned": 12,
+            "status": "present",
+            "action": ""
+          },
+          {
+            "check": "Factual evidence references present",
+            "weight": 13,
+            "earned": 13,
+            "status": "present",
+            "action": ""
+          },
+          {
+            "check": "Report factual points referenced",
+            "weight": 10,
+            "earned": 10,
+            "status": "present",
+            "action": ""
+          },
+          {
+            "check": "Human verification required",
+            "weight": 8,
+            "earned": 8,
+            "status": "present",
+            "action": ""
+          },
+          {
+            "check": "Unknowns/completeness disclosed",
+            "weight": 7,
+            "earned": 7,
+            "status": "present",
+            "action": ""
+          },
+          {
+            "check": "Regulatory applicability review recorded",
+            "weight": 8,
+            "earned": 8,
+            "status": "present",
+            "action": ""
+          },
+          {
+            "check": "Risk rationale or explicit abstention",
+            "weight": 8,
+            "earned": 0,
+            "status": "missing_or_needs_review",
+            "action": "Record evidence-backed ratings or explicit unassessed status; do not manufacture a score."
+          },
+          {
+            "check": "Mitigation traceability",
+            "weight": 9,
+            "earned": 4,
+            "status": "partial",
+            "action": "Link every recommendation to an existing hazard or evidenced factor; explicitly defer when data is insufficient."
+          },
+          {
+            "check": "Critic review and issue handling",
+            "weight": 5,
+            "earned": 2,
+            "status": "partial",
+            "action": "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+          }
+        ],
+        "missing_information": [
+          "Record evidence-backed ratings or explicit unassessed status; do not manufacture a score.",
+          "Link every recommendation to an existing hazard or evidenced factor; explicitly defer when data is insufficient.",
+          "Resolve critic issues or explicitly disclose them to reviewers; do not hide issues to gain points."
+        ],
+        "flags": [],
+        "method": "Transparent weighted presence/consistency rubric v2; provisional; not a validated safety metric.",
+        "notice": "Aviation risk is scored separately. This score does not validate factual accuracy, citation entailment, legal applicability, or overall operational safety. Do not treat 70 as automatic acceptance."
+      },
+      "agent_roles": [
+        "compliance",
+        "critic",
+        "investigation",
+        "mitigation",
+        "risk",
+        "similar_case",
+        "verification"
+      ],
+      "current_case_fact_count": 1,
+      "critic_issue_count": 6
+    }
+  ]
+}

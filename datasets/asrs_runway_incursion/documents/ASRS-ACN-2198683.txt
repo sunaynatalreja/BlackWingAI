@@ -1,0 +1,5 @@
+Synopsis:
+B737 flight crew reported a rejected takeoff and runway incursion.
+
+Narrative:
+Aircraft was instructed to lineup and wait on XXR for landing traffic on XY. Subsequently cleared for takeoff. Both pilots heard the PA chime from the cabin immediately after takeoff clearance was received. We both selected the listening function for the PA on the audio panel. Captain Called Flight Attendant to see if there was an issue. Not sure if a passenger accidentally pushed the call button. Captain delayed takeoff roll by approximately 15 seconds after takeoff clearance was received; trying to ascertain the situation in the cabin and make sure passengers were seated. Takeoff roll began approximately 20 seconds after clearance was received and as the airplane began to accelerate to approximately 40 knots groundspeed; the red runway status lights illuminated at which point the captain aborted the takeoff. Tower Controller instructed landing traffic on XY to go-around. Tower Controller; acknowledged our abort and advised us to exit the Runway on Taxiway 1 for re-sequencing.

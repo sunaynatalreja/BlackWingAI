@@ -1,0 +1,5 @@
+Synopsis:
+C172 pilot reported being notified of cutting off an aircraft on final after taking off from a non-towered airport.
+
+Narrative:
+Aircraft X was in number 1 position for takeoff; Runway XX ZZZ.  Final was scanned for traffic; no radio report of traffic pattern aircraft was noted; and no aircraft seen on final. Aircraft taxied into position for takeoff on Runway XX; performed last checklist items and before power application noticed that another Cessna 172 or similar was flying approximately 150 to 200 ft. above the left side of the runway; possibly in execution of a go-around. The go-around aircraft cleared traffic to the left and I continued the takeoff in Aircraft X and accomplished the mission. After takeoff I received a radio call on UNICOM frequency from; I assume; the go-around aircraft - I did not get the call sign - asking if I knew I cut him off while he was on final. I apologized and informed him that I did not see him on final; to [which] he replied to the effect of no problem; no big deal.

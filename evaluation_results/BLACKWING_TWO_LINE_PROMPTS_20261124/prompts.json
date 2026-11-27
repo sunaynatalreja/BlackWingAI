@@ -1,0 +1,742 @@
+[
+  {
+    "prompt_id": "BW-SEEN-V7-FS-01",
+    "source_prompt_id": "BW-SEEN-V6-FS-01",
+    "case_label": "JFK",
+    "strategy": "Few-shot",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA125",
+      "incident_date": "2023-01-13",
+      "jurisdiction": "US",
+      "location": "John F. Kennedy International Airport (JFK)"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA125; INCIDENT DATE: 2023-01-13; JURISDICTION: US; AIRPORT: John F. Kennedy International Airport (JFK)\nPROMPT STRATEGY: Few-shot | REQUEST: Investigate the reported occurrence at John F. Kennedy International Airport (JFK) on 2023-01-13 involving American Airlines Flight 106 and Delta Air Lines Flight 1943. The reference identifier is DCA23LA125. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Examples are style guidance only: a reported crossing without a recording remains attributed; a disputed position remains unresolved; a hazard without likelihood evidence stays unassessed. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-001",
+    "evaluation_scope": "question-based reference comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-FS-02",
+    "source_prompt_id": "BW-SEEN-V6-FS-02",
+    "case_label": "Goa",
+    "strategy": "Few-shot",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "VT-BXL",
+      "incident_date": "2026-04-03",
+      "jurisdiction": "IN",
+      "location": "Dabolim Airport, Goa"
+    },
+    "text": "SOURCE INCIDENT ID: VT-BXL; INCIDENT DATE: 2026-04-03; JURISDICTION: IN; AIRPORT: Dabolim Airport, Goa\nPROMPT STRATEGY: Few-shot | REQUEST: Investigate the reported occurrence at Dabolim Airport, Goa on 2026-04-03 involving Air India Express AXB-1109, registration VT-BXL, and reported Navy traffic. The reference identifier is VT-BXL. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Examples are style guidance only: a reported crossing without a recording remains attributed; a disputed position remains unresolved; a hazard without likelihood evidence stays unassessed. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-002",
+    "evaluation_scope": "question-based reference comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-FS-03",
+    "source_prompt_id": "BW-SEEN-V6-FS-03",
+    "case_label": "Delhi 2013",
+    "strategy": "Few-shot",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "VT-GOK",
+      "incident_date": "2013-10-02",
+      "jurisdiction": "IN",
+      "location": "Indira Gandhi International Airport, Delhi"
+    },
+    "text": "SOURCE INCIDENT ID: VT-GOK; INCIDENT DATE: 2013-10-02; JURISDICTION: IN; AIRPORT: Indira Gandhi International Airport, Delhi\nPROMPT STRATEGY: Few-shot | REQUEST: Investigate the reported occurrence at Indira Gandhi International Airport, Delhi on 2013-10-02 involving GoAir GOW336, registration VT-GOK, and an Indian Air Force AN-32. The reference identifier is VT-GOK. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Examples are style guidance only: a reported crossing without a recording remains attributed; a disputed position remains unresolved; a hazard without likelihood evidence stays unassessed. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-003",
+    "evaluation_scope": "question-based reference comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-FS-04",
+    "source_prompt_id": "BW-SEEN-V6-FS-04",
+    "case_label": "Austin",
+    "strategy": "Few-shot",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23FA149",
+      "incident_date": "2023-02-04",
+      "jurisdiction": "US",
+      "location": "Austin-Bergstrom International Airport"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23FA149; INCIDENT DATE: 2023-02-04; JURISDICTION: US; AIRPORT: Austin-Bergstrom International Airport\nPROMPT STRATEGY: Few-shot | REQUEST: Investigate the reported occurrence at Austin-Bergstrom International Airport on 2023-02-04 involving Southwest Flight 708 and FedEx Flight 1432. The reference identifier is DCA23FA149. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Examples are style guidance only: a reported crossing without a recording remains attributed; a disputed position remains unresolved; a hazard without likelihood evidence stays unassessed. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-004",
+    "evaluation_scope": "question-based reference comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-FS-05",
+    "source_prompt_id": "BW-SEEN-V6-FS-05",
+    "case_label": "Honolulu",
+    "strategy": "Few-shot",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA133",
+      "incident_date": "2023-01-23",
+      "jurisdiction": "US",
+      "location": "Daniel K. Inouye International Airport, Honolulu"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA133; INCIDENT DATE: 2023-01-23; JURISDICTION: US; AIRPORT: Daniel K. Inouye International Airport, Honolulu\nPROMPT STRATEGY: Few-shot | REQUEST: Investigate the reported occurrence at Daniel K. Inouye International Airport, Honolulu on 2023-01-23 involving the reported runway-crossing occurrence identified by DCA23LA133. The reference identifier is DCA23LA133. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Examples are style guidance only: a reported crossing without a recording remains attributed; a disputed position remains unresolved; a hazard without likelihood evidence stays unassessed. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-005",
+    "evaluation_scope": "asserted factual-claim comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-FS-06",
+    "source_prompt_id": "BW-SEEN-V6-FS-06",
+    "case_label": "Sarasota",
+    "strategy": "Few-shot",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA179",
+      "incident_date": "2023-02-16",
+      "jurisdiction": "US",
+      "location": "Sarasota-Bradenton International Airport"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA179; INCIDENT DATE: 2023-02-16; JURISDICTION: US; AIRPORT: Sarasota-Bradenton International Airport\nPROMPT STRATEGY: Few-shot | REQUEST: Investigate the reported occurrence at Sarasota-Bradenton International Airport on 2023-02-16 involving the reported air traffic occurrence identified by DCA23LA179. The reference identifier is DCA23LA179. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Examples are style guidance only: a reported crossing without a recording remains attributed; a disputed position remains unresolved; a hazard without likelihood evidence stays unassessed. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-006",
+    "evaluation_scope": "asserted factual-claim comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-FS-07",
+    "source_prompt_id": "BW-SEEN-V6-FS-07",
+    "case_label": "Burbank",
+    "strategy": "Few-shot",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA185",
+      "incident_date": "2023-02-22",
+      "jurisdiction": "US",
+      "location": "Bob Hope Airport, Burbank"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA185; INCIDENT DATE: 2023-02-22; JURISDICTION: US; AIRPORT: Bob Hope Airport, Burbank\nPROMPT STRATEGY: Few-shot | REQUEST: Investigate the reported occurrence at Bob Hope Airport, Burbank on 2023-02-22 involving the reported runway occurrence identified by DCA23LA185. The reference identifier is DCA23LA185. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Examples are style guidance only: a reported crossing without a recording remains attributed; a disputed position remains unresolved; a hazard without likelihood evidence stays unassessed. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-007",
+    "evaluation_scope": "asserted factual-claim comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-FS-08",
+    "source_prompt_id": "BW-SEEN-V6-FS-08",
+    "case_label": "Boston",
+    "strategy": "Few-shot",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA192",
+      "incident_date": "2023-02-27",
+      "jurisdiction": "US",
+      "location": "Boston Logan International Airport"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA192; INCIDENT DATE: 2023-02-27; JURISDICTION: US; AIRPORT: Boston Logan International Airport\nPROMPT STRATEGY: Few-shot | REQUEST: Investigate the reported occurrence at Boston Logan International Airport on 2023-02-27 involving the reported runway occurrence identified by DCA23LA192. The reference identifier is DCA23LA192. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Examples are style guidance only: a reported crossing without a recording remains attributed; a disputed position remains unresolved; a hazard without likelihood evidence stays unassessed. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-008",
+    "evaluation_scope": "asserted factual-claim comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-FS-09",
+    "source_prompt_id": "BW-SEEN-V6-FS-09",
+    "case_label": "San Diego",
+    "strategy": "Few-shot",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "OPS23FA010",
+      "incident_date": "2023-08-11",
+      "jurisdiction": "US",
+      "location": "San Diego International Airport"
+    },
+    "text": "SOURCE INCIDENT ID: OPS23FA010; INCIDENT DATE: 2023-08-11; JURISDICTION: US; AIRPORT: San Diego International Airport\nPROMPT STRATEGY: Few-shot | REQUEST: Investigate the reported occurrence at San Diego International Airport on 2023-08-11 involving the reported runway occurrence identified by OPS23FA010. The reference identifier is OPS23FA010. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Examples are style guidance only: a reported crossing without a recording remains attributed; a disputed position remains unresolved; a hazard without likelihood evidence stays unassessed. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-009",
+    "evaluation_scope": "asserted factual-claim comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-FS-10",
+    "source_prompt_id": "BW-SEEN-V6-FS-10",
+    "case_label": "JFK — sequence and source-applicability cross-check",
+    "strategy": "Few-shot",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA125",
+      "incident_date": "2023-01-13",
+      "jurisdiction": "US",
+      "location": "John F. Kennedy International Airport (JFK)"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA125; INCIDENT DATE: 2023-01-13; JURISDICTION: US; AIRPORT: John F. Kennedy International Airport (JFK)\nPROMPT STRATEGY: Few-shot | REQUEST: Investigate the reported occurrence at John F. Kennedy International Airport (JFK) on 2023-01-13 involving American Airlines Flight 106 and Delta Air Lines Flight 1943. The reference identifier is DCA23LA125. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Examples are style guidance only: a reported crossing without a recording remains attributed; a disputed position remains unresolved; a hazard without likelihood evidence stays unassessed. VERIFICATION FOCUS: Cross-check every proposed event ordering against incident-specific passages. Retain timestamp precision and identify gaps between events. Distinguish an operational action from a later investigative activity. Verify procedure vintage and applicability without claiming that an investigation group establishes causation. If the evidence is insufficient, state exactly which recording, factual passage or applicable procedure is needed.",
+    "reference_id": "BW-HO-001",
+    "evaluation_scope": "question-based reference comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-COT-01",
+    "source_prompt_id": "BW-SEEN-V6-COT-01",
+    "case_label": "JFK",
+    "strategy": "Chain-of-thought (CoT)",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA125",
+      "incident_date": "2023-01-13",
+      "jurisdiction": "US",
+      "location": "John F. Kennedy International Airport (JFK)"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA125; INCIDENT DATE: 2023-01-13; JURISDICTION: US; AIRPORT: John F. Kennedy International Airport (JFK)\nPROMPT STRATEGY: Chain-of-thought (CoT) | REQUEST: Investigate the reported occurrence at John F. Kennedy International Airport (JFK) on 2023-01-13 involving American Airlines Flight 106 and Delta Air Lines Flight 1943. The reference identifier is DCA23LA125. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Reason internally through identity, source support, sequence, uncertainty, applicability and risk prerequisites. Return concise evidence-based rationales in the normal schema, without a private reasoning transcript. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-001",
+    "evaluation_scope": "question-based reference comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-COT-02",
+    "source_prompt_id": "BW-SEEN-V6-COT-02",
+    "case_label": "Goa",
+    "strategy": "Chain-of-thought (CoT)",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "VT-BXL",
+      "incident_date": "2026-04-03",
+      "jurisdiction": "IN",
+      "location": "Dabolim Airport, Goa"
+    },
+    "text": "SOURCE INCIDENT ID: VT-BXL; INCIDENT DATE: 2026-04-03; JURISDICTION: IN; AIRPORT: Dabolim Airport, Goa\nPROMPT STRATEGY: Chain-of-thought (CoT) | REQUEST: Investigate the reported occurrence at Dabolim Airport, Goa on 2026-04-03 involving Air India Express AXB-1109, registration VT-BXL, and reported Navy traffic. The reference identifier is VT-BXL. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Reason internally through identity, source support, sequence, uncertainty, applicability and risk prerequisites. Return concise evidence-based rationales in the normal schema, without a private reasoning transcript. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-002",
+    "evaluation_scope": "question-based reference comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-COT-03",
+    "source_prompt_id": "BW-SEEN-V6-COT-03",
+    "case_label": "Delhi 2013",
+    "strategy": "Chain-of-thought (CoT)",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "VT-GOK",
+      "incident_date": "2013-10-02",
+      "jurisdiction": "IN",
+      "location": "Indira Gandhi International Airport, Delhi"
+    },
+    "text": "SOURCE INCIDENT ID: VT-GOK; INCIDENT DATE: 2013-10-02; JURISDICTION: IN; AIRPORT: Indira Gandhi International Airport, Delhi\nPROMPT STRATEGY: Chain-of-thought (CoT) | REQUEST: Investigate the reported occurrence at Indira Gandhi International Airport, Delhi on 2013-10-02 involving GoAir GOW336, registration VT-GOK, and an Indian Air Force AN-32. The reference identifier is VT-GOK. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Reason internally through identity, source support, sequence, uncertainty, applicability and risk prerequisites. Return concise evidence-based rationales in the normal schema, without a private reasoning transcript. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-003",
+    "evaluation_scope": "question-based reference comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-COT-04",
+    "source_prompt_id": "BW-SEEN-V6-COT-04",
+    "case_label": "Austin",
+    "strategy": "Chain-of-thought (CoT)",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23FA149",
+      "incident_date": "2023-02-04",
+      "jurisdiction": "US",
+      "location": "Austin-Bergstrom International Airport"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23FA149; INCIDENT DATE: 2023-02-04; JURISDICTION: US; AIRPORT: Austin-Bergstrom International Airport\nPROMPT STRATEGY: Chain-of-thought (CoT) | REQUEST: Investigate the reported occurrence at Austin-Bergstrom International Airport on 2023-02-04 involving Southwest Flight 708 and FedEx Flight 1432. The reference identifier is DCA23FA149. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Reason internally through identity, source support, sequence, uncertainty, applicability and risk prerequisites. Return concise evidence-based rationales in the normal schema, without a private reasoning transcript. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-004",
+    "evaluation_scope": "question-based reference comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-COT-05",
+    "source_prompt_id": "BW-SEEN-V6-COT-05",
+    "case_label": "Honolulu",
+    "strategy": "Chain-of-thought (CoT)",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA133",
+      "incident_date": "2023-01-23",
+      "jurisdiction": "US",
+      "location": "Daniel K. Inouye International Airport, Honolulu"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA133; INCIDENT DATE: 2023-01-23; JURISDICTION: US; AIRPORT: Daniel K. Inouye International Airport, Honolulu\nPROMPT STRATEGY: Chain-of-thought (CoT) | REQUEST: Investigate the reported occurrence at Daniel K. Inouye International Airport, Honolulu on 2023-01-23 involving the reported runway-crossing occurrence identified by DCA23LA133. The reference identifier is DCA23LA133. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Reason internally through identity, source support, sequence, uncertainty, applicability and risk prerequisites. Return concise evidence-based rationales in the normal schema, without a private reasoning transcript. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-005",
+    "evaluation_scope": "asserted factual-claim comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-COT-06",
+    "source_prompt_id": "BW-SEEN-V6-COT-06",
+    "case_label": "Sarasota",
+    "strategy": "Chain-of-thought (CoT)",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA179",
+      "incident_date": "2023-02-16",
+      "jurisdiction": "US",
+      "location": "Sarasota-Bradenton International Airport"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA179; INCIDENT DATE: 2023-02-16; JURISDICTION: US; AIRPORT: Sarasota-Bradenton International Airport\nPROMPT STRATEGY: Chain-of-thought (CoT) | REQUEST: Investigate the reported occurrence at Sarasota-Bradenton International Airport on 2023-02-16 involving the reported air traffic occurrence identified by DCA23LA179. The reference identifier is DCA23LA179. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Reason internally through identity, source support, sequence, uncertainty, applicability and risk prerequisites. Return concise evidence-based rationales in the normal schema, without a private reasoning transcript. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-006",
+    "evaluation_scope": "asserted factual-claim comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-COT-07",
+    "source_prompt_id": "BW-SEEN-V6-COT-07",
+    "case_label": "Burbank",
+    "strategy": "Chain-of-thought (CoT)",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA185",
+      "incident_date": "2023-02-22",
+      "jurisdiction": "US",
+      "location": "Bob Hope Airport, Burbank"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA185; INCIDENT DATE: 2023-02-22; JURISDICTION: US; AIRPORT: Bob Hope Airport, Burbank\nPROMPT STRATEGY: Chain-of-thought (CoT) | REQUEST: Investigate the reported occurrence at Bob Hope Airport, Burbank on 2023-02-22 involving the reported runway occurrence identified by DCA23LA185. The reference identifier is DCA23LA185. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Reason internally through identity, source support, sequence, uncertainty, applicability and risk prerequisites. Return concise evidence-based rationales in the normal schema, without a private reasoning transcript. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-007",
+    "evaluation_scope": "asserted factual-claim comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-COT-08",
+    "source_prompt_id": "BW-SEEN-V6-COT-08",
+    "case_label": "Boston",
+    "strategy": "Chain-of-thought (CoT)",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA192",
+      "incident_date": "2023-02-27",
+      "jurisdiction": "US",
+      "location": "Boston Logan International Airport"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA192; INCIDENT DATE: 2023-02-27; JURISDICTION: US; AIRPORT: Boston Logan International Airport\nPROMPT STRATEGY: Chain-of-thought (CoT) | REQUEST: Investigate the reported occurrence at Boston Logan International Airport on 2023-02-27 involving the reported runway occurrence identified by DCA23LA192. The reference identifier is DCA23LA192. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Reason internally through identity, source support, sequence, uncertainty, applicability and risk prerequisites. Return concise evidence-based rationales in the normal schema, without a private reasoning transcript. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-008",
+    "evaluation_scope": "asserted factual-claim comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-COT-09",
+    "source_prompt_id": "BW-SEEN-V6-COT-09",
+    "case_label": "San Diego",
+    "strategy": "Chain-of-thought (CoT)",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "OPS23FA010",
+      "incident_date": "2023-08-11",
+      "jurisdiction": "US",
+      "location": "San Diego International Airport"
+    },
+    "text": "SOURCE INCIDENT ID: OPS23FA010; INCIDENT DATE: 2023-08-11; JURISDICTION: US; AIRPORT: San Diego International Airport\nPROMPT STRATEGY: Chain-of-thought (CoT) | REQUEST: Investigate the reported occurrence at San Diego International Airport on 2023-08-11 involving the reported runway occurrence identified by OPS23FA010. The reference identifier is OPS23FA010. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Reason internally through identity, source support, sequence, uncertainty, applicability and risk prerequisites. Return concise evidence-based rationales in the normal schema, without a private reasoning transcript. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-009",
+    "evaluation_scope": "asserted factual-claim comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-COT-10",
+    "source_prompt_id": "BW-SEEN-V6-COT-10",
+    "case_label": "JFK — sequence and source-applicability cross-check",
+    "strategy": "Chain-of-thought (CoT)",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA125",
+      "incident_date": "2023-01-13",
+      "jurisdiction": "US",
+      "location": "John F. Kennedy International Airport (JFK)"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA125; INCIDENT DATE: 2023-01-13; JURISDICTION: US; AIRPORT: John F. Kennedy International Airport (JFK)\nPROMPT STRATEGY: Chain-of-thought (CoT) | REQUEST: Investigate the reported occurrence at John F. Kennedy International Airport (JFK) on 2023-01-13 involving American Airlines Flight 106 and Delta Air Lines Flight 1943. The reference identifier is DCA23LA125. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Reason internally through identity, source support, sequence, uncertainty, applicability and risk prerequisites. Return concise evidence-based rationales in the normal schema, without a private reasoning transcript. VERIFICATION FOCUS: Cross-check every proposed event ordering against incident-specific passages. Retain timestamp precision and identify gaps between events. Distinguish an operational action from a later investigative activity. Verify procedure vintage and applicability without claiming that an investigation group establishes causation. If the evidence is insufficient, state exactly which recording, factual passage or applicable procedure is needed.",
+    "reference_id": "BW-HO-001",
+    "evaluation_scope": "question-based reference comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-TD-01",
+    "source_prompt_id": "BW-SEEN-V6-TD-01",
+    "case_label": "JFK",
+    "strategy": "Task decomposition",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA125",
+      "incident_date": "2023-01-13",
+      "jurisdiction": "US",
+      "location": "John F. Kennedy International Airport (JFK)"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA125; INCIDENT DATE: 2023-01-13; JURISDICTION: US; AIRPORT: John F. Kennedy International Airport (JFK)\nPROMPT STRATEGY: Task decomposition | REQUEST: Investigate the reported occurrence at John F. Kennedy International Airport (JFK) on 2023-01-13 involving American Airlines Flight 106 and Delta Air Lines Flight 1943. The reference identifier is DCA23LA125. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Decompose into factual retrieval, sourced chronology, candidate analogies, procedure applicability, evidence-backed risk or abstention, proposed actions, then Critic/Verification review and report assembly. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-001",
+    "evaluation_scope": "question-based reference comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-TD-02",
+    "source_prompt_id": "BW-SEEN-V6-TD-02",
+    "case_label": "Goa",
+    "strategy": "Task decomposition",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "VT-BXL",
+      "incident_date": "2026-04-03",
+      "jurisdiction": "IN",
+      "location": "Dabolim Airport, Goa"
+    },
+    "text": "SOURCE INCIDENT ID: VT-BXL; INCIDENT DATE: 2026-04-03; JURISDICTION: IN; AIRPORT: Dabolim Airport, Goa\nPROMPT STRATEGY: Task decomposition | REQUEST: Investigate the reported occurrence at Dabolim Airport, Goa on 2026-04-03 involving Air India Express AXB-1109, registration VT-BXL, and reported Navy traffic. The reference identifier is VT-BXL. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Decompose into factual retrieval, sourced chronology, candidate analogies, procedure applicability, evidence-backed risk or abstention, proposed actions, then Critic/Verification review and report assembly. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-002",
+    "evaluation_scope": "question-based reference comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-TD-03",
+    "source_prompt_id": "BW-SEEN-V6-TD-03",
+    "case_label": "Delhi 2013",
+    "strategy": "Task decomposition",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "VT-GOK",
+      "incident_date": "2013-10-02",
+      "jurisdiction": "IN",
+      "location": "Indira Gandhi International Airport, Delhi"
+    },
+    "text": "SOURCE INCIDENT ID: VT-GOK; INCIDENT DATE: 2013-10-02; JURISDICTION: IN; AIRPORT: Indira Gandhi International Airport, Delhi\nPROMPT STRATEGY: Task decomposition | REQUEST: Investigate the reported occurrence at Indira Gandhi International Airport, Delhi on 2013-10-02 involving GoAir GOW336, registration VT-GOK, and an Indian Air Force AN-32. The reference identifier is VT-GOK. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Decompose into factual retrieval, sourced chronology, candidate analogies, procedure applicability, evidence-backed risk or abstention, proposed actions, then Critic/Verification review and report assembly. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-003",
+    "evaluation_scope": "question-based reference comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-TD-04",
+    "source_prompt_id": "BW-SEEN-V6-TD-04",
+    "case_label": "Austin",
+    "strategy": "Task decomposition",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23FA149",
+      "incident_date": "2023-02-04",
+      "jurisdiction": "US",
+      "location": "Austin-Bergstrom International Airport"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23FA149; INCIDENT DATE: 2023-02-04; JURISDICTION: US; AIRPORT: Austin-Bergstrom International Airport\nPROMPT STRATEGY: Task decomposition | REQUEST: Investigate the reported occurrence at Austin-Bergstrom International Airport on 2023-02-04 involving Southwest Flight 708 and FedEx Flight 1432. The reference identifier is DCA23FA149. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Decompose into factual retrieval, sourced chronology, candidate analogies, procedure applicability, evidence-backed risk or abstention, proposed actions, then Critic/Verification review and report assembly. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-004",
+    "evaluation_scope": "question-based reference comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-TD-05",
+    "source_prompt_id": "BW-SEEN-V6-TD-05",
+    "case_label": "Honolulu",
+    "strategy": "Task decomposition",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA133",
+      "incident_date": "2023-01-23",
+      "jurisdiction": "US",
+      "location": "Daniel K. Inouye International Airport, Honolulu"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA133; INCIDENT DATE: 2023-01-23; JURISDICTION: US; AIRPORT: Daniel K. Inouye International Airport, Honolulu\nPROMPT STRATEGY: Task decomposition | REQUEST: Investigate the reported occurrence at Daniel K. Inouye International Airport, Honolulu on 2023-01-23 involving the reported runway-crossing occurrence identified by DCA23LA133. The reference identifier is DCA23LA133. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Decompose into factual retrieval, sourced chronology, candidate analogies, procedure applicability, evidence-backed risk or abstention, proposed actions, then Critic/Verification review and report assembly. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-005",
+    "evaluation_scope": "asserted factual-claim comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-TD-06",
+    "source_prompt_id": "BW-SEEN-V6-TD-06",
+    "case_label": "Sarasota",
+    "strategy": "Task decomposition",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA179",
+      "incident_date": "2023-02-16",
+      "jurisdiction": "US",
+      "location": "Sarasota-Bradenton International Airport"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA179; INCIDENT DATE: 2023-02-16; JURISDICTION: US; AIRPORT: Sarasota-Bradenton International Airport\nPROMPT STRATEGY: Task decomposition | REQUEST: Investigate the reported occurrence at Sarasota-Bradenton International Airport on 2023-02-16 involving the reported air traffic occurrence identified by DCA23LA179. The reference identifier is DCA23LA179. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Decompose into factual retrieval, sourced chronology, candidate analogies, procedure applicability, evidence-backed risk or abstention, proposed actions, then Critic/Verification review and report assembly. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-006",
+    "evaluation_scope": "asserted factual-claim comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-TD-07",
+    "source_prompt_id": "BW-SEEN-V6-TD-07",
+    "case_label": "Burbank",
+    "strategy": "Task decomposition",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA185",
+      "incident_date": "2023-02-22",
+      "jurisdiction": "US",
+      "location": "Bob Hope Airport, Burbank"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA185; INCIDENT DATE: 2023-02-22; JURISDICTION: US; AIRPORT: Bob Hope Airport, Burbank\nPROMPT STRATEGY: Task decomposition | REQUEST: Investigate the reported occurrence at Bob Hope Airport, Burbank on 2023-02-22 involving the reported runway occurrence identified by DCA23LA185. The reference identifier is DCA23LA185. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Decompose into factual retrieval, sourced chronology, candidate analogies, procedure applicability, evidence-backed risk or abstention, proposed actions, then Critic/Verification review and report assembly. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-007",
+    "evaluation_scope": "asserted factual-claim comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-TD-08",
+    "source_prompt_id": "BW-SEEN-V6-TD-08",
+    "case_label": "Boston",
+    "strategy": "Task decomposition",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA192",
+      "incident_date": "2023-02-27",
+      "jurisdiction": "US",
+      "location": "Boston Logan International Airport"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA192; INCIDENT DATE: 2023-02-27; JURISDICTION: US; AIRPORT: Boston Logan International Airport\nPROMPT STRATEGY: Task decomposition | REQUEST: Investigate the reported occurrence at Boston Logan International Airport on 2023-02-27 involving the reported runway occurrence identified by DCA23LA192. The reference identifier is DCA23LA192. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Decompose into factual retrieval, sourced chronology, candidate analogies, procedure applicability, evidence-backed risk or abstention, proposed actions, then Critic/Verification review and report assembly. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-008",
+    "evaluation_scope": "asserted factual-claim comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-TD-09",
+    "source_prompt_id": "BW-SEEN-V6-TD-09",
+    "case_label": "San Diego",
+    "strategy": "Task decomposition",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "OPS23FA010",
+      "incident_date": "2023-08-11",
+      "jurisdiction": "US",
+      "location": "San Diego International Airport"
+    },
+    "text": "SOURCE INCIDENT ID: OPS23FA010; INCIDENT DATE: 2023-08-11; JURISDICTION: US; AIRPORT: San Diego International Airport\nPROMPT STRATEGY: Task decomposition | REQUEST: Investigate the reported occurrence at San Diego International Airport on 2023-08-11 involving the reported runway occurrence identified by OPS23FA010. The reference identifier is OPS23FA010. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Decompose into factual retrieval, sourced chronology, candidate analogies, procedure applicability, evidence-backed risk or abstention, proposed actions, then Critic/Verification review and report assembly. VERIFICATION FOCUS: Verify the operational sequence, supported findings and limits of applicable procedure evidence.",
+    "reference_id": "BW-HO-009",
+    "evaluation_scope": "asserted factual-claim comparison"
+  },
+  {
+    "prompt_id": "BW-SEEN-V7-TD-10",
+    "source_prompt_id": "BW-SEEN-V6-TD-10",
+    "case_label": "JFK — sequence and source-applicability cross-check",
+    "strategy": "Task decomposition",
+    "type": "seen",
+    "metadata": {
+      "source_incident_id": "DCA23LA125",
+      "incident_date": "2023-01-13",
+      "jurisdiction": "US",
+      "location": "John F. Kennedy International Airport (JFK)"
+    },
+    "text": "SOURCE INCIDENT ID: DCA23LA125; INCIDENT DATE: 2023-01-13; JURISDICTION: US; AIRPORT: John F. Kennedy International Airport (JFK)\nPROMPT STRATEGY: Task decomposition | REQUEST: Investigate the reported occurrence at John F. Kennedy International Airport (JFK) on 2023-01-13 involving American Airlines Flight 106 and Delta Air Lines Flight 1943. The reference identifier is DCA23LA125. Use the normal eight-agent workflow and backend report schema. Intake metadata identifies a requested case; it is not independent proof. Retrieve same-incident factual/preliminary evidence from the existing index; exclude protected final/gold reports and answers from generation. Separate sourced facts, attributed accounts, hypotheses and unknowns; cite supporting passages and preserve unresolved Critic findings. If factual support is missing, disclose the evidence gap and defer findings. Use only the backend categorical risk method with adequate severity/likelihood evidence; otherwise retain unassessed. Treat the FAA framework as a reference and verify local applicability. Propose evidence-linked actions or explain deferral. Human review is required; do not self-award scores. Decompose into factual retrieval, sourced chronology, candidate analogies, procedure applicability, evidence-backed risk or abstention, proposed actions, then Critic/Verification review and report assembly. VERIFICATION FOCUS: Cross-check every proposed event ordering against incident-specific passages. Retain timestamp precision and identify gaps between events. Distinguish an operational action from a later investigative activity. Verify procedure vintage and applicability without claiming that an investigation group establishes causation. If the evidence is insufficient, state exactly which recording, factual passage or applicable procedure is needed.",
+    "reference_id": "BW-HO-001",
+    "evaluation_scope": "question-based reference comparison"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-001",
+    "case_label": "Alder Reach Field",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-001 | VERIFICATION FOCUS: Obtain surveyed boundaries and synchronized positions; distinguish proximity from entry. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Alder Reach Field. A delivery van driver reports stopping before a painted access limit while a departing crew reports seeing the van close to the runway. A maintenance sketch lacks a scale. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-002",
+    "case_label": "Birch Ferry Airport",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-002 | VERIFICATION FOCUS: Obtain authenticated amended clearance/readback and the actual taxi track; no inferred compliance finding. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Birch Ferry Airport. A training crew reports receiving a taxi-route amendment while a cabin call interrupted the readback. The controller note records an acknowledgement but does not identify the words used. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-003",
+    "case_label": "Coral Basin Aerodrome",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-003 | VERIFICATION FOCUS: Verify vehicle clearance and physical exit independently; completion is not proof of vacating. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Coral Basin Aerodrome. An operations vehicle was tasked with checking a runway light. A radio note says the inspection ended, while a camera screenshot cannot place the vehicle relative to the protected area. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-004",
+    "case_label": "Driftwood Point Field",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-004 | VERIFICATION FOCUS: Reconcile transmission and movement times; do not infer collision probability from two accounts. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Driftwood Point Field. Two pilots report using the same runway in opposite directions. One heard a departure advisory; the other remembers only static. Both reported taking avoiding action, with no measured separation. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-005",
+    "case_label": "Elm Haven Airport",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-005 | VERIFICATION FOCUS: Obtain dated sign placement records, event-effective works notices and the track; do not allege defective signage yet. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Elm Haven Airport. A crew reports a temporary sign directing it toward a closed taxiway. A works log describes planned sign relocation but has no verified completion time. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-006",
+    "case_label": "Foxglove Ridge Airfield",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-006 | VERIFICATION FOCUS: Establish the complete aircraft/rope footprint and protected-area geometry. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Foxglove Ridge Airfield. A glider tow combination reportedly paused beside a holding line while an observer thought the tow rope extended beyond it. No measurement establishes the rope footprint. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-007",
+    "case_label": "Gannet Shoal Airport",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-007 | VERIFICATION FOCUS: Separate training speculation from event evidence; obtain display and clearance records. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Gannet Shoal Airport. A crew reports receiving a runway change after briefing its departure. A simulator debrief note suggests the earlier runway remained on one display, but no actual aircraft display capture is supplied. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-008",
+    "case_label": "Heather Cross Field",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-008 | VERIFICATION FOCUS: Verify device/event time alignment and position; do not infer reliance or causal distraction. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Heather Cross Field. A pilot reports stopping after an electronic airport map froze. A portable-device log shows a restart but does not identify where the aircraft was at that time. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-009",
+    "case_label": "Ibis Harbour Aerodrome",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-009 | VERIFICATION FOCUS: Establish three-dimensional tracks and clearance scope; a go-around alone does not prove incursion. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Ibis Harbour Aerodrome. A helicopter reports an air-taxi route near a runway threshold. A fixed-wing crew reports a go-around but cannot establish whether the helicopter entered a protected surface. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-010",
+    "case_label": "Juniper Coast Airport",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-010 | VERIFICATION FOCUS: Resolve status transfer using time-aligned inspection and handover records. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Juniper Coast Airport. A controller handover note lists a runway inspection as pending. The incoming controller believed it complete; no vehicle status confirmation or authenticated handover audio is provided. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-011",
+    "case_label": "Kestrel Moor Field",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-011 | VERIFICATION FOCUS: Verify both source editions and event-time frequency; neither account establishes which was correct. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Kestrel Moor Field. A pilot reports using a frequency from a route card while a second pilot reports using a different airport listing. Neither document has a confirmed effective date. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-012",
+    "case_label": "Larch Narrows Airport",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-012 | VERIFICATION FOCUS: Obtain addressed audio, readbacks and separate tracks; retain both accounts without choosing a recipient. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Larch Narrows Airport. A controller reportedly issued a crossing instruction to one of two similarly named vehicles. Both drivers recall hearing their identifier, and neither vehicle GPS record is supplied. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-013",
+    "case_label": "Mica Valley Airfield",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-013 | VERIFICATION FOCUS: Verify geometry and the full aircraft footprint; do not equate a perspective effect with a verified intrusion. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Mica Valley Airfield. An aircraft remained stationary during an equipment check near a runway access point. An observer described its wing as over a protected line, but the image perspective is oblique. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-014",
+    "case_label": "Nettle Sound Airport",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-014 | VERIFICATION FOCUS: Obtain activation/diagnostic logs and clearance timing; do not infer present failure from fault history. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Nettle Sound Airport. A crew reports an unexpected stop-bar indication after receiving a taxi clearance. A maintenance record describes an earlier fault but does not establish event-time system state. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-015",
+    "case_label": "Osprey Hollow Field",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-015 | VERIFICATION FOCUS: Verify the approved route, effective works plan and synchronized vehicle position. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Osprey Hollow Field. A construction escort reports guiding a vehicle across an access lane. An aircraft crew reports seeing the vehicle near a runway intersection but does not know its authorized route. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-016",
+    "case_label": "Plover Bay Airport",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-016 | VERIFICATION FOCUS: Identify the addressed message and readback; avoid inventing omitted wording. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Plover Bay Airport. A crew reports missing part of a controller instruction during simultaneous radio traffic. A tower note refers to a hold instruction but has no recipient or time. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-017",
+    "case_label": "Quartz Inlet Airfield",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-017 | VERIFICATION FOCUS: Establish object identity, runway boundary and timing before linking the equipment to the reject. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Quartz Inlet Airfield. A departing pilot reports rejecting takeoff after seeing an unidentified object near the runway edge. A grounds worker reports equipment beside a drainage channel but no mapped location. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-018",
+    "case_label": "Rowan Mesa Airport",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-018 | VERIFICATION FOCUS: Obtain surveillance diagnostics and actual track; neither a real intruder nor a false alert is established. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Rowan Mesa Airport. A runway occupancy display reportedly showed a persistent target after an aircraft vacated. A controller requested a pause while an operator sought visual confirmation. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-019",
+    "case_label": "Saffron Gate Field",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-019 | VERIFICATION FOCUS: Verify chart editions, local changes and position; chart disagreement alone does not establish noncompliance. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Saffron Gate Field. A crew reports stopping after a taxiway label differed between two diagrams. One diagram is undated; neither is confirmed as the event-effective chart. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  },
+  {
+    "prompt_id": "BW-UNSEEN-020",
+    "case_label": "Thistle Haven Airport",
+    "strategy": "Zero-shot scenario",
+    "type": "synthetic_unseen",
+    "metadata": {
+      "incident_date": null,
+      "jurisdiction": null
+    },
+    "text": "CASE ID: BW-UNSEEN-020 | VERIFICATION FOCUS: Reconstruct the handover, addressed instruction and movement order from authenticated records. | REQUEST: Use the normal eight-agent report schema; attribute these unverified accounts; use RAG only for guidance and candidate analogies, not proof of this event. Keep unsupported risk unassessed, preserve unknowns and require human review. Keep gold evaluation separate from generation.\nORIGINAL FICTIONAL training scenario at Thistle Haven Airport. A crew reports receiving an instruction shortly before a shift change. Two controller notes disagree about whether a coordination message was completed before aircraft movement. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.",
+    "reference_id": "GOLD80-SAFETY-5",
+    "evaluation_scope": "synthetic safety-policy adherence only"
+  }
+]

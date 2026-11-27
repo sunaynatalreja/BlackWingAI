@@ -1,0 +1,16 @@
+question_id,case_id,source_id,strategy,context_units,units_with_all_heuristic_markers,complete_context_unit_exists,min_chars_matching_unit,estimated_tokens_matching_unit,matched_unit_ids_sample
+BW-G001,DCA23LA125,BW-EV-001,fixed,49,0,0,,,
+BW-G001,DCA23LA125,BW-EV-001,page_adjacent_overlap2,49,1,1,1525,382,BW-EV-001:loc3:fixed:00000:8bf699ac7b + BW-EV-001:loc3:fixed:00001:7d6acbb4b3
+BW-G001,DCA23LA125,BW-EV-001,page_merged,20,1,1,1771,443,BW-EV-001:page:3
+BW-G002,DCA23LA125,BW-EV-001,fixed,49,1,1,760,190,BW-EV-001:loc3:fixed:00000:8bf699ac7b
+BW-G002,DCA23LA125,BW-EV-001,page_adjacent_overlap2,49,1,1,1525,382,BW-EV-001:loc3:fixed:00000:8bf699ac7b + BW-EV-001:loc3:fixed:00001:7d6acbb4b3
+BW-G002,DCA23LA125,BW-EV-001,page_merged,20,1,1,1771,443,BW-EV-001:page:3
+BW-G005,DCA23LA125,BW-EV-001,fixed,49,1,1,761,191,BW-EV-001:loc6:fixed:00000:b9e59ee23e
+BW-G005,DCA23LA125,BW-EV-001,page_adjacent_overlap2,49,1,1,1622,406,BW-EV-001:loc6:fixed:00000:b9e59ee23e + BW-EV-001:loc6:fixed:00001:f31e703552
+BW-G005,DCA23LA125,BW-EV-001,page_merged,20,1,1,1635,409,BW-EV-001:page:6
+BW-G011,DCA23FA149,BW-EV-006,fixed,65,3,1,751,188,BW-EV-006:loc3:fixed:00000:34f5b65ae4 | BW-EV-006:loc3:fixed:00001:5c95d3536b | BW-EV-006:loc4:fixed:00000:09f76bd990
+BW-G011,DCA23FA149,BW-EV-006,page_adjacent_overlap2,65,3,1,1027,257,BW-EV-006:loc3:fixed:00000:34f5b65ae4 + BW-EV-006:loc3:fixed:00001:5c95d3536b | BW-EV-006:loc3:fixed:00001:5c95d3536b + BW-EV-006:loc3:fixed:00002:d45fdb33e0 | BW-EV-006:loc4:fixed:00000:09f76bd990 + BW-EV-006:loc4:fixed:00001:e8c6bccb02
+BW-G011,DCA23FA149,BW-EV-006,page_merged,18,2,1,1779,445,BW-EV-006:page:3 | BW-EV-006:page:4
+BW-G014,DCA23FA149,BW-EV-006,fixed,65,2,1,684,171,BW-EV-006:loc6:fixed:00000:05e574c941 | BW-EV-006:loc6:fixed:00001:81c45a0d9e
+BW-G014,DCA23FA149,BW-EV-006,page_adjacent_overlap2,65,2,1,1389,348,BW-EV-006:loc6:fixed:00000:05e574c941 + BW-EV-006:loc6:fixed:00001:81c45a0d9e | BW-EV-006:loc6:fixed:00001:81c45a0d9e + BW-EV-006:loc6:fixed:00002:0b9444eaeb
+BW-G014,DCA23FA149,BW-EV-006,page_merged,18,1,1,2514,629,BW-EV-006:page:6

@@ -1,0 +1,5 @@
+Synopsis:
+Tower CIC reported a runway incursion about to happen to the Local Controller who froze. The landing aircraft went around when pilot observed the possible aircraft conflict.
+
+Narrative:
+Name working local; I was working CD/CIC. I was looking at NOTAMs and filling out traffic count when I heard Name say 'This is making me nervous'. When I looked up from the computer I saw Aircraft Y rolling Runway 24 and Aircraft X descending for Runway 15. There was not adequate spacing for the crossing runways. Name asked if she should send Aircraft X around and I said; Yes!  Name then stared at the aircraft and did nothing. Aircraft X then initiated a go-around avoiding Aircraft Y. I asked Name if they would like to be relieved from position and name said 'No; I'm fine'. CPC's should be aware of cutoff points for launching crossing runway operations with arrivals.

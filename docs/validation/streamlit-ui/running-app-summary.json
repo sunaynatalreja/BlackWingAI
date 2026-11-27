@@ -1,0 +1,15 @@
+{
+  "frontend": "real Streamlit 1.67.0 running cloud entrypoint",
+  "backend": "real FastAPI and temporary SQLite; mocked model runner",
+  "health": "passed",
+  "agent_status": "ready",
+  "snapshots": 7,
+  "created_cases": 1,
+  "completed_runs": 1,
+  "risk_display": "C3 from backend",
+  "review_records": 1,
+  "pdf_export_control": "available after sourced finding acceptance",
+  "live_model_calls": 0,
+  "database": "temporary test database only",
+  "browser_visual_validation": "not performed"
+}

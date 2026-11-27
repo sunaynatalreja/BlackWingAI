@@ -1,0 +1,158 @@
+{
+  "run_id": "da0e8da7-7aea-4ade-a227-70f4900673ce",
+  "events": [
+    {
+      "sequence": 1,
+      "step": "case_created",
+      "agent": null,
+      "status": "complete",
+      "model": "qwen3:8b",
+      "detail": null,
+      "timestamp": "2026-11-20T20:58:50.148589Z"
+    },
+    {
+      "sequence": 2,
+      "step": "source_retrieval",
+      "agent": null,
+      "status": "complete",
+      "model": "qwen3:8b",
+      "detail": "5",
+      "timestamp": "2026-11-20T20:58:50.149048Z"
+    },
+    {
+      "sequence": 3,
+      "step": "investigation",
+      "agent": "Investigation Agent",
+      "status": "complete",
+      "model": "qwen3:8b",
+      "detail": null,
+      "timestamp": "2026-11-20T20:58:50.149057Z"
+    },
+    {
+      "sequence": 4,
+      "step": "similar_case",
+      "agent": "Similar Case Analysis Agent",
+      "status": "complete",
+      "model": "deterministic-corpus-comparison",
+      "detail": null,
+      "timestamp": "2026-11-20T20:58:50.149061Z"
+    },
+    {
+      "sequence": 5,
+      "step": "compliance",
+      "agent": "Compliance Agent",
+      "status": "complete",
+      "model": "qwen3:8b",
+      "detail": null,
+      "timestamp": "2026-11-20T20:58:50.149064Z"
+    },
+    {
+      "sequence": 6,
+      "step": "risk",
+      "agent": "Risk Agent",
+      "status": "complete",
+      "model": "qwen3:8b",
+      "detail": null,
+      "timestamp": "2026-11-20T20:58:50.149068Z"
+    },
+    {
+      "sequence": 7,
+      "step": "mitigation",
+      "agent": "Mitigation Agent",
+      "status": "complete",
+      "model": "qwen3:8b",
+      "detail": null,
+      "timestamp": "2026-11-20T20:58:50.149071Z"
+    },
+    {
+      "sequence": 8,
+      "step": "critic",
+      "agent": "Critic Agent",
+      "status": "complete",
+      "model": "qwen3:8b",
+      "detail": null,
+      "timestamp": "2026-11-20T20:58:50.149073Z"
+    },
+    {
+      "sequence": 9,
+      "step": "verification",
+      "agent": "Verification Agent",
+      "status": "complete",
+      "model": "qwen3:8b",
+      "detail": null,
+      "timestamp": "2026-11-20T20:58:50.149076Z"
+    },
+    {
+      "sequence": 10,
+      "step": "report_task_plan",
+      "agent": "Report Task Planner",
+      "status": "complete",
+      "model": "qwen3:8b",
+      "detail": null,
+      "timestamp": "2026-11-20T20:58:50.149079Z"
+    },
+    {
+      "sequence": 11,
+      "step": "report_overview",
+      "agent": "Report section: Incident overview",
+      "status": "complete",
+      "model": "qwen3:8b",
+      "detail": null,
+      "timestamp": "2026-11-20T20:58:50.149082Z"
+    },
+    {
+      "sequence": 12,
+      "step": "report_findings_and_causes",
+      "agent": "Report section: Findings and causal assessment",
+      "status": "complete",
+      "model": "qwen3:8b",
+      "detail": null,
+      "timestamp": "2026-11-20T20:58:50.149085Z"
+    },
+    {
+      "sequence": 13,
+      "step": "report_comparisons_and_compliance",
+      "agent": "Report section: Historical comparisons and compliance",
+      "status": "complete",
+      "model": "qwen3:8b",
+      "detail": null,
+      "timestamp": "2026-11-20T20:58:50.149087Z"
+    },
+    {
+      "sequence": 14,
+      "step": "report_risk_and_follow_up",
+      "agent": "Report section: Risk and recommended follow-up",
+      "status": "complete",
+      "model": "qwen3:8b",
+      "detail": null,
+      "timestamp": "2026-11-20T20:58:50.14909Z"
+    },
+    {
+      "sequence": 15,
+      "step": "report",
+      "agent": "Report Agent",
+      "status": "complete",
+      "model": "qwen3:8b",
+      "detail": null,
+      "timestamp": "2026-11-20T20:58:50.149093Z"
+    },
+    {
+      "sequence": 16,
+      "step": "deterministic_risk_scoring",
+      "agent": null,
+      "status": "not_configured",
+      "model": "qwen3:8b",
+      "detail": null,
+      "timestamp": "2026-11-20T20:58:50.149095Z"
+    },
+    {
+      "sequence": 17,
+      "step": "human_review",
+      "agent": null,
+      "status": "required",
+      "model": "qwen3:8b",
+      "detail": null,
+      "timestamp": "2026-11-20T20:58:50.149098Z"
+    }
+  ]
+}

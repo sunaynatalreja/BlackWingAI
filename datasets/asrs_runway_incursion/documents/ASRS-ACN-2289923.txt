@@ -1,0 +1,5 @@
+Synopsis:
+C152 Flight Instructor with student reported that the aircraft engine did not develop adequate power to climb after takeoff. Flight Instructor landed on a nearby runway.
+
+Narrative:
+It was routine training flight with my student. This incident happened during pattern work on XXR at ZZZ. We had 2 successful touch and goes. After 3rd touch and go; my student added power; airplane sped up to rotating speed and we rotated. Moment after lift off; I noticed airplane was [not] generating enough power and barely climbing. By the time I noticed; We were at 100ft AGL and had less than 1000ft remaining runway. I took the control and decided to land on XY; where I didn't get clearance to land; instead of continue climb and make pattern for XXR. I think I should have looked at the RPM gauge and make sure the engine is generating enough power to take off before rotate.

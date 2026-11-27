@@ -1,0 +1,5 @@
+Synopsis:
+GA pilot reported as they crossed the runway at a non-towered airport; another aircraft executed a go-around above them. Reporter noticed they were communicating on the wrong frequency and the other aircraft had not heard reporter's announced intentions to cross the runway.
+
+Narrative:
+No wind conditions and planned eastbound route; planned to launch on 06. Announced back-taxi 06; as approach and crossing Runway 31 observed Aircraft Y executing go-around above me; then observed radio mis-tuned to 123.8; not 122.8; tuned correctly and responded to Aircraft Y inquiry apology and would wait for him to land before departure. Had been using frequencies in the 123.## range; human error did not verify correct frequency. Tuning error unnoticed on original approach; no traffic observed on ADS-B in vicinity during approach and landing.

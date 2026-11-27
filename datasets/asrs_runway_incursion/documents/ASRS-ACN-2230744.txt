@@ -1,0 +1,5 @@
+Synopsis:
+Air carrier pilot reported a safety concern; when ATC cleared another aircraft to cross the landing runway while the landing aircraft had not yet turned onto the taxiway. The aircraft slowed and turned onto the taxiway; but the pilot was concerned of the potential conflict with the ATC clearance.
+
+Narrative:
+On landing rollout RWY 14; received clearance to make a left turn when able and taxi via Hotel to the ramp. I was unable to take the high speed exit (taxiway D) as Aircraft X was taxiing opposite direction on Hotel. While still on centerline; slowing the aircraft; Tower cleared an aircraft (Aircraft Y) to cross the runway in front of us creating a safety hazard. I was able to slow and make the left turn at taxiway B while Aircraft Y was crossing the runway in front of me from taxiway Lima to Alpha. Had there been a malfunction or issue during my rollout; we would have impacted the crossing traffic.Cause: Causal factor was ATC clearing Aircraft Y to cross the runway while I was still on rollout. Recommendation would be to educate the Nassau Tower that traffic cannot cross a runway until landing traffic is clear.

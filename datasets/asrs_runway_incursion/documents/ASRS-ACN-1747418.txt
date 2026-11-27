@@ -1,0 +1,5 @@
+Synopsis:
+Pilot reported radio communication confusion as to which runway they had been cleared to land.
+
+Narrative:
+First flight back after COVID reopening; local flight in the pattern with a private-rated student. I believe the Controller instructed us to turn right and enter the Runway XX upwind from the XX left downwind. We were then instructed to return to the downwind; but there was confusion as to whether that meant the Runway YY or Runway XX left downwind. I asked for clarification on frequency; but the transmission was blocked. On a left base to Runway YY; we were cleared to land Runway YY.Upon reflection; I am not sure if we were intended to enter the left pattern for Runway YY or Runway XX.With all three frequencies (local; ground; and clearance delivery) combined on Tower; there was some radio confusion. Additionally; aircraft were being directed to both XX and YY due to practice approaches being conducted to YY.I believe these confusing situational factors adversely affect safety; particularly due to the staffing/currency challenges as a result of COVID-19.

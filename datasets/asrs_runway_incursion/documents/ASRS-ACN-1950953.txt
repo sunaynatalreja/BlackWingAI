@@ -1,0 +1,5 @@
+Synopsis:
+Air Taxi Captain reported a critical ground conflict; which required hard braking; with a fast moving maintenance truck while taxing across a closed runway.
+
+Narrative:
+Landed Runway XX exited right on [Taxiway] X. Ground cleared is to the FBO west via [Taxiway] Y; [Taxiway] Z; cross Runway XX/XY (notated close for maintenance). Crossing Runway XX/XY on [Taxiway] Z had to break hard to avoid being hit by very fast moving ( 40 mph ) large maintenance truck was traveling from our left ( north eastbound on Runway XX/XY). The truck made no effort to slow down to avoid hitting us indicating that he had not seen us and was not aware that ground had cleared us to cross the runway. We immediately notified ground who queried airport maintenance about the truck's movement.

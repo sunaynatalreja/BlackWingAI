@@ -1,0 +1,36 @@
+BLACKWING TWO-LINE INPUTS / UI UPDATE — 24 NOVEMBER 2026
+Arun & Sunayna approve
+
+Applied to BlackWingAI-Arun-Git, branch feature/arun-rag-risk-compliance.
+Use the individual files under seen_V7 and unseen_V6. Copy the complete two-line
+file; your browser/editor may visually wrap each line. Originals remain unchanged.
+There are 30 seen prompts (10 Few-shot, 10 CoT, 10 Task decomposition) and 20 unseen
+fictional scenarios. The JSON and combined text files contain the same inputs.
+
+Restart FastAPI to load compact-header parsing, in your configured IIT terminal:
+python -m uvicorn blackwing.api:app --host 127.0.0.1 --port 8001
+
+Restart Streamlit to reload imported UI modules, from another activated terminal:
+python -m streamlit run blackwing/ui.py --server.port 8502
+
+The report view keeps Report Completeness, Gold comparison score (with LaaJ / gold
+evaluation caption), and separate backend Aviation risk. While running, pending
+values and agent progress remain visible. The long running-report banner and
+Refresh investigation status button are removed. Status updates automatically.
+Failed/interrupted warnings and trace inspection are retained. Prompt completeness
+stays in Run trace. Gold scoring still requires the explicit comparison action.
+
+Verification already performs model and deterministic evidence/consistency checks.
+It does not receive protected gold answers or compute the post-generation gold score.
+
+47 focused offline tests passed. Running and completed UI states passed a real
+Streamlit runtime check using mocked responses; no actual case score was produced.
+All 50 inputs passed intake/routing checks. No live investigations or hosted model
+calls were made. Current direct factual-source metadata matches seven seen IDs;
+VT-BXL and VT-GOK lack such matching tags and need suitable independent factual/
+preliminary evidence for supported event findings. Short prompts cannot create
+missing evidence. Check README and offline_audit.json for scoring scope and limits.
+
+The UI theme/tabs, aviation-risk matrix, completeness weights, saved reports, all
+13 checked protected-gold files and 18 checked index files are preserved. No index
+rebuild, commit, merge or push was performed.

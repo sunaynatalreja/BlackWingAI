@@ -1,0 +1,5 @@
+Synopsis:
+Air carrier Captain reported a lack of indication of whether the ILS critical holding point was in use at FACT airport. Additionally; as the holding area is close to the approach end of another runway; larger aircraft could overlap the approach end.
+
+Narrative:
+Runway incursion threat potential. Cape Town goes to a single communications frequency in the evening. The Controller monitors Clearance Delivery; Ground and Tower calls. We were cleared to taxi on A1; cross Runway 16 to Taxiway A2 holding point for Runway 19. Except for the red stop bar at the ILS critical area holding point on Taxiway A2; there was no indication by the Controller or ATIS that the Runway 19 ILS critical holding point was in use. The Taxiway A2 holding area in question is very close to the approach end of Runway 16. When a [widebody aircraft] is holding at this location; one-half to one-third of the aircraft overlaps and is on actually on Runway 16 approach end. This is a potentially dangerous condition. It would be better to know in advance and hold on Taxiway A1 before crossing Runway 16 to get to Runway 19.

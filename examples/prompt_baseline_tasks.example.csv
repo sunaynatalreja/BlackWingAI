@@ -1,0 +1,3 @@
+task_id,split,approved,incident_id,incident_date,jurisdiction,narrative,task_instruction
+DEMO-001,development,true,SYNTHETIC-001,2024-06-01,US,"Synthetic exercise only. Ground observer reported that one aircraft was seen close to a runway holding position. No radar track, transcript, or clearance record has been provided.",Draft a short preliminary incident report with limitations.
+DEMO-002,development,true,SYNTHETIC-002,2023-07-20,IN,"Synthetic exercise only. Pilot narrative says an aircraft taxied toward a crossing point and stopped. The pilot does not recall whether the controller transmitted a runway crossing clearance. No independently verified documents are attached.",Prepare an evidence-limited preliminary report.

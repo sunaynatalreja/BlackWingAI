@@ -1,0 +1,9 @@
+﻿case,method,questions_scored,source_hint_hit_at_5,source_hint_hit_at_10,source_hint_mrr_at_10,mean_latency_seconds,median_latency_seconds,protected_hits,true_recall_at_k,approval_status
+AUSTIN,bm25,15,0.6667,0.6667,0.6222,1.9746,1.9232,0,NOT MEASURED - exhaustive relevance judgments unavailable,SOURCE_FILTERED_TECHNICAL_TRIAL_NOT_CLEAN_HELDOUT
+AUSTIN,dense,15,0.8,0.8667,0.6639,1.8603,1.7999,0,NOT MEASURED - exhaustive relevance judgments unavailable,SOURCE_FILTERED_TECHNICAL_TRIAL_NOT_CLEAN_HELDOUT
+AUSTIN,hybrid,15,0.8,0.8667,0.7578,2.0115,2.007,0,NOT MEASURED - exhaustive relevance judgments unavailable,SOURCE_FILTERED_TECHNICAL_TRIAL_NOT_CLEAN_HELDOUT
+AUSTIN,rerank,15,0.8667,0.8667,0.8667,3.1028,3.0719,0,NOT MEASURED - exhaustive relevance judgments unavailable,SOURCE_FILTERED_TECHNICAL_TRIAL_NOT_CLEAN_HELDOUT
+JFK,bm25,10,0.7,0.8,0.6625,2.3722,2.1729,0,NOT MEASURED - exhaustive relevance judgments unavailable,SOURCE_FILTERED_TECHNICAL_TRIAL_NOT_CLEAN_HELDOUT
+JFK,dense,10,0.8,1,0.6972,2.4337,2.242,0,NOT MEASURED - exhaustive relevance judgments unavailable,SOURCE_FILTERED_TECHNICAL_TRIAL_NOT_CLEAN_HELDOUT
+JFK,hybrid,10,0.8,0.9,0.7667,2.3527,2.2178,0,NOT MEASURED - exhaustive relevance judgments unavailable,SOURCE_FILTERED_TECHNICAL_TRIAL_NOT_CLEAN_HELDOUT
+JFK,rerank,10,0.9,1,0.8111,4.5871,3.4519,0,NOT MEASURED - exhaustive relevance judgments unavailable,SOURCE_FILTERED_TECHNICAL_TRIAL_NOT_CLEAN_HELDOUT

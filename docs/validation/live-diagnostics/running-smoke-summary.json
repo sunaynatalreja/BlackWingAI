@@ -1,0 +1,25 @@
+{
+  "real_fastapi_process_survived_background_failure": true,
+  "health_after_failure": 200,
+  "subsequent_case_creation": 201,
+  "run_status": "failed",
+  "error_code": "model_timeout",
+  "trace_states": [
+    "complete",
+    "execution_started",
+    "invoking_workflow",
+    "workflow_started",
+    "workflow_ready",
+    "agent_started",
+    "waiting_for_model_response",
+    "model_request_failed",
+    "agent_failed",
+    "execution_failed"
+  ],
+  "report_endpoint": 409,
+  "streamlit_status": "ready",
+  "streamlit_report_unavailable_message": "failed investigation, preserved trace, new run guidance",
+  "provider_io": "httpx.MockTransport only",
+  "live_model_calls": 0,
+  "storage": "temporary SQLite only"
+}

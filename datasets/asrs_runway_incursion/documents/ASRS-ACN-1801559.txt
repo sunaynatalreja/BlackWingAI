@@ -1,0 +1,5 @@
+Synopsis:
+Pilot reported a rejected take off after communication problems with ATC resulted in Ground Conflict.
+
+Narrative:
+My copilot and I taxied out to Runway XXR. It was a busy day and the Tower was issuing rapid instructions and replies. I heard what I believed the Tower to say was ' Runway XXR cleared for takeoff'. I repeated the instruction and no response was heard from the Tower. I lined up on the centerline of  Runway XXR and began my takeoff roll. At approximately 50 AGL theTower 'cancelled my takeoff clearance' and I pulled out the power and landed straight ahead. It was at this time that I saw a Cessna Caravan departing Runway XYL as it crossed the departure end of  Runway XXR. We were taxied back to  Runway XXR and we departed the airport uneventfully.A contributing factor I believe is the speed at which the ZZZ Tower issues instructions and replies. I believe the controller may have been too busy issuing the next instruction to listen to whether I had heard and understood his instructions and repeated them back correctly.

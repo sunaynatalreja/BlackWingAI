@@ -1,0 +1,5 @@
+Synopsis:
+Corporate jet Captain reported executing an ATC-directed rejected takeoff at GRR when ATC became aware of a conflict with an aircraft landing on an intersecting runway.
+
+Narrative:
+We were taking the plane back to ZZZ [airport] empty from GRR. We requested runway 17 for departure after hearing it was available on the ATIS. Ground cleared us for taxi to runway 17 via K; K1. We were holding short of runway 17 at K1. Tower then cleared us for takeoff on runway 17 out of GRR. On departure roll below V1 we performed an abort due to conflicting traffic landing on runway 26L. After aborting the Tower asked us to taxi back to runway 17 via D; B; B5. We were then asked to call Tower while holding short. I called Tower and spoke with a manager. He advised me they were going to listen to the tapes for a possible pilot deviation. We then taxied back to FBO via K1; K to preform a system reset. Shortly after completion of the system reset the ATC manager called me back and said the Tower Controller did make a mistake and cleared us for takeoff on an intersecting runway while the other aircraft was cleared and in the process of landing.

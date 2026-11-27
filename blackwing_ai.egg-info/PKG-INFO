@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: blackwing-ai
+Version: 0.1.0
+Summary: BlackWing AI runway-incursion investigation prototype
+Requires-Python: >=3.11

@@ -1,0 +1,17 @@
+BLACKWING AI — final local validation, 21 November 2026
+Branch: feature/arun-rag-risk-compliance
+Command: .\.venv\Scripts\python.exe -m pytest -q -p no:cacheprovider --tb=short --junitxml=<artifact path>
+Result: 110 passed; 0 failures; 0 errors; 0 skipped.
+Pytest reported duration: 5.63 seconds.
+Warnings: 2 existing dependency deprecations (Starlette/httpx and LangGraph checkpoint serializer).
+Baseline: 83 passed. Added cases: 27. Automated model/provider IO: mocked; outbound connections blocked.
+
+Read-only real-index smoke:
+retrieve_evidence: complete; duration_ms=245.724; invocation_id=6a6e3aca-3b24-48a6-a69e-4a647ca1b8c5
+find_similar_incidents: complete; duration_ms=0.546; invocation_id=e6ad1ff5-049f-48d7-bcdd-167d20bafd28
+assess_reference_risk: complete; duration_ms=0.008; invocation_id=808c8bf0-abbf-4a91-80b3-96de5363367b
+Historical matches: 3; risk status: unassessed_insufficient_inputs
+Both saved 777-document / 27,255-chunk corpora passed chunk-signature and raw-vector-hash checks. No embeddings generated.
+Correction: one successful targeted revision (10 steps), impossible correction safely skipped (9 steps), failed revision safely terminated (10 steps).
+Persistence: API results/reviews survive reopen; separate-process restart test preserves completed outputs and marks active work interrupted; new recovery run allowed.
+Not performed: live IIT requests, live Ollama investigations, actual frontend integration or independent model-answer evaluation.

@@ -1,0 +1,9 @@
+{
+  "questions": 10,
+  "minimum_input_tokens": 2384,
+  "maximum_input_tokens": 2639,
+  "output_reserve": 768,
+  "safety_reserve": 256,
+  "all_fit_8192": true,
+  "hosted_calls": 0
+}

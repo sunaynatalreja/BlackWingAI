@@ -1,0 +1,5 @@
+Synopsis:
+Tower Controller reported a pilot took the wrong runway for departure; resulting in takeoff clearance cancellation and traffic for another aircraft.
+
+Narrative:
+I was working Local Position and Aircraft X wanted to depart for a maintenance flight overhead. They called ready to depart. I cleared them for takeoff Runway XXR making right hand turns spiraling overhead. I had Aircraft Y in left closed traffic for Runway XX they were midfield. After clearing Aircraft X; I then cleared Aircraft Y to land and told them about the traffic departing. As I was doing my scan I noticed Aircraft X turn onto Runway XY for departure. I immediately cancelled their take off clearance and also Aircraft Y; and told them to go-around left side of the runway. I then explained what to Aircraft X what they had done wrong and fixed the issue and then cleared them for takeoff.

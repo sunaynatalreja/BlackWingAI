@@ -1,0 +1,5 @@
+Synopsis:
+C172 Flight Instructor reported an aircraft landed behind them on the same runway before they had exited the runway at a non towered airport.
+
+Narrative:
+We Aircraft X a C172 were performing a landing to a full stop on runway XX at ZZZ. The runway was clear as we descended from final to landing. As we touched down and began to apply brakes we heard a radio call from the aircraft holding short of runway XX asking the Aircraft Y landing if they saw the other aircraft (me) on the runway. His response was yes. He performed a landing on a 4700 ft runway that we were only about 1/2 of the way down; still fully on the runway at a slow speed. He was maybe under 1000 ft behind us and should have gone around; not landing. The offending aircraft was Aircraft Y a blue and white single engine aircraft.

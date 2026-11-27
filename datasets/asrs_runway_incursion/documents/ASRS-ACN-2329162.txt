@@ -1,0 +1,5 @@
+Synopsis:
+Air carrier Captain reported a runway incursion during taxi out. ATC notified the flight crew.
+
+Narrative:
+Approximately XA:32 got a call from Tower on guard while waiting in between Runways XXL and XXR advising Aircraft X to contact ZZZ Tower. After getting out of takeoff line; and calling ATC; FO (First Officer) was told by Tower Controller that we were on wrong frequency after crossing XXR and holding short XXL. Complied with all SOP crossing XXL; saw no traffic within 2 miles. The Tower personnel stated that we answered a call for a Aircraft Y to cross XXL and contact Ground. I only heard the part about crossing XXL; the FO heard the contact Ground; which is why he switched frequencies after crossing XXL. The Tower controller stated that he was forced to have an airplane execute a go-around because we were not supposed to cross XXL.

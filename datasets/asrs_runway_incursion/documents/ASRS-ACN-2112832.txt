@@ -1,0 +1,5 @@
+Synopsis:
+C172 flight Instructor with student reported during landing rollout an aircraft landed behind them before the Instructor had exited the runway causing a critical ground conflict.
+
+Narrative:
+My student was pilot flying; I was giving IFR instruction. Upon rollout on the last landing of the flight returning back to ZZZ; I looked back and noticed a Piper PA28 rolling out behind us that I heard in the pattern earlier. I immediately took control and exited the runway as the plane was catching up to us. He was behind us in the pattern; we made every call; the last call I remember he made was entering base for runway XX. He had to have been within 50 feet of us on the runway and as we exited I called him on the radio to ask if he saw us and he said yes he sees us and continued to roll out. After exiting the plane I attempted to find the person flying the Piper to check what was going on and offer him a lesson on runway incursions; but he was nowhere to be found and his aircraft was already tied down.

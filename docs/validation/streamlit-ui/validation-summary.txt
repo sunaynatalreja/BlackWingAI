@@ -1,0 +1,18 @@
+BLACKWING AI Streamlit integration validation - 21 November 2026
+Branch: feature/arun-rag-risk-compliance
+Source ref: origin/feature/blackwing-agentic-copilot (b0e24b40b473162f9ee32758ee58ec5b54f81410)
+Complete regression: 128 passed; 0 failures; 0 errors; 0 skipped.
+Original backend suite: 110 tests retained. New integration cases: 18.
+Pytest reported duration: 12.83 seconds. Warnings: 2 existing dependency deprecations.
+All 7 integration modules imported. pip check: No broken requirements found.
+AppTest: intake/upload/run/risk/quality/review/PDF/history/cloud entrypoint/stale-run handling passed.
+Running Streamlit agent API: 7 ready snapshots; 1 temporary case; 1 completed mocked run; 1 durable review.
+Running risk display: C3 from backend. Reviewed PDF export control available.
+No new Streamlit server warnings or traceback. Temporary servers stopped.
+No live Ollama or IIT calls. Real FastAPI/storage, mocked model runner, isolated temporary test database.
+Preservation: backend Python unchanged; all 12 saved index files unchanged; no embeddings generated or index rebuild.
+Source report compiler/renderer: byte-identical. Source evidence checklist: AST-identical.
+Source scorer finding: no standalone numerical scorer; existing checklist preserved and independent completeness scorer added.
+Not evaluated: live model connectivity/answer quality, browser pixel/CSS rendering, public cloud deployment.
+Remaining functional limits: scanned PDFs need text; RAG-only excerpts not exposed by report API are not invented for reviewed PDFs; Q&A searches saved outputs.
+No commit, merge, branch switch or push.

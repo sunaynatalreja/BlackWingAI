@@ -1,0 +1,5 @@
+Synopsis:
+RV-12 pilot reported entering the runway; causing a missed approach with aircraft on final approach. Pilot continued the takeoff and departed area.
+
+Narrative:
+About to depart a non-towered airport; I entered the active runway while an aircraft was on final approach approximately 1.5-2 NM out. The closure rate was higher than anticipated; causing the landing aircraft to initiate a go-around. I continued the takeoff and departed the area. The other aircraft remained in the pattern. There was no collision risk or loss of control. Lesson learned: avoid entering the runway with landing traffic inside a wider spacing margin; especially when feeling pressure from other traffic wanting to depart.

@@ -1,0 +1,5 @@
+Synopsis:
+Pilot reported a critical ground conflict during takeoff with an airport service truck. Upon entering the runway; the driver realized the conflict and exited the runway.
+
+Narrative:
+On taking off from ZZZ airport today; I noticed an airport service truck close to the left edge of the runway. The truck entered the runway; realized that I was coming; and pulled back to the edge. I didn't hear a radio call from the truck; and he apparently didn't hear mine when I took the runway. One factor here is that my aircraft has recently developed some ignition interference on the radio. It's possible the truck's radio wasn't able to overpower it. The truck was far enough down so that it was not a factor; I left the ground well before coming to his position.

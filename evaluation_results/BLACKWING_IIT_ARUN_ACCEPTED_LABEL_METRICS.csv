@@ -1,0 +1,41 @@
+﻿question_id,method,k,returned_at_k,precision_at_k_accepted,binary_ndcg_at_k_accepted,pooled_recall_at_k_accepted,relevant_retrieved,pooled_relevant_total,reviewed_by,approval_basis,independent_item_review,metric_status
+BW-G001,BM25,5,5,0.4,0.3633,0.5,2,4,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G001,BM25,10,10,0.3,0.4762,0.75,3,4,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G001,IIT-query Dense / local documents,5,5,0.2,0.1681,0.25,1,4,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G001,IIT-query Dense / local documents,10,10,0.2,0.2856,0.5,2,4,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G001,Hybrid RRF,5,5,0.2,0.2463,0.25,1,4,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G001,Hybrid RRF,10,10,0.3,0.4823,0.75,3,4,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G001,Local CrossEncoder,5,5,0.4,0.5585,0.5,2,4,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G001,Local CrossEncoder,10,10,0.2,0.5585,0.5,2,4,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G002,BM25,5,5,0.0,0.0,0.0,0,5,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G002,BM25,10,8,0.1,0.107,0.2,1,5,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G002,IIT-query Dense / local documents,5,5,0.6,0.6548,0.6,3,5,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G002,IIT-query Dense / local documents,10,10,0.4,0.7756,0.8,4,5,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G002,Hybrid RRF,5,5,0.2,0.214,0.2,1,5,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G002,Hybrid RRF,10,10,0.3,0.4141,0.6,3,5,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G002,Local CrossEncoder,5,5,0.6,0.6992,0.6,3,5,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G002,Local CrossEncoder,10,10,0.4,0.82,0.8,4,5,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G005,BM25,5,1,0.0,0.0,0.0,0,9,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G005,BM25,10,1,0.0,0.0,0.0,0,9,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G005,IIT-query Dense / local documents,5,5,0.4,0.5531,0.2222,2,9,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G005,IIT-query Dense / local documents,10,10,0.4,0.5358,0.4444,4,9,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G005,Hybrid RRF,5,5,0.4,0.3836,0.2222,2,9,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G005,Hybrid RRF,10,10,0.4,0.4107,0.4444,4,9,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G005,Local CrossEncoder,5,5,0.6,0.6399,0.3333,3,9,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G005,Local CrossEncoder,10,10,0.6,0.6763,0.6667,6,9,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G011,BM25,5,5,0.6,0.4469,0.6,3,5,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G011,BM25,10,10,0.4,0.5677,0.8,4,5,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G011,IIT-query Dense / local documents,5,5,0.4,0.5087,0.4,2,5,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G011,IIT-query Dense / local documents,10,10,0.5,0.8447,1.0,5,5,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G011,Hybrid RRF,5,5,0.6,0.6548,0.6,3,5,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G011,Hybrid RRF,10,10,0.4,0.7756,0.8,4,5,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G011,Local CrossEncoder,5,5,0.6,0.6992,0.6,3,5,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G011,Local CrossEncoder,10,10,0.5,0.9103,1.0,5,5,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G014,BM25,5,0,0.0,0.0,0.0,0,4,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G014,BM25,10,0,0.0,0.0,0.0,0,4,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G014,IIT-query Dense / local documents,5,5,0.2,0.2463,0.25,1,4,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G014,IIT-query Dense / local documents,10,10,0.3,0.5085,0.75,3,4,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G014,Hybrid RRF,5,5,0.2,0.2463,0.25,1,4,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G014,Hybrid RRF,10,10,0.3,0.5085,0.75,3,4,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G014,Local CrossEncoder,5,5,0.4,0.3191,0.5,2,4,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED
+BW-G014,Local CrossEncoder,10,10,0.3,0.4493,0.75,3,4,Arun,User-directed blanket acceptance of AI proposed labels,NOT DOCUMENTED,ACCEPTED_AI_LABELS; NOT INDEPENDENTLY HUMAN VALIDATED

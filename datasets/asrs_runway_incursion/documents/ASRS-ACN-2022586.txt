@@ -1,0 +1,5 @@
+Synopsis:
+GA Instructor with student reported a conflict event when they entered Runway 4 at CDW with an aircraft on final to the same runway.
+
+Narrative:
+I was doing an instructional flight in Aircraft X.  I was holding short Runway 4 full length; and after doing my engine runup; I called the Tower to request a takeoff clearance for a VFR northern departure.Tower cleared me to takeoff on Runway 4 and read back the instructions for the same. I lined up on the centerline with Runway 4; and as I was about to add full power; I saw/heard another aircraft fly over me and then eventually land on Runway 4. I held my position on the runway and called Tower informing them about the situation. The tower then cleared me to take off Runway 4. The takeoff and rest of the flight was uneventful.I remember clearing the final before I entered the runway; but due to trees and possibly the cloud coverage; I didn't see the oncoming aircraft on final.Corrective action: I will be more careful moving forward with clearing my final and also try to listen to the tower conversations with other traffic before I make my call for a take off request.

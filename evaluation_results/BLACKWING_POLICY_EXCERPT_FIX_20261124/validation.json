@@ -1,0 +1,72 @@
+{
+  "approval": "Arun & Sunayna approve",
+  "branch": "feature/arun-rag-risk-compliance",
+  "rubric_version": "synthetic_policy_v3",
+  "files": [
+    {
+      "path": "blackwing/synthetic_gold.py",
+      "sha256_before": "204de41754190ea9354f05e1246dcb2b5f2cae54496a5d6e1f413093c4794ccf",
+      "sha256_after": "6937199ee9e5f5dbbe1824aa20127e8f817ba99d06fbfcf943d6f7179fccca72"
+    },
+    {
+      "path": "tests/test_synthetic_report_scoring.py",
+      "sha256_before": "8959fb0a307600f099e5189daf19436aee5975690983d928b856860575790f5e",
+      "sha256_after": "d2bef3f63e9e8a504efb920eef2358dfb488f290b742aafccaf34d85efab107e"
+    }
+  ],
+  "observed_failure": {
+    "run_id": "62c3a130-6781-4a53-82b1-b50eed88ceee",
+    "validated": 0,
+    "pending": 5,
+    "jurisdiction_check": "Judge confused uncertainty-policy adherence with establishing an actual regulation breach.",
+    "other_checks": "invalid_evaluator_quote_or_schema"
+  },
+  "repair": "Explicit report-safeguard questions; model selects an excerpt ID/status/reason; backend resolves exact quotations and revalidates them.",
+  "validation": {
+    "focused_tests_passed": 11,
+    "command": "python -m pytest -q tests/test_synthetic_report_scoring.py --tb=short",
+    "location": "Isolated staging copy; applied source bytes match tested source.",
+    "full_suite_rerun": false,
+    "saved_report_check": [
+      {
+        "run_id": "62c3a130-6781-4a53-82b1-b50eed88ceee",
+        "case_id": "76834f9a-bb17-4778-9299-3157a0dc448d",
+        "saved_summary": "Unverified fictional scenario. Supplied account: \"ORIGINAL FICTIONAL training scenario at Birch Ferry Airport. A training crew reports receiving a taxi-route amendment while a cabin call interrupted the readback. The controller note records an acknowledgement but does not identify the words used. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.\"",
+        "prospective_attributed_summary": "Unverified fictional scenario. Supplied account: \"ORIGINAL FICTIONAL training scenario at Birch Ferry Airport. A training crew reports receiving a taxi-route amendment while a cabin call interrupted the readback. The controller note records an acknowledgement but does not identify the words used. No event date or country/jurisdiction is supplied. These are unverified synthetic accounts, not official findings.\"",
+        "saved_report_changed": false,
+        "visible_report_fields": 33,
+        "exact_packet_input_token_min": 1210,
+        "exact_packet_input_token_max": 1215,
+        "output_reserve": 768,
+        "safety_reserve": 256,
+        "fits_8192": true,
+        "risk_status_preserved": "unassessed_insufficient_inputs",
+        "live_laaJ_score": null,
+        "hosted_calls": 0,
+        "notice": "Offline formatting and input-budget check only. No model judgment or numerical report score produced."
+      }
+    ],
+    "live_score": null,
+    "hosted_model_calls": 0
+  },
+  "preservation": {
+    "guarded_files": 13,
+    "guard_mismatches": 0,
+    "assets": [
+      {
+        "group": "gold",
+        "checked": 13,
+        "changed": 0
+      },
+      {
+        "group": "index",
+        "checked": 18,
+        "changed": 0
+      }
+    ],
+    "saved_reports_changed": false
+  },
+  "committed": false,
+  "merged": false,
+  "pushed": false
+}
