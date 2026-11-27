@@ -226,16 +226,53 @@ async def _execute_run_body(
         record_event(lifecycle_event("evidence_retrieval", "retrieval_started", case_id=case["case_id"],
                                     detail="Searching the existing evidence index"))
         def initial_retrieval():
-            from blackwing.rag.query_text import case_query_text
-            query = " ".join(part for part in [case_query_text(case["narrative"]), case.get("location"), "runway incursion"] if part)
+            from blackwing.rag.query_text import case_retrieval_query
+            query = " ".join(part for part in [case_retrieval_query(case), case.get("location"), "runway incursion"] if part)
+            documents = repo.list_documents()
             with tool_audit(case["case_id"], record_event):
-                return retrieve_evidence(retriever.search,
-                    input_identifiers=[case.get("source_incident_id") or case["case_id"]],
-                    query=query, documents=repo.list_documents(), embedding_model=settings.rag_embedding_model,
-                    document_types=["incident_report", "regulation", "procedure", "guidance"],
-                    jurisdiction=case.get("jurisdiction"),
-                    incident_date=str(case.get("incident_date")) if case.get("incident_date") else None,
-                    limit=5)["results"]
+                def search(scope: str, limit: int) -> list[dict[str, Any]]:
+                    return retrieve_evidence(retriever.search,
+                        input_identifiers=[case.get("source_incident_id") or case["case_id"]],
+                        query=query, documents=documents, embedding_model=settings.rag_embedding_model,
+                        document_types=["incident_report", "regulation", "procedure", "guidance"],
+                        scope=scope,
+                        # In direct scope this only matches a source explicitly
+                        # indexed to this case. In historical scope it excludes
+                        # the current event; it is never added to query text.
+                        case_id=case.get("source_incident_id"),
+                        jurisdiction=case.get("jurisdiction"),
+                        incident_date=str(case.get("incident_date")) if case.get("incident_date") else None,
+                        limit=limit)["results"]
+
+                incident_date = str(case.get("incident_date")) if case.get("incident_date") else None
+                direct = search("direct", 1) if case.get("source_incident_id") else []
+                historical = search("historical", 2)
+                regulatory = (search("regulatory", 1)
+                              if case.get("jurisdiction") and incident_date else [])
+                # Chunks from one document would crowd out the others; keep
+                # up to three distinct guidance sources.
+                guidance, guidance_seen = [], set()
+                for row in search("guidance", 15):
+                    source = str(row.get("source_id") or row.get("document_id") or "")
+                    if source and source not in guidance_seen:
+                        guidance_seen.add(source)
+                        guidance.append(row)
+                    if len(guidance) == 3:
+                        break
+                # Keep evidence categories distinct: exact-case factual sources,
+                # pre-event analogies, date-applicable regulation, and dated
+                # general guidance. Future incident reports cannot enter as
+                # factual or historical evidence just because their wording fits.
+                chosen: list[dict[str, Any]] = []
+                seen: set[str] = set()
+                for row in [*direct, *historical, *regulatory, *guidance]:
+                    key = str(row.get("chunk_id") or row.get("evidence_id") or row.get("source_id") or "")
+                    if key and key not in seen:
+                        chosen.append(row)
+                        seen.add(key)
+                    if len(chosen) == 7:
+                        break
+                return chosen
         try:
             retrieved = await asyncio.to_thread(initial_retrieval)
             status = "retrieval_completed"
@@ -249,7 +286,7 @@ async def _execute_run_body(
     uploads = _case_uploads(case.get("evidence", []), case.get("source_incident_id") or case["case_id"])
     evidence = [*uploads, *retrieved]
     agent_evidence = saved_resume.get("agent_evidence") if saved_resume else None
-    if not resume and use_agent_retrieval and os.getenv("BLACKWING_AGENT_RAG", "0") == "1":
+    if not resume and use_agent_retrieval and os.getenv("BLACKWING_AGENT_RAG", "1") == "1":
         # Keep integration outside agent packages and UI. No LLM calls here.
         from blackwing.rag.agent_router import build_agent_packets
         record_event(lifecycle_event("evidence_retrieval", "retrieval_started", case_id=case["case_id"],

@@ -170,11 +170,15 @@ def _case_uploads(items: list[dict[str, Any]], case_id: str) -> list[dict[str, A
     return uploads
 
 
-def _safe_query(narrative: str, topic: str) -> str:
-    # Use identifiers from narrative when available, but avoid sending full
-    # lengthy evidence or sensitive input to an external embeddings endpoint.
-    from blackwing.rag.query_text import case_query_text
-    head = case_query_text(narrative)[:350]
+def _safe_query(narrative: str, topic: str, uploaded_evidence=None, incident_id=None) -> str:
+    # Use event facts from submitted evidence, but never the unseen incident ID.
+    # Keep the external embedding query bounded and avoid source URLs/metadata.
+    from blackwing.rag.query_text import case_retrieval_query
+    head = case_retrieval_query({
+        "narrative": narrative,
+        "evidence": uploaded_evidence or [],
+        "source_incident_id": incident_id,
+    }, max_evidence_chars=1000)
     return f"{topic} {head}"
 
 
@@ -199,7 +203,8 @@ def build_agent_packets(*, retriever: Any, narrative: str, case_id: str,
 
     def search(scope: str, limit: int, **kwargs: Any) -> list[dict[str, Any]]:
         result = retriever.search(
-            _safe_query(narrative, TOPIC_QUERIES[scope]), documents,
+            _safe_query(narrative, TOPIC_QUERIES[scope], uploaded_evidence,
+                        incident_id=case_id), documents,
             embedding_model=embedding_model, limit=limit, method=method,
             scope=scope, **kwargs,
         )
@@ -216,7 +221,16 @@ def build_agent_packets(*, retriever: Any, narrative: str, case_id: str,
         row["caution"] = "OTHER INCIDENT: analogy only; never factual evidence for current case"
     rules = search("regulatory", 2, jurisdiction=jurisdiction,
                    incident_date=incident_date) if jurisdiction and incident_date else []
-    guidance = search("guidance", 2, incident_date=incident_date)
+    # Several chunks of one guidance document would hide the others; keep up
+    # to three distinct guidance sources.
+    guidance, guidance_seen = [], set()
+    for row in search("guidance", 20, incident_date=incident_date):
+        source = str(row.get("source_id") or row.get("document_id") or "")
+        if source and source not in guidance_seen:
+            guidance_seen.add(source)
+            guidance.append(row)
+        if len(guidance) == 3:
+            break
     for row in guidance:
         row["evidence_role"] = "general_guidance"
         row["caution"] = "Advisory, not a binding determination"
@@ -234,7 +248,7 @@ def build_agent_packets(*, retriever: Any, narrative: str, case_id: str,
         ),
 
         "compliance": _unique(
-            [*rules[:1], *current[:1], *guidance[:1]],
+            [*rules[:1], *current[:1], *guidance[:2]],
             limit_per_agent
         ),
 
@@ -243,7 +257,7 @@ def build_agent_packets(*, retriever: Any, narrative: str, case_id: str,
         "risk": _unique(uploads, limit_per_agent),
 
         "mitigation": _unique(
-            [*guidance[:1], *current[:1]],
+            [*guidance[:2], *current[:1]],
             limit_per_agent
         ),
 

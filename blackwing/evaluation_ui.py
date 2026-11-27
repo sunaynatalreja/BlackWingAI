@@ -39,12 +39,13 @@ def show_run_trace(run, report=None):
         st.info('No run is selected.')
         return
     case_id = str(run.get('case_id') or '')
+    selected_run_id = str(run_id)
+    retrieval_key = 'retrieval-evaluation-v6-' + case_id + '-' + selected_run_id
 
     state_key = 'run-trace-snapshot-' + run_id
     if st.button('Refresh run trace', key='refresh-run-trace-' + run_id):
         st.session_state.pop(state_key, None)
-        if case_id:
-            st.session_state.pop('retrieval-evaluation-v2-' + case_id, None)
+        st.session_state.pop(retrieval_key, None)
     snapshot = st.session_state.get(state_key)
     if snapshot is None:
         with st.spinner('Loading run timeline and audit details…'):
@@ -204,15 +205,16 @@ def show_run_trace(run, report=None):
     if not case_id:
         st.info('Retrieval recall is unavailable because this run is not linked to a case.')
         return
-    st.caption('Agent-evidence Recall@5/@10 compares content-based retrieval results with the indexed sources supplied to this investigation’s agents. It does not use the incident ID or uploaded evidence as a target.')
-    selected_run_id = run.get('run_id')
+    st.caption('Recall@5/@10 = relevant sources found in the top 5/10 retrieved sources ÷ all relevant sources. Relevance comes from approved labels when the case has them, otherwise from a rule (applicable to the case date and jurisdiction, and about the incident category). The incident ID is never used as a query.')
     # Bind cached metrics to this exact run; a new run creates a fresh evidence set.
-    retrieval_key = 'retrieval-evaluation-v4-' + case_id + '-' + str(selected_run_id or '')
     retrieval_eval = st.session_state.get(retrieval_key)
     if retrieval_eval is None:
         try:
             retrieval_eval = copilot.get_retrieval_evaluation(case_id, selected_run_id)
-            st.session_state[retrieval_key] = retrieval_eval
+            # Cache completed measurements only. A transient not-measurable
+            # response must not stick in the UI after run state is updated.
+            if retrieval_eval.get('status') == 'completed':
+                st.session_state[retrieval_key] = retrieval_eval
         except httpx.HTTPError:
             retrieval_eval = {'status': 'unavailable', 'reason': 'Could not load retrieval results for this case.'}
     if retrieval_eval.get('status') == 'completed':
@@ -222,16 +224,26 @@ def show_run_trace(run, report=None):
         st.caption(f"Run: {retrieval_eval.get('run_id') or selected_run_id} · "
                    f"{retrieval_eval.get('query_count', 0)} evaluation query/queries · "
                    f"retrieval method: {retrieval_eval.get('method', 'hybrid')} · "
-                   f"{retrieval_eval.get('relevant_source_count', 0)} agent-evidence sources")
+                   f"{retrieval_eval.get('relevant_source_count', 0)} relevant sources")
         st.dataframe([{
-            'Evaluation basis': 'Agent evidence source set',
+            'Evaluation basis': row.get('query_id') or 'Approved question',
             'Relevant sources': row.get('relevant_source_count'),
             'Found @5': f"{row.get('relevant_found@5', 0)} / {row.get('relevant_source_count', 0)}",
             'Recall@5': f"{row.get('recall@5', 0):.1%}",
             'Found @10': f"{row.get('relevant_found@10', 0)} / {row.get('relevant_source_count', 0)}",
             'Recall@10': f"{row.get('recall@10', 0):.1%}",
         } for row in retrieval_eval.get('queries', [])], hide_index=True, width='stretch',
-            alt='Post-hoc agent-evidence source recall proxy for the selected run')
+            alt='Recall against approved relevant sources for each labeled question')
+        later_sources = retrieval_eval.get('temporally_ineligible_sources') or []
+        if later_sources:
+            labels = ', '.join(
+                f"{item.get('source_id')} ({item.get('source_date')}: {item.get('reason')})"
+                for item in later_sources
+            )
+            st.warning(
+                'This run\'s evidence included sources dated on or after the case, which are not valid '
+                f"historical predecessors: {labels}. They are excluded from the recall calculation above."
+            )
         st.caption(retrieval_eval.get('notice', ''))
     else:
         reason = retrieval_eval.get('reason') or 'Approved retrieval labels are unavailable for this case.'
@@ -387,9 +399,9 @@ def show_final_report_evaluation_trace(case, result):
             bert = item.get('bertscore') or {}
             rows.append({
                 'Report section': item.get('title') or key,
-                'LLM judge / 100': judge.get('score'),
-                'Coverage / 100': judge.get('coverage'),
-                'Consistency / 100': judge.get('consistency'),
+                'LLM judge / 100': judge['score'] if judge.get('score') is not None else 'Unavailable',
+                'Coverage / 100': judge['coverage'] if judge.get('coverage') is not None else 'Unavailable',
+                'Consistency / 100': judge['consistency'] if judge.get('consistency') is not None else 'Unavailable',
                 'Cosine similarity': cosine.get('cosine_similarity'),
                 'Cosine distance': cosine.get('cosine_distance'),
                 'BERTScore F1': bert.get('f1'),
