@@ -1,0 +1,10 @@
+SOURCED FACTUAL INPUT EXCERPTS - OPS06IA007
+Chicago crossing/departure conflict (2006)
+This is a selected source packet, not the final investigation report. Preserve source attribution.
+
+SOURCE ORD-LETTER: https://www.ntsb.gov/safety/safety-recs/recletters/A07_30_32.pdf
+
+[ORD06-SEQUENCE] Source input_recommendation_letter.pdf, original PDF page 3
+On March 23, 2006, about 0907 central standard time, a controller issued conflicting clearances to two airplanes resulting in a runw ay incursion at Chicago O’Hare International Airport (ORD). The controller cleared an Airbus A320 passenger airplane to cross runway 4L and, less than 15 seconds later, cleared a Boeing 737 passenger airplane to take off on the same runway. The pilots in the depa rting 737 observed the A320 moving toward the runway, rejected the takeoff, and stopped before reaching the taxiway intersection where the A320 was to cross.
+
+Scope limits: Selected source material only. No date-applicable procedure text or occurrence/exposure basis is supplied here. Do not infer a binding compliance finding, proven cause or categorical risk rating from absent evidence. Human review is required.

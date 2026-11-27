@@ -1,0 +1,9 @@
+Source: UK Air Accidents Investigation Branch; EW/C2018/08/01. Selected factual paraphrase of public final occurrence account, not an independent preliminary report.
+
+Observation 1: On 13 August 2018 at 0948 UTC the incident occurred on runway 06 at Edinburgh Airport.
+Observation 2: The aircraft were Boeing 737-800 EI-FJW and Airbus A320-214 OE-IVC, both on passenger services.
+Observation 3: The Boeing was landing while the Airbus was still accelerating for take-off on the same runway.
+Observation 4: The landing aircraft closed to within 875 m of the departing aircraft.
+Observation 5: Neither aircraft sustained damage and no injuries were recorded.
+
+Scope limitation: Selected factual observations only. No final analysis, recommendations or independently validated risk ratings supplied. Verify applicable procedures and identify missing evidence.

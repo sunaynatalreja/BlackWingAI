@@ -1,0 +1,21 @@
+SOURCED FACTUAL INPUT EXCERPTS - DCA17IA148
+SFO taxiway overflight (2017)
+This is a selected source packet, not the final investigation report. Preserve source attribution.
+
+SOURCE SFO-ATC: https://data.ntsb.gov/Docket/Document/docBLOB?FileExtension=.PDF&FileName=Air+Traffic+Control+Factual+Report-Master.PDF&ID=40462883
+
+SOURCE SFO-ERR: https://data.ntsb.gov/Docket/Document/docBLOB?FileExtension=.PDF&FileName=Air+Traffic+Control+Factual+Report+-+Erratum+and+Addendum+-Master.PDF&ID=40466890
+
+[SFO17-SUMMARY] Source input_ATC_factual.pdf, original PDF page 3
+On July 7, 2017, about 2356 Pacific daylight time, Air Canada flight 759 (ACA759), an Airbus A320, Canadian registration C-FKCK, was cleared to land on runway 28R at San Francisco International Airport, San Francisco, California, but instead lined up on parallel taxiway C, where four air carrier airplanes (a Boeing 787 followed by an Airbus A340, another Boeing 787, and a Boeing 737) were awaiting takeoff clearance. ACA759 overflew the first airplane on the taxiway and descended below 100 ft above the ground, and the ACA759 flight crew initiated a go around. The flight was operated under the provisions of 14 Code of Federal Regulations Part 129 as an international scheduled passenger flight from Toronto/Lester B. Pearson International Airport, Toronto, Canada, with 135 passengers and 5 crewmembers on board. Night visual meteorological conditions prevailed at the time of the incident. The airplane was not d amaged, and no injuries were reported.
+
+[SFO17-CLEARANCE] Source input_ATC_factual.pdf, original PDF page 5
+At 2355:45, the pilot of ACA759 transmitted to the LC/CIC controller, “Just want to confirm, this is Air Canada 759, we see some lights on the runway there, across the runway. Can you confirm we’re cleared to land?” Figure 1. Air Canada FMS Bridge Visual runway 28R approach chart. At 2355:52, the LC/CIC controller responded, “… confirmed cleared to land runway 28 right. There's no one on runway 28 right but you.” The pilot of ACA759 replied, “OK, Air Canada 759.” [The LC/CIC controller said in his interview that he had just visually scanned the r unways from departure end to approach end when ACA759 asked for confirmation on the landing clearance. He then checked the radar display7 and the ASSC8 display (airport surface surveillance capability), and rescanned runway 28R before advising the pilot that runway 28R was clear. He looked at the ASSC display and saw the data symbol for ACA759 just right of centerline, and the bars on the runway were up [indicating the runway was clear]. He said that the position of ACA759 (data symbol) on the ASSC was normal for the Bridge visual approach.]
+
+[SFO17-RESPONSE] Source input_ATC_factual.pdf, original PDF page 6
+At 2355:59, a transmission was broadcasted over the local control frequency , “where is that guy going ?” Three seconds later, another transmission was broadcasted, “He’s on the taxiway.” [Crew statements from United Airlines flight 1 (UAL1) indicated they made those transmissions 9] At 2356:09, the LC/CIC controller instructed ACA759 to go around. The pilot acknowledged that he was going around. The LC/CIC controller advised the pilot that he appeared to have been lined up for taxiway C.
+
+[SFO17-ERRATUM] Source input_ATC_errata.pdf, original PDF page 2
+Correction to section E. Factual Information, 1.0 History of Flight, paragraph 2: Change “At 2346:19…” to “At 2346:08…”
+
+Scope limits: Selected source material only. No date-applicable procedure text or occurrence/exposure basis is supplied here. Do not infer a binding compliance finding, proven cause or categorical risk rating from absent evidence. Human review is required.

@@ -1,0 +1,9 @@
+Source: Australian Transport Safety Bureau; AO-2019-055. Selected factual paraphrase of public final occurrence account, not an independent preliminary report.
+
+Observation 1: On the evening of 25 September 2019 at Canberra Airport a Virgin Australia ATR72 VH-VPJ was preparing for a scheduled passenger flight to Sydney.
+Observation 2: The crew received line-up clearance for runway 35 via intersection Golf.
+Observation 3: The aircraft instead lined up on runway 30 and started its take-off roll.
+Observation 4: The crew rejected take-off at about the time ATC directed it to stop.
+Observation 5: The aircraft was repositioned for departure from runway 35.
+
+Scope limitation: Selected factual observations only. No final analysis, recommendations or independently validated risk ratings supplied. Verify applicable procedures and identify missing evidence.

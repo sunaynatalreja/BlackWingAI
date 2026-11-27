@@ -1,0 +1,28 @@
+SOURCED FACTUAL INPUT EXCERPTS - OPS07IA009
+LAX crossing clearance conflict (2007)
+This is a selected source packet, not the final investigation report. Preserve source attribution.
+
+SOURCE input_factual.pdf: https://data.ntsb.gov/carol-repgen/api/Aviation/ReportMain/GenerateFactualReport/66469/pdf
+
+SOURCE input_transcript.pdf: https://www.faa.gov/sites/faa.gov/files/data_research/accident_incident/2007-08-16/8-16_transcript.pdf
+
+The FAA transcript excerpt below was visually transcribed from its scanned PDF. Clock values are as printed; the PDF does not state a time zone. The FAA labels it not a final transcript.
+
+[LAX07-FACTUAL] Source input_factual.pdf, original PDF page 2
+On August 16, 2007, at 1257 Pacific Daylight time, a runway incursion occurred involving West Jet (WJA) flight 900 and Northwest Airlines (NWA) flight 180 at Los Angeles International Airport, Los Angeles, California during daytime visual flight rules conditions. WJA900 landed runway 24R and exited on reverse taxiway Y. While exiting, the flight crew of WJA 900 switched to the north ground control (GC2) frequency without instruction and advised they were on the reverse taxiway, Y, for gate 35. The GC2 controller thought that the WJA aircraft was south of runway 24L and instructed the flight to taxi via taxiway E to the gate. When WJA900 was approaching runway 24L on the reverse taxiway, the pilot saw NWA180 begin its take-off roll and questioned whether or not they had clearance to cross the runway. The GC2 controller, realizing WJA 900 had not received a crossing clearance, stopped WJA900 from crossing the runway. The Airport Movement Area Safety System (AMASS) alerted and separation was lost.
+
+[LAX07-TRANSCRIPT] Source input_transcript.pdf, original PDF page 1
+19:55:55 LC-2: NWA180, L A Tower, Runway Two Four Left, cleared for takeoff, winds two one zero at six.
+19:56:01 NWA180: Cleared for takeoff, two four left, NWA180.
+19:56:36 WJA900: Ground, WJA900 with you reverse Yankee for Gate 35.
+19:56:40 GC-2: WJA900, Los Angeles Ground, taxi Echo to the gate.
+19:56:44 WJA900: Echo, gate, 900.
+19:56:57 WJA900: Confirm cleared to cross for 900?
+19:57:01 GC-2: Uh, who was that?
+19:57:02 WJA900: WJA900, confirm cleared to cross.
+19:57:04 GC-2: WJA, if you if you, no, sir, hold there, hold there.
+19:57:08 WJA900: Holding here, yeah, WJA900.
+19:57:23 LC-2: WJA900, uh cross two four left, ground point six five.
+19:57:39 GC-2: WJA900, uh continue across the runway and taxi Echo.
+
+Scope limits: Selected source material only. No date-applicable procedure text or occurrence/exposure basis is supplied here. Do not infer a binding compliance finding, proven cause or categorical risk rating from absent evidence. Human review is required.
