@@ -191,6 +191,8 @@ async def generate_answer(question, evidence, settings, history=None):
 
 async def answer_question(request, *, settings, repo, retriever, generate=None):
     question, signature = question_for(request)
+    from blackwing.context_guard import require_relevant_context
+    require_relevant_context(question)
     gold_query_id = request.gold_query_id
     if not gold_query_id:
         try:

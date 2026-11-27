@@ -1,0 +1,203 @@
+{
+  "schema_version": 2,
+  "unit": "document",
+  "index_signature": "5a4031a05054904abac5b6d443f87ee58f8a378475a84003c8d778c64da93ae9",
+  "scope_id": "approved-5q-50-case-context-20261126",
+  "scope_description": "Five generic questions with approved source-document labels, scored by source coverage among the first 5 or 10 BM25 passage hits across the full 777-source non-protected index.",
+  "query_context_policy": "Question wording is generic and case-independent. Structured case intake metadata is supplied separately as retrieval context. No answer or gold report content is added.",
+  "approval": {
+    "status": "APPROVED",
+    "statement": "Existing approved relevance labels retained; user approved generic-question plus case-context evaluation.",
+    "approved_by": [
+      "Arun",
+      "Sunayna"
+    ],
+    "context_policy_approved_by": [
+      "Sunayna"
+    ]
+  },
+  "label_source_sha256": "e99b4a6a566a7d29788f234a6463050457d6fa4076e58063d78dacaca7e21de3",
+  "source_hash_validation": "All 50 PDFs have identical source hashes in the prior labeled index and current index.",
+  "eligible_ids": [
+    "BW-EV-001",
+    "BW-EV-002",
+    "BW-EV-003",
+    "BW-EV-004",
+    "BW-EV-006",
+    "BW-EV-007",
+    "BW-EV-008",
+    "BW-EV-009",
+    "BW-EV-010",
+    "BW-EV-011",
+    "BW-EV-012",
+    "BW-EV-013",
+    "BW-EV-014",
+    "BW-EV-015",
+    "BW-GD-001",
+    "BW-GD-002",
+    "BW-GD-003",
+    "BW-GD-004",
+    "BW-GD-005",
+    "BW-GD-006",
+    "BW-GD-007",
+    "BW-GD-008",
+    "BW-GD-009",
+    "BW-GD-010",
+    "BW-GD-011",
+    "BW-GD-012",
+    "BW-GD-013",
+    "BW-GD-014",
+    "BW-GD-015",
+    "BW-MT-001",
+    "BW-MT-002",
+    "BW-MT-003",
+    "BW-MT-004",
+    "BW-RG-001",
+    "BW-RG-002",
+    "BW-RG-003",
+    "BW-RG-004",
+    "BW-RG-005",
+    "BW-RG-006",
+    "BW-RG-007",
+    "BW-RG-008",
+    "BW-RG-009",
+    "BW-RK-001",
+    "BW-RK-002",
+    "BW-RK-003",
+    "BW-RK-004",
+    "BW-RK-005",
+    "BW-RK-006",
+    "BW-RK-007",
+    "BW-RK-008"
+  ],
+  "questions": [
+    {
+      "question_id": "BW-G001",
+      "query": "On which local date and at what airport did the occurrence take place?",
+      "case_context": {
+        "incident_id": "DCA23LA125",
+        "airport": "John F. Kennedy International Airport JFK",
+        "incident_date": "2023-01-13",
+        "jurisdiction": "US",
+        "flight_numbers": [
+          "AAL106",
+          "DAL1943"
+        ],
+        "aircraft_types": [
+          "Boeing 777-200",
+          "Boeing 737-900ER"
+        ]
+      },
+      "complete_relevance": true,
+      "relevant_ids": [
+        "BW-EV-001",
+        "BW-EV-002",
+        "BW-EV-003"
+      ]
+    },
+    {
+      "question_id": "BW-G002",
+      "query": "Which flights and aircraft types were involved in the occurrence?",
+      "case_context": {
+        "incident_id": "DCA23LA125",
+        "airport": "John F. Kennedy International Airport JFK",
+        "incident_date": "2023-01-13",
+        "jurisdiction": "US",
+        "flight_numbers": [
+          "AAL106",
+          "DAL1943"
+        ],
+        "aircraft_types": [
+          "Boeing 777-200",
+          "Boeing 737-900ER"
+        ]
+      },
+      "complete_relevance": true,
+      "relevant_ids": [
+        "BW-EV-001",
+        "BW-EV-002",
+        "BW-EV-003"
+      ]
+    },
+    {
+      "question_id": "BW-G005",
+      "query": "What difference is reported between the assigned taxi route and the observed route?",
+      "case_context": {
+        "incident_id": "DCA23LA125",
+        "airport": "John F. Kennedy International Airport JFK",
+        "incident_date": "2023-01-13",
+        "jurisdiction": "US",
+        "flight_numbers": [
+          "AAL106",
+          "DAL1943"
+        ],
+        "aircraft_types": [
+          "Boeing 777-200",
+          "Boeing 737-900ER"
+        ]
+      },
+      "complete_relevance": true,
+      "relevant_ids": [
+        "BW-EV-001",
+        "BW-EV-002",
+        "BW-EV-003"
+      ]
+    },
+    {
+      "question_id": "BW-G011",
+      "query": "Which date, airport, and flights were involved in the occurrence?",
+      "case_context": {
+        "incident_id": "DCA23FA149",
+        "airport": "Austin-Bergstrom International Airport AUS",
+        "incident_date": "2023-02-04",
+        "jurisdiction": "US",
+        "flight_numbers": [
+          "SWA708",
+          "FDX1432"
+        ],
+        "aircraft_types": [
+          "Boeing 737-79P",
+          "Boeing 767-32LF"
+        ],
+        "runway": "18L"
+      },
+      "complete_relevance": true,
+      "relevant_ids": [
+        "BW-EV-006"
+      ]
+    },
+    {
+      "question_id": "BW-G014",
+      "query": "Which aircraft was arriving, which was departing, and which runway was in use?",
+      "case_context": {
+        "incident_id": "DCA23FA149",
+        "airport": "Austin-Bergstrom International Airport AUS",
+        "incident_date": "2023-02-04",
+        "jurisdiction": "US",
+        "flight_numbers": [
+          "SWA708",
+          "FDX1432"
+        ],
+        "aircraft_types": [
+          "Boeing 737-79P",
+          "Boeing 767-32LF"
+        ],
+        "runway": "18L"
+      },
+      "complete_relevance": true,
+      "relevant_ids": [
+        "BW-EV-006"
+      ]
+    }
+  ],
+  "judgment_scope": {
+    "judged_sources": 50,
+    "indexed_sources": 777,
+    "unjudged_sources": 727,
+    "unjudged_treatment": "Not assumed irrelevant; denominator contains only approved known-relevant sources.",
+    "ranking_cutoff_unit": "passage hits; a source is found if any passage from it appears before the cutoff.",
+    "full_corpus_relevance_complete": false,
+    "reason": "Only 50 of 777 indexed sources have approved labels; do not report these rates as full-corpus recall."
+  },
+  "full_corpus_relevance_complete": false
+}

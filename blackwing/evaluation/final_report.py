@@ -261,6 +261,37 @@ def _bertscore_for_pairs(pairs: list[tuple[str, str]], model: str) -> tuple[floa
     return float(precision.mean()), float(recall.mean()), float(f1.mean())
 
 
+_SCORE_FIELDS = ("score", "coverage", "consistency")
+
+
+def _salvage_scores(content: str) -> dict[str, int] | None:
+    """Read the integer score fields the model actually wrote, even from malformed or
+    truncated JSON. Nothing is invented: a field is returned only if it is present."""
+    found: dict[str, int] = {}
+    for key in _SCORE_FIELDS:
+        match = re.search(r'["\']?%s["\']?\s*[:=]\s*(\d{1,3})(?!\d)' % key, content, re.I)
+        if match and 0 <= int(match.group(1)) <= 100:
+            found[key] = int(match.group(1))
+    return found if "score" in found else None
+
+
+def _judge_result(parsed: dict[str, Any], attempt: int, *, salvaged: bool = False) -> dict[str, Any]:
+    result = {"score": parsed["score"]}
+    for key in ("coverage", "consistency"):
+        value = parsed.get(key)
+        result[key] = value if type(value) is int and 0 <= value <= 100 else None
+    for key in ("material_omissions", "unsupported_or_conflicting_claims"):
+        value = parsed.get(key)
+        result[key] = [str(item)[:500] for item in value[:8]] if isinstance(value, list) else []
+    rationale = str(parsed.get("rationale") or "")[:1200]
+    result["rationale"] = rationale or ("Judge output was cut off or malformed; the integer scores it wrote "
+                                        "were read directly." if salvaged else "")
+    result["attempts"] = attempt + 1
+    if salvaged:
+        result["scores_salvaged_from_partial_output"] = True
+    return result
+
+
 async def _judge_section(section_id: str, section_title: str, generated: str, reference: str,
                          reference_scope: str, settings: Any,
                          client: httpx.AsyncClient) -> dict[str, Any]:
@@ -268,9 +299,15 @@ async def _judge_section(section_id: str, section_title: str, generated: str, re
         "You are a strict evaluator of a preliminary aviation incident report against the supplied "
         "matching gold report passages. Evaluate only information the published report section actually "
         "contains. Assess factual coverage, consistency with the reference, and unsupported additions. "
-        "Do not reward verbosity or expose private reasoning. Return only JSON with integer score 0-100, "
-        "integer coverage 0-100, integer consistency 0-100, lists material_omissions and "
-        "unsupported_or_conflicting_claims, and a concise rationale."
+        "Do not reward verbosity or expose private reasoning. Return only one compact JSON object whose "
+        "FIRST three fields are integer score, coverage and consistency (each 0-100), followed by "
+        "material_omissions and unsupported_or_conflicting_claims (at most 3 short strings each) and a "
+        "rationale of at most 40 words."
+    )
+    minimal_system = (
+        "You are a strict evaluator of an aviation incident report section against matching gold report "
+        "passages. Reply with ONLY this JSON and nothing else: "
+        '{"score": <int 0-100>, "coverage": <int 0-100>, "consistency": <int 0-100>}'
     )
     payload_data = {
         "report_section": section_title,
@@ -281,55 +318,72 @@ async def _judge_section(section_id: str, section_title: str, generated: str, re
         "scoring_guide": "100 means accurate and materially complete for this section; 0 means largely absent or materially incorrect. Missing reference coverage is not a contradiction. Do not count unsupported detail as coverage.",
     }
     user_content = json.dumps(payload_data, ensure_ascii=False)
+    # Qwen3 models may spend the whole output budget on hidden reasoning; turn it off.
+    if "qwen3" in str(settings.api_model).casefold():
+        user_content += " /no_think"
     output_cap = max(1, settings.output_token_quota("report_evaluation"))
-    correction = ""
     last_error = None
-    for attempt in range(2):
+    use_json_mode = bool(settings.api_json_response_format)
+    # Small hosted models intermittently emit malformed or over-long JSON. Retry with
+    # progressively simpler requests; the last attempts only ask for the three scores.
+    max_attempts = 6
+    for attempt in range(max_attempts):
+        minimal = attempt >= 3
         payload = {
             "model": settings.api_model, "stream": False,
-            "messages": [{"role": "system", "content": system + correction},
+            "messages": [{"role": "system", "content": minimal_system if minimal else system},
                          {"role": "user", "content": user_content}],
             "temperature": 0,
-            "max_tokens": min(output_cap, 256 if attempt == 0 else 384),
+            "max_tokens": min(output_cap, 64) if minimal else min(output_cap, 320 if attempt == 0 else 384),
         }
-        if settings.api_json_response_format:
+        if use_json_mode:
             payload["response_format"] = {"type": "json_object"}
-        response = await _hosted_post(client, url=f"{settings.api_base_url}/chat/completions",
-                                      headers={"Authorization": f"Bearer {settings.api_key}"}, payload=payload,
-                                      min_interval_seconds=settings.api_min_interval_seconds)
-        response.raise_for_status()
+        content = ""
         try:
+            response = await _hosted_post(client, url=f"{settings.api_base_url}/chat/completions",
+                                          headers={"Authorization": f"Bearer {settings.api_key}"}, payload=payload,
+                                          min_interval_seconds=settings.api_min_interval_seconds)
+            response.raise_for_status()
             choice = response.json()["choices"][0]
-            if choice.get("finish_reason") in {"length", "max_tokens"}:
-                raise ValueError("Judge response was truncated")
             content = choice["message"]["content"]
             if isinstance(content, list):
                 content = "".join(part.get("text", "") for part in content if isinstance(part, dict))
-            parsed, _ = parse_agent_json(content)
+            content = re.sub(r"<think>.*?</think>", "", str(content), flags=re.S | re.I).strip()
+            if choice.get("finish_reason") in {"length", "max_tokens"}:
+                salvaged = _salvage_scores(content)
+                if salvaged:
+                    return _judge_result(salvaged, attempt, salvaged=True)
+                raise ValueError("Judge response was truncated")
+            try:
+                parsed, _ = parse_agent_json(content)
+            except ValueError:
+                salvaged = _salvage_scores(content)
+                if salvaged:
+                    return _judge_result(salvaged, attempt, salvaged=True)
+                raise
             if not isinstance(parsed, dict):
                 raise ValueError("Judge returned a non-object response")
             score = parsed.get("score")
             if type(score) is not int or not 0 <= score <= 100:
+                salvaged = _salvage_scores(content)
+                if salvaged:
+                    return _judge_result(salvaged, attempt, salvaged=True)
                 raise ValueError("Judge score did not validate as an integer from 0 to 100")
-            result = {"score": score}
-            for key in ("coverage", "consistency"):
-                value = parsed.get(key)
-                result[key] = value if type(value) is int and 0 <= value <= 100 else None
-            for key in ("material_omissions", "unsupported_or_conflicting_claims"):
-                value = parsed.get(key)
-                result[key] = [str(item)[:500] for item in value[:8]] if isinstance(value, list) else []
-            result["rationale"] = str(parsed.get("rationale") or "")[:1200]
-            return result
-        except (ValueError, KeyError, IndexError, TypeError) as exc:
+            return _judge_result(parsed, attempt)
+        except (httpx.HTTPError, ValueError, KeyError, IndexError, TypeError) as exc:
             last_error = exc
-            if attempt == 0:
-                correction = (
-                    "\nYour prior response was malformed or incomplete. Re-evaluate the same section. "
-                    "Return exactly one compact JSON object with integer fields score, coverage, and consistency "
-                    "from 0 to 100; arrays material_omissions and unsupported_or_conflicting_claims; and a "
-                    "short rationale. No markdown, extra text, or additional fields."
-                )
-    raise ValueError("Section judge returned invalid JSON or schema after one format retry") from last_error
+            if isinstance(exc, httpx.HTTPStatusError):
+                status_code = exc.response.status_code
+                if status_code in {400, 422} and use_json_mode:
+                    use_json_mode = False  # some hosts reject response_format; retry without it
+                elif status_code not in {408, 425, 429, 500, 502, 503, 504}:
+                    break
+            if attempt + 1 >= max_attempts:
+                break
+            logger.warning("Retrying final report judge; section=%s attempt=%s/%s error_type=%s",
+                           section_id, attempt + 2, max_attempts, type(exc).__name__)
+            await asyncio.sleep(min(4.0, 0.5 * (2 ** attempt)))
+    raise ValueError(f"Section judge failed validation after {attempt + 1} attempts") from last_error
 
 
 async def evaluate_final_report(report: dict[str, Any], reference: dict[str, Any], settings: Any,
@@ -435,15 +489,25 @@ async def evaluate_final_report(report: dict[str, Any], reference: dict[str, Any
                                    "llm_judge": None,
                                    "cosine": cosine_rows.get(section_id) or previous.get("cosine"),
                                    "bertscore": bert_rows.get(section_id) or previous.get("bertscore")}
-            try:
-                row["llm_judge"] = await _judge_section(
-                    section_id, title, section["text"], judge_reference_sections[section_id],
-                    str(row["reference_scope"] or "Matched gold report passages"), settings, client)
-                row["status"] = "completed"
-            except Exception as exc:
-                row["status"] = "partial" if row["cosine"] or row["bertscore"] else "failed"
-                row["judge_error"] = type(exc).__name__
-                logger.warning("Final report judge unavailable; section=%s error_type=%s", section_id, type(exc).__name__)
+            # Two full rounds per section: a transient host or model failure in one round
+            # should not leave the section without a judge score.
+            for round_number in range(2):
+                try:
+                    row["llm_judge"] = await _judge_section(
+                        section_id, title, section["text"], judge_reference_sections[section_id],
+                        str(row["reference_scope"] or "Matched gold report passages"), settings, client)
+                    row["status"] = "completed"
+                    row.pop("judge_error", None)
+                    break
+                except Exception as exc:
+                    row["status"] = "partial" if row["cosine"] or row["bertscore"] else "failed"
+                    cause = exc.__cause__ or exc
+                    row["judge_error"] = type(cause).__name__
+                    if isinstance(cause, httpx.HTTPStatusError):
+                        row["judge_http_status"] = cause.response.status_code
+                    logger.warning("Final report judge unavailable; section=%s round=%s error_type=%s",
+                                   section_id, round_number + 1, type(cause).__name__)
+                    await asyncio.sleep(2.0)
             result["sections"][section_id] = row
             result["sections_completed"] = len(result["sections"])
             save(result)

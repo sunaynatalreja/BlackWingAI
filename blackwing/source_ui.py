@@ -158,7 +158,14 @@ def _investigation(render_report, *, cloud=False):
             refresh = '3s' if st.session_state.get('source_run_active',True) else None
             st.fragment(_render_live_case,run_every=refresh)(case_id,render_report)
     except httpx.HTTPStatusError as exc:
-        st.error(f'FastAPI returned HTTP {exc.response.status_code}. Check the persisted case/run state before retrying.')
+        if exc.response.status_code == 422:
+            try:
+                detail = exc.response.json().get('detail')
+            except ValueError:
+                detail = None
+            st.error(detail if isinstance(detail, str) else 'Not a relevant context for BlackWing AI. Submit an aviation safety incident or operational event.')
+        else:
+            st.error(f'FastAPI returned HTTP {exc.response.status_code}. Check the persisted case/run state before retrying.')
     except httpx.HTTPError:
         st.error('Cannot reach FastAPI at '+copilot.backend_url()+'. Start the backend in its configured IIT terminal. Do not resubmit until its health endpoint responds.')
     except (ValueError,UnicodeError) as exc:

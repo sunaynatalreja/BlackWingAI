@@ -14,6 +14,49 @@ from .tokenization import ApproximateTokenizer, chunk_document, clip_query
 
 TOKEN_RE = re.compile(r"[a-z0-9]+(?:[-'][a-z0-9]+)*", re.I)
 
+_NTSB_INCIDENT_YEAR = re.compile(r"\b[A-Z]{3}(\d{2})[A-Z]{2}\d{3,}\b", re.I)
+_LABELED_ISO_DATE = re.compile(
+    r"\b(?:incident\s+date|occurrence\s+date|date\s*&\s*time)\s*:\s*"
+    r"(19\d{2}|20\d{2})-(\d{2})-(\d{2})\b", re.I,
+)
+_LABELED_MONTH_DATE = re.compile(
+    r"\b(?:incident\s+date|occurrence\s+date|date\s*&\s*time)\s*:\s*"
+    r"\b(January|February|March|April|May|June|July|August|September|October|November|December)"
+    r"\s+(\d{1,2}),?\s+(19\d{2}|20\d{2})\b", re.I,
+)
+_MONTHS = {name.casefold(): index for index, name in enumerate(
+    ("January", "February", "March", "April", "May", "June", "July", "August",
+     "September", "October", "November", "December"), 1)}
+
+
+def infer_occurrence_date(row: Mapping[str, Any]) -> str | None:
+    """Recover an occurrence date conservatively when source metadata omitted it.
+
+    Prefer explicit metadata, then a date stated in the source text, then the
+    two-digit year in a standard NTSB incident identifier. The identifier gives
+    only a year, so callers must not infer an ordering within that year.
+    """
+    value = str(row.get("incident_date") or "").strip()
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        return value
+    text = " ".join(str(row.get(key) or "") for key in
+                    ("title", "excerpt", "content", "text"))
+    match = _LABELED_ISO_DATE.search(text)
+    if match:
+        return "-".join(match.groups())
+    match = _LABELED_MONTH_DATE.search(text)
+    if match:
+        month, day, year = match.groups()
+        return f"{year}-{_MONTHS[month.casefold()]:02d}-{int(day):02d}"
+    incident_id = " ".join(str(row.get(key) or "") for key in
+                            ("incident_id", "case_id", "title"))
+    match = _NTSB_INCIDENT_YEAR.search(incident_id)
+    if match:
+        year = int(match.group(1))
+        year += 2000 if year <= 29 else 1900
+        return f"{year:04d}"
+    return None
+
 
 def _terms(text: str) -> list[str]:
     return [item.casefold() for item in TOKEN_RE.findall(text) if len(item) >= 2]
@@ -123,10 +166,14 @@ def _scope_filter(row: dict[str, Any], *, scope: str, case_id: str | None,
         if incident_date and row.get("effective_through") and str(row["effective_through"]) < incident_date:
             return False
     if scope == "historical" and incident_date:
-        exact_date = row.get("incident_date")
-
-        if exact_date:
-            if str(exact_date) >= incident_date:
+        source_date = infer_occurrence_date(row)
+        if source_date:
+            # NTSB identifiers only establish a year. Treat same-year cases as
+            # non-preceding when the actual date cannot be established.
+            if len(source_date) == 4:
+                if source_date >= incident_date[:4]:
+                    return False
+            elif source_date >= incident_date:
                 return False
 
         elif kind == "voluntary_asrs":

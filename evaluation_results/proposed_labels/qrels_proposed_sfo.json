@@ -1,0 +1,56 @@
+{
+ "schema_version": 2,
+ "unit": "document",
+ "scope_id": "proposed-sfo-dca17ia148-guidance-20261127",
+ "scope_description": "Draft relevance labels for the guidance sources dated on or before the SFO 2017 incident date.",
+ "approval": {
+  "status": "PROPOSED_UNREVIEWED",
+  "drafted_by": "Claude (AI assistant)",
+  "method": "Judged each date-eligible guidance source from its title and first-page text against the case facts, before looking at any retrieval ranking.",
+  "requires": "Human review and approval by the project team before use as a reported metric."
+ },
+ "judgment_notes": {
+  "relevant": {
+   "BW-GD-001": "FAA AC 120-71B: flight-deck SOPs and pilot-monitoring duties; relevant to crew monitoring/awareness on approach and landing.",
+   "BW-GD-003": "FAA SAFO 11004: runway incursion prevention guidance for operators.",
+   "BW-GD-004": "FAA AC 120-74B: Part 121 flightcrew procedures during taxi operations to avoid runway incursions.",
+   "BW-GD-013": "FAA SAFO 11009: runway status lights, a surface-incursion mitigation technology.",
+   "BW-MT-002": "IOSA key risk-control insights for managing runway incursion.",
+   "BW-MT-003": "ICAO Doc 9870 Manual on the Prevention of Runway Incursions.",
+   "BW-RK-005": "ICAO Runway Safety Team Handbook (2015).",
+   "BW-RK-008": "Bow-tie risk analysis for aerodrome runway incursion (barriers/controls)."
+  },
+  "not_relevant": {
+   "BW-GD-002": "Part 91/135 single-pilot flight-school taxi procedures; airline operation here.",
+   "BW-GD-012": "Ground-vehicle operations; no vehicle involved.",
+   "BW-GD-014": "SAFO 13007 on using runways as taxiways; different hazard.",
+   "BW-RK-002": "Generic SMS hazard taxonomy; not runway specific.",
+   "BW-RK-004": "EASA EPAS 2023-2025; EU strategic plan published after the event.",
+   "BW-RK-007": "Canadian SMS guide for smaller organizations; not applicable."
+  }
+ },
+ "questions": [
+  {
+   "question_id": "SFO-GUIDANCE-1",
+   "scope": "guidance",
+   "query": "runway incursion hazard safety barriers situational awareness signage surveillance communication preventive measures",
+   "case_context": {
+    "incident_id": "DCA17IA148",
+    "airport": "San Francisco International Airport SFO",
+    "incident_date": "2017-07-07",
+    "jurisdiction": "US"
+   },
+   "complete_relevance": true,
+   "relevant_ids": [
+    "BW-GD-001",
+    "BW-GD-003",
+    "BW-GD-004",
+    "BW-GD-013",
+    "BW-MT-002",
+    "BW-MT-003",
+    "BW-RK-005",
+    "BW-RK-008"
+   ]
+  }
+ ]
+}
