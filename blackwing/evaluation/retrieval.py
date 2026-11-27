@@ -11,7 +11,10 @@ def query_with_case_context(question):
     """Keep the question generic; attach structured facts supplied by its case intake."""
     query = str(question.get('query') or '').strip()
     context = question.get('case_context') or {}
-    fields = ('incident_id', 'airport', 'incident_date', 'jurisdiction',
+    # The incident identifier is routing metadata, not descriptive retrieval
+    # content. It is absent from the RAG corpus for unseen cases and would
+    # distort both retrieval and the recall benchmark if embedded in queries.
+    fields = ('airport', 'incident_date', 'jurisdiction',
               'flight_numbers', 'aircraft_types', 'runway')
     values = []
     for field in fields:

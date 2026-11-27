@@ -38,6 +38,7 @@ from blackwing.schemas import (
 )
 from blackwing.agents.base import AgentExecutionError
 from blackwing.service import analyze_incident
+from blackwing.context_guard import IrrelevantContext, require_relevant_context
 from blackwing.rag.retriever import retriever
 from blackwing.tools import retrieve_evidence, tool_audit
 from blackwing.diagnostics import lifecycle_event, safe_error
@@ -397,11 +398,26 @@ async def operations_metrics(repo: MemoryRepository = Depends(get_repository),
     }
 
 
-@app.post("/api/v1/cases", response_model=CaseResponse, status_code=status.HTTP_201_CREATED, tags=["cases"])
+@app.post(
+    "/api/v1/cases",
+    response_model=CaseResponse,
+    status_code=status.HTTP_201_CREATED,
+    tags=["cases"],
+    summary="Create an aviation safety investigation case",
+    description="Accepts aviation incident narratives and supporting evidence. Rejects harmful instructions and requests or material outside aviation safety scope with HTTP 422 before saving a case.",
+    responses={422: {"description": "Input is not a relevant aviation safety context."}},
+)
 async def create_case(
     request: CaseCreate,
     repo: MemoryRepository = Depends(get_repository),
 ) -> CaseResponse:
+    try:
+        require_relevant_context([
+            request.narrative,
+            *(item.excerpt for item in request.evidence),
+        ], request_text=request.narrative)
+    except IrrelevantContext as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     case_id = str(uuid4())
     payload = request.model_dump(mode="json")
     for key, value in declared_intake_metadata(payload['narrative']).items():
@@ -844,4 +860,4 @@ from blackwing.final_report_evaluation_routes import build_router as build_final
 app.include_router(build_final_report_evaluation_router(get_repository, get_settings))
 
 from blackwing.retrieval_evaluation_routes import build_router as build_retrieval_evaluation_router
-app.include_router(build_retrieval_evaluation_router(get_settings))
+app.include_router(build_retrieval_evaluation_router(get_settings, get_repository))

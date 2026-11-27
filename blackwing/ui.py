@@ -95,7 +95,6 @@ def _render_report(generated: dict, report: dict, case_id: str, run_id: str, *, 
         f"<p>{escape(safe_report_text(generated.get('executive_summary') or 'No executive summary was produced.'))}</p></div>",
         unsafe_allow_html=True,
     )
-
     agent_outputs = report.get("agent_outputs", {})
     similar = agent_outputs.get("similar_case", {})
     score_status = (agent_outputs.get("risk") or {}).get("assessment_status", "provisional")

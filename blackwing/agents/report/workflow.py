@@ -306,7 +306,9 @@ async def create_report(
             section["title"] = _TASKS[task_id]["title"]
             sections.append(section)
         sections = _ground_sections(sections, {"agent_outputs": prior_outputs, "retrieved_evidence": evidence}, incident_id=incident_id, narrative=narrative)
-        output = ReportAgentOutput(executive_summary=sections[0]["summary"][:2200], sections=sections,
+        overview = next((item for item in sections if item.get("task_id") == "overview"), sections[0])
+        output = ReportAgentOutput(executive_summary=overview["summary"][:2200],
+                                   sections=sections,
                                    human_approval_required=True).model_dump(mode="json")
         return output, [{"step": "report_assembly", "status": "deterministic_fallback"}]
     planner = AgentSpec(

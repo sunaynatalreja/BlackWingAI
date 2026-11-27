@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from blackwing.qa import QAAnswer, QARequest, QAReview, QAInputError, QAReferenceNotFound, answer_question, generate_answer, query_catalog, reference_for
 from blackwing.rag.retriever import retriever
 from blackwing.diagnostics import safe_error
+from blackwing.context_guard import IrrelevantContext
 
 logger = logging.getLogger('blackwing.qa')
 
@@ -39,13 +40,17 @@ def build_router(get_repository, get_settings):
 
 
     @router.post('/answers', response_model=QAAnswer, status_code=201,
-        summary='Retrieve evidence and generate one answer without reading approved answer columns')
+        summary='Retrieve aviation evidence and generate one answer',
+        description='Rejects harmful instructions and questions outside aviation safety context with HTTP 422 before retrieval or model inference.',
+        responses={422: {'description': 'Input is not a relevant aviation safety context.'}})
     async def create_answer(request:QARequest, settings=Depends(get_settings), repo=Depends(get_repository),
                             generate=Depends(get_qa_generator)):
         if repo.list_cases(status='analysis_running', limit=1, offset=0)[0]:
             raise HTTPException(409, detail='Wait for the active investigation to finish before starting Q&A.')
         try:
             return await answer_question(request, settings=settings, repo=repo, retriever=retriever, generate=generate)
+        except IrrelevantContext as exc:
+            raise HTTPException(422, detail=str(exc)) from exc
         except QAReferenceNotFound as exc:
             raise HTTPException(404, detail='Selected question or case was not found.') from exc
         except QAInputError as exc:

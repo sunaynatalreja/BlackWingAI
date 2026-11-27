@@ -13,7 +13,7 @@ from blackwing.schemas import CaseResponse, RunResponse, ReportResponse, TraceRe
 
 
 def backend_url():
-    return os.getenv("BLACKWING_UI_API_URL", "http://127.0.0.1:8001").rstrip("/")
+    return os.getenv("BLACKWING_UI_API_URL", "http://127.0.0.1:8000").rstrip("/")
 
 
 def client():
@@ -193,8 +193,9 @@ def get_final_report_evaluation(case_id, run_id):
     return request('GET', f'/api/v1/cases/{case_id}/runs/{run_id}/final-report-evaluation')
 
 
-def get_retrieval_evaluation():
-    return request('GET', '/api/v1/evaluations/retrieval')
+def get_retrieval_evaluation(case_id, run_id=None):
+    suffix = f'?run_id={run_id}' if run_id else ''
+    return request('GET', f'/api/v1/cases/{case_id}/retrieval-evaluation{suffix}')
 
 
 def start_final_report_evaluation(case_id, run_id):

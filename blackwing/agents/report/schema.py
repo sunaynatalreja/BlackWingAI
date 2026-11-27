@@ -47,7 +47,10 @@ def normalize_report_section(payload: dict) -> dict:
     if not summary:
         raise ValueError('Report section requires a nonempty summary')
     # Section ID/title are assigned by code, never normalized from model text.
-    return {'summary': summary.strip(), 'key_points': points}
+    return {
+        'summary': summary.strip(),
+        'key_points': points,
+    }
 
 
 ReportTaskId = Literal[

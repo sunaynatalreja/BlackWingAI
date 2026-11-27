@@ -337,7 +337,13 @@ def main(*, brand, render_report, cloud=False):
             st.fragment(live_workspace, run_every="3s")()
     except httpx.HTTPStatusError as exc:
         # Do not echo provider/transport details or credentials into the UI.
-        if exc.response.status_code == 409:
+        if exc.response.status_code == 422:
+            try:
+                detail = exc.response.json().get("detail")
+            except ValueError:
+                detail = None
+            st.error(detail if isinstance(detail, str) else "Not a relevant context for BlackWing AI. Submit an aviation safety incident or operational event.")
+        elif exc.response.status_code == 409:
             st.error("The backend rejected this action because the case/run state changed. Refresh and try the permitted action.")
         else:
             st.error(f"The FastAPI backend returned HTTP {exc.response.status_code}. Check the case data and backend log.")

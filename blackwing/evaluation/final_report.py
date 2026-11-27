@@ -284,21 +284,24 @@ async def _judge_section(section_id: str, section_title: str, generated: str, re
     output_cap = max(1, settings.output_token_quota("report_evaluation"))
     correction = ""
     last_error = None
-    for attempt in range(2):
+    # Small hosted models intermittently emit malformed JSON even with JSON mode.
+    # Retry the same section a few times; only persist a score after schema validation.
+    max_attempts = 4
+    for attempt in range(max_attempts):
         payload = {
             "model": settings.api_model, "stream": False,
             "messages": [{"role": "system", "content": system + correction},
                          {"role": "user", "content": user_content}],
             "temperature": 0,
-            "max_tokens": min(output_cap, 256 if attempt == 0 else 384),
+            "max_tokens": min(output_cap, 256 if attempt == 0 else 384 if attempt < 3 else 512),
         }
         if settings.api_json_response_format:
             payload["response_format"] = {"type": "json_object"}
-        response = await _hosted_post(client, url=f"{settings.api_base_url}/chat/completions",
-                                      headers={"Authorization": f"Bearer {settings.api_key}"}, payload=payload,
-                                      min_interval_seconds=settings.api_min_interval_seconds)
-        response.raise_for_status()
         try:
+            response = await _hosted_post(client, url=f"{settings.api_base_url}/chat/completions",
+                                          headers={"Authorization": f"Bearer {settings.api_key}"}, payload=payload,
+                                          min_interval_seconds=settings.api_min_interval_seconds)
+            response.raise_for_status()
             choice = response.json()["choices"][0]
             if choice.get("finish_reason") in {"length", "max_tokens"}:
                 raise ValueError("Judge response was truncated")
@@ -319,17 +322,24 @@ async def _judge_section(section_id: str, section_title: str, generated: str, re
                 value = parsed.get(key)
                 result[key] = [str(item)[:500] for item in value[:8]] if isinstance(value, list) else []
             result["rationale"] = str(parsed.get("rationale") or "")[:1200]
+            result["attempts"] = attempt + 1
             return result
-        except (ValueError, KeyError, IndexError, TypeError) as exc:
+        except (httpx.HTTPError, ValueError, KeyError, IndexError, TypeError) as exc:
             last_error = exc
-            if attempt == 0:
-                correction = (
-                    "\nYour prior response was malformed or incomplete. Re-evaluate the same section. "
-                    "Return exactly one compact JSON object with integer fields score, coverage, and consistency "
-                    "from 0 to 100; arrays material_omissions and unsupported_or_conflicting_claims; and a "
-                    "short rationale. No markdown, extra text, or additional fields."
-                )
-    raise ValueError("Section judge returned invalid JSON or schema after one format retry") from last_error
+            status_code = exc.response.status_code if isinstance(exc, httpx.HTTPStatusError) else None
+            retryable_http = status_code is None or status_code in {408, 425, 429, 500, 502, 503, 504}
+            if attempt + 1 >= max_attempts or (isinstance(exc, httpx.HTTPStatusError) and not retryable_http):
+                break
+            correction = (
+                "\nRetry the same section. Your previous attempt failed validation or had a transient service error. "
+                "Return exactly one compact JSON object with integer fields score, coverage, and consistency "
+                "from 0 to 100; arrays material_omissions and unsupported_or_conflicting_claims; and a "
+                "short rationale. No markdown, extra text, or additional fields."
+            )
+            logger.warning("Retrying final report judge; section=%s attempt=%s/%s error_type=%s",
+                           section_id, attempt + 2, max_attempts, type(exc).__name__)
+            await asyncio.sleep(min(2.0, 0.4 * (2 ** attempt)))
+    raise ValueError(f"Section judge failed validation after {attempt + 1} attempts") from last_error
 
 
 async def evaluate_final_report(report: dict[str, Any], reference: dict[str, Any], settings: Any,

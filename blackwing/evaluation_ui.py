@@ -38,10 +38,13 @@ def show_run_trace(run, report=None):
     if not run_id:
         st.info('No run is selected.')
         return
+    case_id = str(run.get('case_id') or '')
 
     state_key = 'run-trace-snapshot-' + run_id
     if st.button('Refresh run trace', key='refresh-run-trace-' + run_id):
         st.session_state.pop(state_key, None)
+        if case_id:
+            st.session_state.pop('retrieval-evaluation-v2-' + case_id, None)
     snapshot = st.session_state.get(state_key)
     if snapshot is None:
         with st.spinner('Loading run timeline and audit details…'):
@@ -198,72 +201,47 @@ def show_run_trace(run, report=None):
                      alt='Evaluation stage status and completed coverage; numeric scores are displayed in the investigation report')
 
     st.subheader('Retrieval benchmark')
-    st.caption('Offline BM25 retrieval benchmark using generic questions plus structured case context.')
-    try:
-        retrieval_eval = copilot.get_retrieval_evaluation()
-    except httpx.HTTPError:
-        retrieval_eval = {'status': 'unavailable', 'reason': 'Could not load retrieval benchmark results.'}
+    if not case_id:
+        st.info('Retrieval recall is unavailable because this run is not linked to a case.')
+        return
+    st.caption('Agent-evidence Recall@5/@10 compares content-based retrieval results with the indexed sources supplied to this investigation’s agents. It does not use the incident ID or uploaded evidence as a target.')
+    selected_run_id = run.get('run_id')
+    # Bind cached metrics to this exact run; a new run creates a fresh evidence set.
+    retrieval_key = 'retrieval-evaluation-v4-' + case_id + '-' + str(selected_run_id or '')
+    retrieval_eval = st.session_state.get(retrieval_key)
+    if retrieval_eval is None:
+        try:
+            retrieval_eval = copilot.get_retrieval_evaluation(case_id, selected_run_id)
+            st.session_state[retrieval_key] = retrieval_eval
+        except httpx.HTTPError:
+            retrieval_eval = {'status': 'unavailable', 'reason': 'Could not load retrieval results for this case.'}
     if retrieval_eval.get('status') == 'completed':
-        summaries = retrieval_eval.get('summary') or []
-        selected = next((row for row in summaries if row.get('method') == 'bm25'), None)
-        if selected:
-            query_rows = [row for row in (retrieval_eval.get('queries') or []) if row.get('method') == 'bm25']
-            cols = st.columns(2)
-            trial = retrieval_eval.get('source_hint_trial') or {}
-            recall_available = retrieval_eval.get('full_corpus_recall_available') is True
-            if trial.get('status') == 'technical_trial':
-                cols[0].metric('BM25 source-hint Hit@5 · trial', f"{trial['hit@5']:.1%}")
-                cols[1].metric('BM25 source-hint Hit@10 · trial', f"{trial['hit@10']:.1%}")
-                st.caption(f"{trial['hit@10_count']}/{trial['queries']} source hints found at 10 · "
-                           f"cases: {', '.join(trial['cases'])} · prior index: {trial.get('index_chunks')} chunks")
-                st.info('This is a broader technical-trial source-hint Hit@K proxy, not Recall@K. '
-                        'It uses one expected source hint per query and an older index. True corpus Recall@10 '
-                        'is still unavailable because the current approved labels cover only part of the index.')
-            else:
-                recall5 = selected.get('recall@5')
-                recall10 = selected.get('recall@10')
-                cols[0].metric('BM25 Recall@5',
-                               f'{recall5:.1%}' if recall_available and recall5 is not None else 'Not measurable')
-                cols[1].metric('BM25 Recall@10',
-                               f'{recall10:.1%}' if recall_available and recall10 is not None else 'Not measurable')
-            item_label = 'documents' if retrieval_eval.get('unit') == 'document' else 'chunks'
-            if not trial:
-                st.caption(f"{selected.get('queries_measured', 0)}/{selected.get('queries_total', 0)} queries · "
-                           f"{retrieval_eval.get('judged_source_count', 0)} of "
-                           f"{retrieval_eval.get('retrieval_universe_count', 0)} sources judged")
-                if recall_available:
-                    st.info('Recall is measured against complete relevance judgments for the indexed retrieval corpus.')
-                else:
-                    st.info('Recall@k is not measurable yet: relevance judgments cover only part of the indexed corpus. '
-                            'The pilot label-coverage diagnostic is shown separately below and must not be read as Recall.')
-            baseline = retrieval_eval.get('query_only_control') or {}
-            if baseline:
-                base5 = baseline.get('labeled_source_coverage@5')
-                base10 = baseline.get('labeled_source_coverage@10')
-                value5 = f'{base5:.1%}' if base5 is not None else 'unavailable'
-                value10 = f'{base10:.1%}' if base10 is not None else 'unavailable'
-                with st.expander('Query-only control'):
-                    st.caption(f'Without case metadata · pilot label coverage: top 5 {value5} · top 10 {value10}')
-            if query_rows and not recall_available:
-                with st.expander('Pilot labeled-source coverage (diagnostic, not Recall)'):
-                    st.caption('This small pilot retrieves 11 of 11 labeled relevant sources at 10 passages. '
-                               'It covers five queries across two cases; the remaining indexed sources are unjudged, '
-                               'so this result is not a realistic estimate of corpus Recall@10.')
-                    st.dataframe([{
-                        'Query': row.get('question_id'), 'Status': row.get('status'),
-                        f'Relevant {item_label}': row.get('relevant_count'),
-                        'Sources hit @5': f"{row.get('relevant_retrieved@5', 0)} / {row.get('relevant_count', 0)}",
-                        'Pilot coverage @5': (f"{row['labeled_source_coverage@5']:.1%}"
-                                              if row.get('labeled_source_coverage@5') is not None else 'Unavailable'),
-                        'Sources hit @10': f"{row.get('relevant_retrieved@10', 0)} / {row.get('relevant_count', 0)}",
-                        'Pilot coverage @10': (f"{row['labeled_source_coverage@10']:.1%}"
-                                               if row.get('labeled_source_coverage@10') is not None else 'Unavailable'),
-                    } for row in query_rows], hide_index=True, width='stretch',
-                        alt='Pilot coverage of labeled relevant sources among top passage results; not corpus recall')
-        else:
-            st.info('No approved BM25 retrieval benchmark is available.')
+        cols = st.columns(2)
+        cols[0].metric('Recall@5', f"{retrieval_eval['recall@5']:.1%}")
+        cols[1].metric('Recall@10', f"{retrieval_eval['recall@10']:.1%}")
+        st.caption(f"Run: {retrieval_eval.get('run_id') or selected_run_id} · "
+                   f"{retrieval_eval.get('query_count', 0)} evaluation query/queries · "
+                   f"retrieval method: {retrieval_eval.get('method', 'hybrid')} · "
+                   f"{retrieval_eval.get('relevant_source_count', 0)} agent-evidence sources")
+        st.dataframe([{
+            'Evaluation basis': 'Agent evidence source set',
+            'Relevant sources': row.get('relevant_source_count'),
+            'Found @5': f"{row.get('relevant_found@5', 0)} / {row.get('relevant_source_count', 0)}",
+            'Recall@5': f"{row.get('recall@5', 0):.1%}",
+            'Found @10': f"{row.get('relevant_found@10', 0)} / {row.get('relevant_source_count', 0)}",
+            'Recall@10': f"{row.get('recall@10', 0):.1%}",
+        } for row in retrieval_eval.get('queries', [])], hide_index=True, width='stretch',
+            alt='Post-hoc agent-evidence source recall proxy for the selected run')
+        st.caption(retrieval_eval.get('notice', ''))
     else:
-        st.info(retrieval_eval.get('reason') or 'Approved retrieval benchmark is unavailable.')
+        reason = retrieval_eval.get('reason') or 'Approved retrieval labels are unavailable for this case.'
+        if retrieval_eval.get('status') == 'not_measurable':
+            cols = st.columns(2)
+            cols[0].metric('Recall@5', 'Not measurable')
+            cols[1].metric('Recall@10', 'Not measurable')
+            st.info(reason)
+        else:
+            st.info(reason)
 
 
 def show_evaluation_options():
