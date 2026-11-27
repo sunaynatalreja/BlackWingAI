@@ -1,0 +1,9 @@
+Source: Australian Transport Safety Bureau; AO-2016-062. Selected factual paraphrase of public final occurrence account, not an independent preliminary report.
+
+Observation 1: On 16 June 2016 at Alice Springs Airport, a Cessna 172 VH-EKV was departing for Ayers Rock and a Beech 58 VH-MLB for Nyirripi; the tower was scheduled to open at 0800 CST.
+Observation 2: The Cessna broadcast taxi intentions for runway 12 at 0738:26 CST.
+Observation 3: The Beech broadcast taxi and backtracking intentions for runway 30 at 0741:15 CST; the Cessna subsequently broadcast its runway 12 line-up.
+Observation 4: A controller observed the Cessna taking off while the Beech was taxiing on the same runway and issued a stop instruction at 0742:08 CST.
+Observation 5: The controller reported that the Cessna passed above the Beech at about 150 ft AGL. Both aircraft later departed without further incident.
+
+Scope limitation: Selected factual observations only. No final analysis, recommendations or independently validated risk ratings supplied. Verify applicable procedures and identify missing evidence.

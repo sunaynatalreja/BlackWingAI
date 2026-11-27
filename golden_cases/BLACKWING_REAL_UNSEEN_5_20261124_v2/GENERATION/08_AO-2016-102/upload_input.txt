@@ -1,0 +1,9 @@
+Source: Australian Transport Safety Bureau; AO-2016-102. Selected factual paraphrase of public final occurrence account, not an independent preliminary report.
+
+Observation 1: On 17 August 2016 an Airbus A320 VH-VGI and Fokker F50 VH-FKV were involved in a runway conflict at Adelaide Airport.
+Observation 2: The surface movement controller instructed the Fokker to hold short of runway 23, but the check captain read back a crossing instruction.
+Observation 3: The Fokker entered runway 23 while the Airbus was approaching to land.
+Observation 4: The surface movement controller instructed the Fokker to expedite; the Airbus had already begun going around when the aerodrome controller issued the go-around instruction at 0928:25.
+Observation 5: The Fokker completed the crossing and the Airbus subsequently landed without further incident.
+
+Scope limitation: Selected factual observations only. No final analysis, recommendations or independently validated risk ratings supplied. Verify applicable procedures and identify missing evidence.

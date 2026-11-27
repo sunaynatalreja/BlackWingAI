@@ -1,0 +1,9 @@
+Source: Australian Transport Safety Bureau; AO-2020-019. Selected factual paraphrase of public final occurrence account, not an independent preliminary report.
+
+Observation 1: On 17 March 2020 a QantasLink Dash 8-402 VH-LQJ was preparing to depart Gladstone for Brisbane while an ATEC Faeta 321, 24-8279, was conducting circuit training.
+Observation 2: The Dash 8 crew had set 126.7 MHz rather than the local 118.8 MHz CTAF.
+Observation 3: At 0644:29 EST the Faeta transmitted that it was on short final to runway 10.
+Observation 4: At about 0645 EST the Dash 8 taxied onto the runway for a runway 28 departure; the approaching Faeta instructor initiated a go-around.
+Observation 5: The Dash 8 received a TCAS traffic advisory at 0645:42 EST and the crew later corrected the radio frequency.
+
+Scope limitation: Selected factual observations only. No final analysis, recommendations or independently validated risk ratings supplied. Verify applicable procedures and identify missing evidence.

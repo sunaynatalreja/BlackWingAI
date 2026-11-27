@@ -1,0 +1,9 @@
+Source: Australian Transport Safety Bureau; AO-2018-032. Selected factual paraphrase of public final occurrence account, not an independent preliminary report.
+
+Observation 1: On 28 April 2018 the incident at Perth Airport involved Qantas Boeing 737 aircraft VH-XZM and VH-VZL.
+Observation 2: VH-XZM landed on runway 03 and vacated via taxiway J2.
+Observation 3: VH-XZM passed an illuminated stop bar at runway 06 without clearance and entered the runway strip.
+Observation 4: VH-VZL, already taking off on runway 06, rejected take-off.
+Observation 5: The departing aircraft’s wingtip passed approximately 15 m from the nose of the other aircraft at low speed before it stopped.
+
+Scope limitation: Selected factual observations only. No final analysis, recommendations or independently validated risk ratings supplied. Verify applicable procedures and identify missing evidence.
